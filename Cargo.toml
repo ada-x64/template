@@ -1,0 +1,71 @@
+# ------------------------------------------
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# ------------------------------------------
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+
+[package.metadata.bevy_lint]
+panicking_methods = { level = "warn" }
+
+[lints]
+rust.unexpected_cfgs = { level = "warn", check-cfg = ["cfg(bevy_lint)"] }
+clippy.too_many_arguments = "allow"
+clippy.type_complexity = "allow"
+clippy.nonstandard_macro_braces = "warn"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.dist]
+inherits = "release"
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
+
+[dependencies]
+bevy = "0.16.1"
+tiny_bail = "0.5.0"
+itertools = "0.14.0"
+thiserror = "2.0.12"
+bevy_enhanced_input = "0.18.0"
+bevy_asset_loader = "0.23.0"
+bevy_mod_debugdump = { optional = true, version = "0.13.0" }
+bevy_simple_subsecond_system = { optional = true, version = "0.2.0" }
+iyes_perf_ui = "0.5.0"
+bevy_minibuffer = { optional = true, version = "0.4.1" }
+bevy_minibuffer_inspector = { optional = true, version = "0.2.0" }
+bevy_egui = { optional = true, version = "0.36.0" }
+bevy-inspector-egui = { optional = true, version = "0.33.1" }
+
+[features]
+dev = [
+    "dep:bevy_mod_debugdump",
+    "dep:bevy_simple_subsecond_system", # Replace with official in 0.17
+    "dep:bevy_egui",                    # TODO Remove
+    "dep:bevy-inspector-egui",          # TODO Replace with Aalo
+    "dep:bevy_minibuffer",
+    "dep:bevy_minibuffer_inspector",    # TODO Replace with Aalo
+]

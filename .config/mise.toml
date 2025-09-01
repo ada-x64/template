@@ -1,0 +1,164 @@
+# ------------------------------------------
+# SPDX-License-Identifier: MIT OR Apache-2.0
+# ------------------------------------------
+
+[tools]
+"mold" = "latest"
+act = "latest"
+"cargo:dioxus-cli" = { version = "0.7.0-alpha.1" }
+
+[tools.rust]
+# keep in sync with bevy_cli
+version = "nightly-2025-06-26"
+components = "rustc-codegen-cranelift-preview,rustc-dev,llvm-tools-preview,clippy"
+targets = "x86_64-pc-windows-msvc,x86_64-unknown-linux-gnu"
+
+[tasks.install_bevy_lint]
+hide = true
+run = """
+rustup run nightly-2025-06-26 cargo install \
+    --git https://github.com/TheBevyFlock/bevy_cli.git \
+    --tag lint-v0.4.0 \
+    --locked \
+    bevy_lint || true
+"""
+
+## CHECKS #####################################################################
+
+[tasks."check:deps"]
+alias = "deny"
+tools = { "cargo:cargo-deny" = "latest" }
+description = "Check dependencies with cargo-deny"
+run = """
+cargo deny --workspace \
+    -L error \
+    check advisories bans sources \
+    --hide-inclusion-graph
+"""
+
+[tasks."check:headers"]
+alias = "check-headers"
+depends = ["fix:headers --fail-on-fix"]
+
+[tasks.bevy_lint]
+hide = true
+depends = ["install_bevy_lint"]
+run = """
+    # bevy_lint
+
+    # TEMP: Disable sccache in ci
+    if [ -n $CI ];then
+        RUSTC_WRAPPER=""
+    else
+        RUSTC_WRAPPER="sccache"
+        CARGO=$(rustup which --toolchain nightly-2025-06-26 cargo) bevy_lint
+    fi
+    if [ '{{flag(name="fix")}}' = 'true' ]; then
+        FIX=" --fix";
+    fi
+
+    bevy_lint --locked --all-features \
+        $FIX \
+        {{arg(name="package", var=true)}};
+"""
+
+[tasks.clippy]
+hide = true
+run = """
+    # clippy
+
+    # TEMP: Disable sccache in ci
+    if [ -n $CI ];then
+        RUSTC_WRAPPER="";
+    else
+        RUSTC_WRAPPER="sccache"
+    fi
+    if [ '{{flag(name="fix")}}' = 'true' ]; then
+        FIX=" --fix";
+    fi
+
+    cargo --color=always clippy --locked --all-features \
+        $FIX \
+        {{arg(name="package", var=true)}};
+"""
+
+[tasks.check]
+alias = "check-app"
+depends = ["clippy -p app", "bevy_lint -p app"]
+sources = ["src"]
+
+
+## FIXES ######################################################################
+
+[tasks."fix:headers"]
+alias = "fix-headers"
+tools = { "uv" = "latest", "pipx:add_header_comment" = "latest" }
+description = "Check file headers"
+run = """
+    # Checking headers
+
+    if [ '{{flag(name="fail-on-fix")}}' = 'true' ]; then
+        FAIL_ON_FIX=" --fail-on-fix";
+    fi
+
+    HEADER_PATH=".config/header.txt"
+
+    shopt -s globstar
+
+    uv run add-header-comment --header-filepath $HEADER_PATH \
+        $FAIL_ON_FIX \
+        ./.config/*.toml \
+        ./*.toml;
+
+    uv run add-header-comment --header-filepath $HEADER_PATH\
+        $FAIL_ON_FIX \
+        --comment-style='//' \
+        src/**/*.rs;
+"""
+
+[tasks."fix:rust"]
+alias = "fix-rust"
+description = "Fix any fixable issues in rust. Includes formatting."
+depends = ["check --fix"]
+
+[tasks.fix]
+description = "Fix all fixable issues."
+depends = ["fix:rust", "fix:headers"]
+
+## BUILD AND DEPLOY ###########################################################
+
+[tasks.ci]
+tools = { "act" = "latest" }
+description = "Test CI locally with nektos/act"
+run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04 {{arg(name='rest', default='--', var=true)}}"
+
+[tasks.test]
+tools = { "cargo:cargo-nextest" = "latest" }
+description = "Run tests for a specific package or all packages"
+run = """
+if [ "$1" = "all" ]; then
+  cargo nextest run --workspace
+else
+  cargo nextest run -p "$1" "${@:2}"
+fi
+"""
+
+[tasks.run]
+description = "Run the specified workspace binary"
+env = { "RUSTC_WRAPPER" = "sccache" }
+tools = { "sccache" = "latest" }
+run = "cargo run -F dev --bin {{arg(name='binary')}} {{arg(name='rustc-opts', var=true, default='--')}}"
+
+[tasks.build]
+description = "Build the specified workspace binary"
+env = { "RUSTC_WRAPPER" = "sccache" }
+tools = { "sccache" = "latest" }
+run = "cargo build -F dev --bin {{arg(name='binary')}} {{arg(name='rustc-opts', var=true, default='--')}}"
+
+[tasks.play]
+description = "Play the game"
+depends = ["run app"]
+
+[tasks.dev]
+description = "Run the build with hotpatching and dev features enabled"
+run = "BEVY_ASSET_ROOT='.' dx serve --hot-patch --features dev"
