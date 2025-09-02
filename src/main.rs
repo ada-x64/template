@@ -4,31 +4,23 @@
 
 use bevy::prelude::*;
 
-#[cfg(feature = "dev")]
-pub(crate) mod dev;
+pub(crate) mod data;
+pub(crate) mod screens;
 pub(crate) mod services;
 
 #[cfg(feature = "dev")]
-use crate::dev::DevPlugin;
+pub(crate) mod dev;
 
-use crate::services::ServicesPlugin;
-
-pub struct AppPlugin {}
-impl Plugin for AppPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins(ServicesPlugin {});
-    }
+/// This would ideally be in lib.rs but it's here bc
+/// hot patching won't work with libraries
+fn app_plugins(app: &mut App) {
+    app.add_plugins((services::plugin, screens::plugin));
+    #[cfg(feature = "dev")]
+    app.add_plugins(dev::plugin);
 }
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, AppPlugin {}));
-    #[cfg(feature = "dev")]
-    app.add_plugins(DevPlugin);
-    // test
-    app.world_mut().spawn((
-        Camera3d::default(),
-        Transform::from_xyz(-2., 2.5, 5.).looking_at(Vec3::ZERO, Vec3::Y),
-    ));
+    app.add_plugins((DefaultPlugins, app_plugins));
     app.run();
 }

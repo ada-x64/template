@@ -4,7 +4,7 @@ This is a simple template for a bevy project.
 
 This assumes a single executable without a workspace. The Mise file
 can be updated to accomodate a workspace workflow if desired. Note that
-bevy*simple_subsecond_system does \_not* work with workspaces.
+`bevy_simple_subsecond_system` does _not_ work with workspaces.
 
 ## System deps
 
@@ -12,6 +12,10 @@ bevy*simple_subsecond_system does \_not* work with workspaces.
 - [mise](https://mise.jdx.dev)
 
 Call `mise run` to see a list of all the available commands.
+
+## Credits
+
+Some of this code comes from [foxtrot](https://github.com/janhohenheim/foxtrot)
 
 ## License
 
