@@ -1,31 +1,13 @@
-use bevy::{prelude::*, render::view::RenderLayers};
+use bevy::prelude::*;
 
-use crate::{
-    data::{CameraOrder, RenderLayer},
-    screens::ScreenStates,
-};
-
-/// Camera which tracks the player.
-#[derive(Component, Debug, Default)]
-pub struct PlayerCam;
+use crate::services::player::data::*;
 
 /// Spawns the gameplay camera
-pub fn player_cam() -> impl Bundle {
-    (
-        PlayerCam,
-        StateScoped(ScreenStates::InWorld),
-        Name::new("PlayerCam"),
-        Transform::from_xyz(-2.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        Camera3d::default(),
-        PointLight::default(),
-        ShowLightGizmo::default(),
-        Camera {
-            order: CameraOrder::World.into(),
-            clear_color: ClearColorConfig::Custom(
-                bevy::color::palettes::tailwind::SLATE_800.into(), // just to ensure it's actually rendering
-            ),
-            ..Default::default()
-        },
-        RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
-    )
+pub fn track_player(
+    pt: Single<&Transform, (With<PlayerController>, Without<PlayerCam>)>,
+    mut ct: Single<&mut Transform, (With<PlayerCam>, Without<PlayerRoot>)>,
+) {
+    **ct = ct
+        .looking_at(pt.translation, Vec3::Y)
+        .with_translation(pt.translation - Vec3::new(0., -5., -10.));
 }

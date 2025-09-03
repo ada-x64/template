@@ -9,7 +9,7 @@ pub fn plugin(app: &mut App) {
             PhysicsGizmos::default(),
             GizmoConfig {
                 render_layers: RenderLayers::from(RenderLayer::GIZMOS_3D),
-                enabled: false,
+                enabled: true,
                 ..Default::default()
             },
         )

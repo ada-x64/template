@@ -24,6 +24,7 @@ pub fn spawn_worldgen_root(
         children![(
             Name::new("World Mesh"),
             Collider::convex_hull_from_mesh(meshes.get(&assets.mesh).unwrap()).unwrap(),
+            RigidBody::Static,
             Mesh3d(assets.mesh.clone()),
             Visibility::Visible,
             MeshMaterial3d(assets.material.clone()),

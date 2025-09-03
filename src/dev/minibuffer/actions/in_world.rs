@@ -3,7 +3,7 @@ use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_flycam::FlyCam;
 use bevy_minibuffer::prelude::*;
 
-use crate::{data::RenderLayer, screens::ScreenStates, services::player::camera::PlayerCam};
+use crate::{data::RenderLayer, screens::ScreenStates, services::player::data::PlayerCam};
 
 fn toggle_flycam(
     state: Res<State<ScreenStates>>,
