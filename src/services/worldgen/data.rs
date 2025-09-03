@@ -1,5 +1,8 @@
 use bevy::{color::palettes::css::SILVER, prelude::*};
 
+#[derive(Event, Reflect, Debug, Copy, Clone)]
+pub struct SpawnWorldgenRoot;
+
 #[derive(Resource, Asset, Reflect, Debug)]
 pub struct WorldgenHandles {
     pub mesh: Handle<Mesh>,

@@ -18,12 +18,14 @@ pub fn player_cam() -> impl Bundle {
         Transform::from_xyz(-2.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         Camera3d::default(),
         PointLight::default(),
+        ShowLightGizmo::default(),
         Camera {
-            order: CameraOrder::Player.into(),
+            order: CameraOrder::World.into(),
             clear_color: ClearColorConfig::Custom(
                 bevy::color::palettes::tailwind::SLATE_800.into(), // just to ensure it's actually rendering
             ),
             ..Default::default()
         },
+        RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
     )
 }

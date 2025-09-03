@@ -10,6 +10,7 @@ use crate::screens::ScreenStates;
 #[reflect(Component)]
 pub struct WorldgenRoot;
 pub fn spawn_worldgen_root(
+    _: Trigger<SpawnWorldgenRoot>,
     mut commands: Commands,
     assets: Res<WorldgenHandles>,
     meshes: Res<Assets<Mesh>>,
@@ -34,5 +35,6 @@ pub fn spawn_worldgen_root(
 pub fn plugin(app: &mut App) {
     app.register_type::<WorldgenRoot>()
         .init_resource::<WorldgenHandles>()
-        .register_type::<WorldgenHandles>();
+        .register_type::<WorldgenHandles>()
+        .add_observer(spawn_worldgen_root);
 }

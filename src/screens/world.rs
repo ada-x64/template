@@ -4,8 +4,8 @@ use bevy_asset_loader::prelude::*;
 use crate::{
     screens::ScreenStates,
     services::{
-        player::{assets::PlayerAssets, spawn_player_root},
-        worldgen::spawn_worldgen_root,
+        player::{assets::PlayerAssets, data::SpawnPlayerRoot},
+        worldgen::data::SpawnWorldgenRoot,
     },
 };
 
@@ -25,6 +25,10 @@ pub fn plugin(app: &mut App) {
         )
         .add_systems(
             OnEnter(WorldScreenStates::Ready),
-            (spawn_player_root, spawn_worldgen_root).run_if(in_state(ScreenStates::InWorld)),
+            (|mut commands: Commands| {
+                commands.trigger(SpawnPlayerRoot);
+                commands.trigger(SpawnWorldgenRoot);
+            })
+            .run_if(in_state(ScreenStates::InWorld)),
         );
 }
