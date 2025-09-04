@@ -1,3 +1,6 @@
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 use bevy::{color::palettes::css::SILVER, prelude::*};
 
 #[derive(Event, Reflect, Debug, Copy, Clone)]

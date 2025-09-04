@@ -1,3 +1,6 @@
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 use bevy::render::view::RenderLayers;
 use bitflags::bitflags;
 

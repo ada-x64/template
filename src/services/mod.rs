@@ -1,3 +1,6 @@
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 pub(crate) mod player;
 pub(crate) mod ui;
 pub(crate) mod worldgen;

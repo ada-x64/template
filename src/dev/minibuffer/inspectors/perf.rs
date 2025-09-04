@@ -1,3 +1,6 @@
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 use bevy::prelude::*;
 use bevy_minibuffer::prelude::*;
 use iyes_perf_ui::prelude::{PerfUiDefaultEntries, PerfUiRoot};

@@ -1,3 +1,6 @@
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 pub(crate) mod assets;
 pub(crate) mod camera;
 pub(crate) mod controller;
@@ -6,7 +9,6 @@ pub(crate) mod data;
 use crate::data::*;
 use avian3d::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
-use bevy_enhanced_input::prelude::*;
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
 use data::*;
