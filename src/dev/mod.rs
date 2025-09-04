@@ -9,7 +9,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         bevy_mod_debugdump::CommandLineArgs,
         SimpleSubsecondPlugin::default(), // TODO: Switch to official hotloading in 0.17
-        bevy_flycam::NoCameraPlayerPlugin, // temp?
+                                          // bevy_flycam::NoCameraPlayerPlugin, // temp?
     ));
 
     // local functionality

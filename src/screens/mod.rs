@@ -14,8 +14,15 @@ pub enum ScreenStates {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((world::plugin, main_menu::plugin, splash::plugin));
+    app.add_plugins((world::plugin, main_menu::plugin, splash::plugin))
+        .add_systems(Update, log_state_transition);
     // #[cfg(feature = "dev")]
     app.insert_state(ScreenStates::InWorld);
     // app.insert_state(ScreenStates::Splash);
+}
+
+fn log_state_transition(mut reader: EventReader<StateTransitionEvent<ScreenStates>>) {
+    for ev in reader.read() {
+        info!("{ev:?}");
+    }
 }

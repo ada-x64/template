@@ -1,12 +1,14 @@
 pub(crate) mod assets;
 pub(crate) mod camera;
+pub(crate) mod controller;
 pub(crate) mod data;
 
 use crate::data::*;
 use avian3d::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
+use bevy_enhanced_input::prelude::*;
 use bevy_tnua::prelude::*;
-use bevy_tnua_avian3d::{TnuaAvian3dPlugin, TnuaAvian3dSensorShape};
+use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
 use data::*;
 
 use crate::{
@@ -28,15 +30,16 @@ pub fn spawn_player_root(
         children![
             (
                 Name::new("Player Controller"),
-                PlayerController,
+                PlayerController::default(),
                 Transform::IDENTITY,
                 RigidBody::Dynamic,
                 Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
-                TnuaController::default().basis(TnuaBuiltinWalk::default()),
+                TnuaController::default(),
                 TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS - 0.1, 0.0)),
-                LockedAxes::ROTATION_LOCKED,
+                LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
                 Friction::ZERO,
                 SceneRoot(player_assets.model.clone()),
+                ICtxDefault,
             ),
             (
                 Name::new("PlayerCam"),
@@ -45,12 +48,10 @@ pub fn spawn_player_root(
                 Transform::IDENTITY,
                 Camera3d::default(),
                 PointLight::default(),
+                #[cfg(feature = "dev")]
                 ShowLightGizmo::default(),
                 Camera {
                     order: CameraOrder::World.into(),
-                    clear_color: ClearColorConfig::Custom(
-                        bevy::color::palettes::tailwind::SLATE_800.into(), // just to ensure it's actually rendering
-                    ),
                     ..Default::default()
                 },
                 RenderLayers::from(
@@ -62,14 +63,11 @@ pub fn spawn_player_root(
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((
-        TnuaControllerPlugin::default(),
-        TnuaAvian3dPlugin::new(FixedUpdate),
-    ))
-    .add_systems(FixedUpdate, (camera::track_player).in_set(PlayerSystems))
-    .configure_sets(
-        FixedUpdate,
-        PlayerSystems.run_if(in_state(ScreenStates::InWorld)),
-    )
-    .add_observer(spawn_player_root);
+    app.add_plugins(controller::plugin)
+        .add_systems(FixedUpdate, (camera::track_player).in_set(PlayerSystems))
+        .add_observer(spawn_player_root)
+        .configure_sets(
+            FixedUpdate,
+            PlayerSystems.run_if(in_state(ScreenStates::InWorld)),
+        );
 }

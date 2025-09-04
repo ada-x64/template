@@ -147,7 +147,7 @@ fi
 description = "Run the specified workspace binary"
 env = { "RUSTC_WRAPPER" = "sccache" }
 tools = { "sccache" = "latest" }
-run = "cargo run -F dev --bin {{arg(name='binary')}} {{arg(name='rustc-opts', var=true, default='--')}}"
+run = "cargo run --bin {{arg(name='binary')}} {{arg(name='rustc-opts', var=true, default='--')}}"
 
 [tasks.build]
 description = "Build the specified workspace binary"
@@ -157,7 +157,7 @@ run = "cargo build -F dev --bin {{arg(name='binary')}} {{arg(name='rustc-opts', 
 
 [tasks.play]
 description = "Play the game"
-depends = ["run app"]
+run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
 
 [tasks.dev]
 description = "Run the build with hotpatching and dev features enabled"

@@ -64,6 +64,7 @@ bitflags = "2.9.3"
 serde = { version = "1.0.219", features = ["derive"] }
 anyhow = "1.0.99"
 bevy_flycam = { version = "0.16.1", optional = true }
+bevy_rich_text3d = "0.4.2"
 
 [features]
 dev = [
