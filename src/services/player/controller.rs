@@ -23,14 +23,21 @@ pub fn spawn_player_actions(event: Trigger<OnAdd, ICtxDefault>, mut commands: Co
 
 // // Observers
 pub fn on_move(trigger: Trigger<Fired<PAMove>>, mut controller: Single<&mut PlayerController>) {
-    controller.move_vec = trigger.value;
+    controller.last_move = Some(trigger.value);
 }
 
-pub fn update_controller(mut query: Single<(&mut TnuaController, &mut PlayerController)>) {
+pub fn update_controller(
+    mut query: Single<(&mut TnuaController, &mut PlayerController)>,
+    cam_tf: Single<&Transform, With<PlayerCam>>,
+) {
     let (tnua, controller) = &mut *query;
+
+    let yaw = cam_tf.rotation.to_euler(EulerRot::YXZ).0;
+    let yaw_quat = Quat::from_axis_angle(Vec3::Y, yaw);
+    let last_move = controller.last_move.take().unwrap_or_default();
+
     tnua.basis(TnuaBuiltinWalk {
-        desired_velocity: controller.move_vec,
-        // desired_forward: Dir3::new(controller.move_vec).ok(),
+        desired_velocity: yaw_quat * last_move,
         float_height: PLAYER_CAPSULE_HEIGHT / 2. + 0.01,
         ..Default::default()
     })

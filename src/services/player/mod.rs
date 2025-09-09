@@ -46,6 +46,7 @@ pub fn spawn_player_root(
             (
                 Name::new("PlayerCam"),
                 PlayerCam,
+                PlayerCamController::default(),
                 StateScoped(ScreenStates::InWorld),
                 Transform::IDENTITY,
                 Camera3d::default(),
@@ -59,14 +60,14 @@ pub fn spawn_player_root(
                 RenderLayers::from(
                     RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES
                 ),
+                ICtxCamDefault,
             )
         ],
     ));
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(controller::plugin)
-        .add_systems(FixedUpdate, (camera::track_player).in_set(PlayerSystems))
+    app.add_plugins((controller::plugin, camera::plugin))
         .add_observer(spawn_player_root)
         .configure_sets(
             FixedUpdate,

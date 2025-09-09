@@ -5,6 +5,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_minibuffer::prelude::*;
 
+use crate::services::data::GrabCursor;
+
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States, Reflect)]
 enum WorldInspectorState {
     #[default]
@@ -16,6 +18,7 @@ fn inspect_world(
     state: Res<State<WorldInspectorState>>,
     mut next_state: ResMut<NextState<WorldInspectorState>>,
     mut minibuffer: Minibuffer,
+    mut commands: Commands,
 ) {
     use WorldInspectorState::*;
     let state = match state.get() {
@@ -23,7 +26,8 @@ fn inspect_world(
         Visible => Invisible,
     };
     next_state.set(state);
-    minibuffer.clear()
+    minibuffer.clear();
+    commands.send_event(GrabCursor::<false>);
 }
 
 pub fn plugin(app: &mut App) {
