@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 pub(crate) mod actions;
+pub(crate) mod fly_cam;
 pub(crate) mod inspectors;
 
 use bevy::prelude::*;
@@ -19,5 +20,5 @@ pub fn plugin(app: &mut App) {
     .add_acts(BasicActs::default());
 
     // add functionality
-    app.add_plugins((actions::plugin, inspectors::plugin));
+    app.add_plugins((actions::plugin, inspectors::plugin, fly_cam::plugin));
 }

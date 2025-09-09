@@ -18,7 +18,7 @@ fn grab_mouse(_: Trigger<GrabCursor<true>>, mut window: Single<&mut Window>) {
     window.cursor_options.visible = false;
     window.cursor_options.grab_mode = CursorGrabMode::Locked;
 }
-fn release_mouse(_: Trigger<GrabCursor<true>>, mut window: Single<&mut Window>) {
+fn release_mouse(_: Trigger<GrabCursor<false>>, mut window: Single<&mut Window>) {
     window.cursor_options.visible = true;
     window.cursor_options.grab_mode = CursorGrabMode::None;
 }

@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 use avian3d::prelude::PhysicsGizmos;
-use bevy::{prelude::*, render::view::RenderLayers};
-use bevy_flycam::FlyCam;
+use bevy::prelude::*;
 use bevy_minibuffer::prelude::*;
 
-use crate::{data::RenderLayer, screens::ScreenStates, services::player::data::PlayerCam};
+use crate::{
+    dev::minibuffer::fly_cam::FlyCam, screens::ScreenStates, services::player::data::PlayerCam,
+};
 
 fn toggle_flycam(
     state: Res<State<ScreenStates>>,
@@ -42,29 +43,11 @@ fn toggle_gizmos<T: GizmoConfigGroup>(mut g: ResMut<GizmoConfigStore>, mut minib
     }
 }
 
-fn spawn_flycam(mut commands: Commands) {
-    commands.spawn((
-        Camera3d::default(),
-        StateScoped(ScreenStates::InWorld),
-        Camera {
-            is_active: false,
-            ..Default::default()
-        },
-        FlyCam,
-        Transform::from_xyz(-2.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
-    ));
-}
-
 pub fn plugin(app: &mut App) {
     app.add_acts((
         Act::new(toggle_flycam).bind(vec![KeyCode::Space, KeyCode::Space]),
         // TODO could use Askyy prompts here
         Act::new(toggle_gizmos::<PhysicsGizmos>).named("toggle_physics_gizmos"),
         Act::new(toggle_gizmos::<LightGizmoConfigGroup>).named("toggle_light_gizmos"),
-    ))
-    .add_systems(
-        OnEnter(ScreenStates::InWorld),
-        spawn_flycam.run_if(|q: Query<&FlyCam>| q.is_empty()),
-    );
+    ));
 }

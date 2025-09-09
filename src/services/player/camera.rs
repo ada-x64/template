@@ -6,7 +6,7 @@ use bevy_enhanced_input::prelude::*;
 #[cfg(feature = "dev")]
 use bevy_simple_subsecond_system::hot;
 
-use crate::services::player::data::*;
+use crate::services::{data::GrabCursor, player::data::*};
 
 fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Commands) {
     info!("spawn_cam_actions");
@@ -54,13 +54,23 @@ fn on_rotate(
     mut controller: Query<&mut PlayerCamController>,
 ) {
     info_once!("Got rotatation trigger! value={}", trigger.value);
-    // controller.get_mut(trigger.target()).unwrap().rotate =
-    //     Some(Quat::from_axis_angle(Vec3::Y, trigger.value));
+    controller.get_mut(trigger.target()).unwrap().rotate =
+        Some(Quat::from_axis_angle(Vec3::Y, trigger.value.x));
 }
 
 fn on_zoom(trigger: Trigger<Fired<PAZoomCam>>, mut controller: Query<&mut PlayerCamController>) {
     info_once!("Got zoom trigger! value={}", trigger.value);
-    // controller.get_mut(trigger.target()).unwrap().zoom = Some(trigger.value);
+    controller.get_mut(trigger.target()).unwrap().zoom = Some(trigger.value);
+}
+
+fn on_capture_cursor(_trigger: Trigger<Fired<PACaptureCursor>>, mut commands: Commands) {
+    info!("Capturing cursor!");
+    commands.send_event(GrabCursor::<true>);
+}
+
+fn on_release_cursor(_trigger: Trigger<Fired<PAReleaseCursor>>, mut commands: Commands) {
+    info!("Releasing cursor!");
+    commands.send_event(GrabCursor::<false>);
 }
 
 #[cfg_attr(feature = "dev", hot)]
@@ -73,8 +83,6 @@ fn camera_controls(
     ct.look_at(pt.translation, Vec3::Y);
 }
 
-fn grab_cursor() {}
-
 pub fn plugin(app: &mut App) {
     app.add_systems(
         FixedUpdate,
@@ -82,7 +90,10 @@ pub fn plugin(app: &mut App) {
             .chain()
             .in_set(PlayerSystems),
     )
+    .add_input_context::<ICtxCamDefault>()
     .add_observer(spawn_cam_actions)
     .add_observer(on_zoom)
-    .add_observer(on_rotate);
+    .add_observer(on_rotate)
+    .add_observer(on_capture_cursor)
+    .add_observer(on_release_cursor);
 }

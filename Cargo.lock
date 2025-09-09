@@ -212,7 +212,6 @@ dependencies = [
  "bevy-tnua-avian3d",
  "bevy_asset_loader",
  "bevy_enhanced_input",
- "bevy_flycam",
  "bevy_minibuffer",
  "bevy_mod_debugdump",
  "bevy_rich_text3d",
@@ -936,15 +935,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "bevy_flycam"
-version = "0.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e86d62cba553c444f64b947b8ea76803d6c767dc4c23598a812974defb4265b3"
-dependencies = [
- "bevy",
 ]
 
 [[package]]

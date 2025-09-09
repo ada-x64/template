@@ -9,6 +9,7 @@ pub(crate) mod data;
 use crate::data::*;
 use avian3d::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
+use bevy_enhanced_input::prelude::ContextActivity;
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
 use data::*;
@@ -42,6 +43,7 @@ pub fn spawn_player_root(
                 Friction::ZERO,
                 SceneRoot(player_assets.model.clone()),
                 ICtxDefault,
+                ContextActivity::<ICtxDefault>::ACTIVE,
             ),
             (
                 Name::new("PlayerCam"),
@@ -61,6 +63,7 @@ pub fn spawn_player_root(
                     RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES
                 ),
                 ICtxCamDefault,
+                ContextActivity::<ICtxCamDefault>::ACTIVE,
             )
         ],
     ));
