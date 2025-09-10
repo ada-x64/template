@@ -5,8 +5,6 @@ use bevy::prelude::*;
 use bevy_minibuffer::prelude::*;
 use iyes_perf_ui::prelude::{PerfUiDefaultEntries, PerfUiRoot};
 
-use crate::services::data::GrabCursor;
-
 pub fn inspect_perf(
     mut minibuffer: Minibuffer,
     mut commands: Commands,
@@ -17,7 +15,6 @@ pub fn inspect_perf(
     } else {
         commands.spawn(PerfUiDefaultEntries::default());
     }
-    commands.send_event(GrabCursor::<false>);
     minibuffer.clear()
 }
 

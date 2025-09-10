@@ -54,11 +54,3 @@ pub struct PARotateCam;
 #[derive(InputAction, Reflect)]
 #[action_output(f32)]
 pub struct PAZoomCam;
-
-#[derive(InputAction)]
-#[action_output(bool)]
-pub struct PACaptureCursor;
-
-#[derive(InputAction)]
-#[action_output(bool)]
-pub struct PAReleaseCursor;

@@ -9,6 +9,10 @@ use data::*;
 
 use crate::screens::ScreenStates;
 
+pub mod prelude {
+    pub use super::data::*;
+}
+
 #[derive(Component, PartialEq, Eq, Debug, Default, Reflect)]
 #[reflect(Component)]
 pub struct WorldgenRoot;

@@ -1,4 +1,6 @@
-//! Simple fly cam. Scraped from https://github.com/simgine/bevy_enhanced_input/blob/master/examples/simple_fly_cam.rs
+// ------------------------------------------
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// ------------------------------------------
 
 use core::f32::consts::{FRAC_PI_2, FRAC_PI_8};
 
@@ -70,9 +72,6 @@ pub fn spawn_flycam(mut commands: Commands) {
                     Bidirectional::up_down_dpad(),
                 )),
             ),
-            // For bindings we also have a macro similar to `children!`.
-            (Action::<CaptureCursor>::new(), bindings![MouseButton::Left]),
-            (Action::<ReleaseCursor>::new(), bindings![KeyCode::Escape]),
         ]),
     ));
 }

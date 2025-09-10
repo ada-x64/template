@@ -19,7 +19,11 @@ use crate::{
     services::player::{assets::PlayerAssets, data::SpawnPlayerRoot},
 };
 
-pub fn spawn_player_root(
+pub mod prelude {
+    pub use super::data::*;
+}
+
+fn spawn_player_root(
     _: Trigger<SpawnPlayerRoot>,
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,

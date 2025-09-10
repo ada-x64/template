@@ -1,12 +1,7 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-use bevy::prelude::*;
-use bevy_enhanced_input::prelude::*;
-#[cfg(feature = "dev")]
-use bevy_simple_subsecond_system::hot;
-
-use crate::services::{data::GrabCursor, player::data::*};
+use crate::prelude::*;
 
 fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Commands) {
     info!("spawn_cam_actions");
@@ -32,8 +27,6 @@ fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Comman
                 )
             )
         ),
-        (Action::<PACaptureCursor>::new(), bindings![MouseButton::Left]),
-        (Action::<PAReleaseCursor>::new(), bindings![KeyCode::Escape]),
         ]
     ]);
 }
@@ -63,21 +56,17 @@ fn on_zoom(trigger: Trigger<Fired<PAZoomCam>>, mut controller: Query<&mut Player
     controller.get_mut(trigger.target()).unwrap().zoom = Some(trigger.value);
 }
 
-fn on_capture_cursor(_trigger: Trigger<Fired<PACaptureCursor>>, mut commands: Commands) {
-    info!("Capturing cursor!");
-    commands.send_event(GrabCursor::<true>);
-}
-
-fn on_release_cursor(_trigger: Trigger<Fired<PAReleaseCursor>>, mut commands: Commands) {
-    info!("Releasing cursor!");
-    commands.send_event(GrabCursor::<false>);
-}
-
 #[cfg_attr(feature = "dev", hot)]
 fn camera_controls(
     pt: Single<&Transform, (With<PlayerController>, Without<PlayerCam>)>,
     mut ct: Single<(&mut Transform, &mut PlayerCamController), Without<PlayerController>>,
+    window: Single<&Window>,
 ) {
+    use bevy::window::CursorGrabMode;
+    // do this, but also disable ctx when flycam is enabled
+    if window.cursor_options.grab_mode != CursorGrabMode::Locked {
+        return;
+    }
     let (ref mut ct, ref mut controller) = *ct;
     ct.translate_around(Vec3::ZERO, controller.rotate.take().unwrap_or_default());
     ct.look_at(pt.translation, Vec3::Y);
@@ -93,7 +82,5 @@ pub fn plugin(app: &mut App) {
     .add_input_context::<ICtxCamDefault>()
     .add_observer(spawn_cam_actions)
     .add_observer(on_zoom)
-    .add_observer(on_rotate)
-    .add_observer(on_capture_cursor)
-    .add_observer(on_release_cursor);
+    .add_observer(on_rotate);
 }

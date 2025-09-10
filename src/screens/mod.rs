@@ -8,6 +8,10 @@ pub(crate) mod main_menu;
 pub(crate) mod splash;
 pub(crate) mod world;
 
+pub mod prelude {
+    pub use super::ScreenStates;
+}
+
 /// Loading is handled within the individual screens.
 #[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect)]
 pub enum ScreenStates {
