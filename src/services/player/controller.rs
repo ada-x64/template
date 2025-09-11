@@ -1,3 +1,4 @@
+use avian3d::prelude::LinearVelocity;
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
@@ -35,11 +36,14 @@ pub fn update_controller(
     let yaw = cam_tf.rotation.to_euler(EulerRot::YXZ).0;
     let yaw_quat = Quat::from_axis_angle(Vec3::Y, yaw);
     let last_move = controller.last_move.take().unwrap_or_default();
+    let desired_velocity = yaw_quat * last_move;
+    let desired_forward = Dir3::new(-desired_velocity.normalize()).ok();
 
     tnua.basis(TnuaBuiltinWalk {
         desired_velocity: yaw_quat * last_move,
-        desired_forward: Some(Dir3::Z),
-        float_height: 10., // PLAYER_CAPSULE_HEIGHT / 2. + 0.1,
+        float_height: PLAYER_CAPSULE_HEIGHT / 2. + PLAYER_CAPSULE_RADIUS,
+        desired_forward,
+        turning_angvel: 10000.,
         ..Default::default()
     });
 }

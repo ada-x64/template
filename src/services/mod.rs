@@ -22,7 +22,7 @@ pub fn plugin(app: &mut App) {
     // third-party
     app.add_plugins((
         avian3d::PhysicsPlugins::default(),
-        TnuaControllerPlugin::default(),
+        TnuaControllerPlugin::new(FixedUpdate),
         TnuaAvian3dPlugin::new(FixedUpdate),
         EnhancedInputPlugin,
         Text3dPlugin::default(),

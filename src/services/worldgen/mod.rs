@@ -30,7 +30,8 @@ pub fn spawn_worldgen_root(
         StateScoped(ScreenStates::InWorld),
         children![(
             Name::new("World Mesh"),
-            Collider::convex_hull_from_mesh(meshes.get(&assets.mesh).unwrap()).unwrap(),
+            // Collider::convex_hull_from_mesh(meshes.get(&assets.mesh).unwrap()).unwrap(),
+            Collider::half_space(Vec3::Y),
             RigidBody::Static,
             Mesh3d(assets.mesh.clone()),
             Visibility::Visible,

@@ -71,6 +71,6 @@ dev = [
     "dep:bevy_simple_subsecond_system", # Replace with official in 0.17
     "dep:bevy-inspector-egui",          # TODO Replace with Aalo
     "dep:bevy_minibuffer",
-    "bevy/dynamic_linking",
-
 ]
+
+dylib = ["bevy/dynamic_linking"]

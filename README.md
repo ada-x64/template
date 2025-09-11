@@ -13,6 +13,13 @@ can be updated to accomodate a workspace workflow if desired. Note that
 
 Call `mise run` to see a list of all the available commands.
 
+### Developing over headless SSH
+
+The mise scripts allow you to develop over SSH. It assumes you have symmetric
+SSH access, and that both machines can use rsync. By default, builds will
+proceed with -Fdev and -Fdylib, but over ssh we do not dynamically link.
+This increases build times but allows us to sync far faster.
+
 ## Credits
 
 Some of this code comes from [foxtrot](https://github.com/janhohenheim/foxtrot)
