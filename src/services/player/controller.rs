@@ -38,9 +38,10 @@ pub fn update_controller(
 
     tnua.basis(TnuaBuiltinWalk {
         desired_velocity: yaw_quat * last_move,
-        float_height: PLAYER_CAPSULE_HEIGHT / 2. + 0.01,
+        desired_forward: Some(Dir3::Z),
+        float_height: 10., // PLAYER_CAPSULE_HEIGHT / 2. + 0.1,
         ..Default::default()
-    })
+    });
 }
 
 // Plugin

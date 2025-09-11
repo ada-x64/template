@@ -36,7 +36,7 @@ fn spawn_player_root(
         RigidBody::Dynamic,
         Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
         TnuaController::default(),
-        TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS - 0.1, 0.0)),
+        TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS + 0.1, 0.)),
         LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
         Friction::ZERO,
         SceneRoot(player_assets.model.clone()),
@@ -48,7 +48,7 @@ fn spawn_player_root(
         PlayerCam,
         PlayerCamController::default(),
         StateScoped(ScreenStates::InWorld),
-        Transform::from_xyz(0., 10., 0.), // TODO: Should be set relative to terrain
+        Transform::from_xyz(0., 10., 5.),
         Camera3d::default(),
         PointLight::default(),
         #[cfg(feature = "dev")]
