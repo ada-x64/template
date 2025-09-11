@@ -19,18 +19,27 @@ pub struct SpawnPlayerRoot;
 #[derive(Component, Debug, Default)]
 pub struct PlayerCam;
 
-#[derive(Component)]
-pub struct PlayerRoot;
-
 #[derive(Component, Default)]
 pub struct PlayerController {
     pub last_move: Option<Vec3>,
 }
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct PlayerCamController {
-    pub rotate: Option<Quat>,
-    pub zoom: Option<f32>,
+    pub rotation: f32, // radians
+    pub zoom: f32,     // percentage
+    pub max_zoom: f32,
+    pub min_zoom: f32,
+}
+impl Default for PlayerCamController {
+    fn default() -> Self {
+        Self {
+            rotation: 0.,
+            zoom: 1.,
+            max_zoom: 20.,
+            min_zoom: 0.1,
+        }
+    }
 }
 /// Default player input context
 #[derive(Component)]

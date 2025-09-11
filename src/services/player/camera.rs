@@ -1,3 +1,5 @@
+use avian3d::math::PI;
+
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
@@ -11,7 +13,7 @@ fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Comman
             Action::<PARotateCam>::new(),
             Bindings::spawn((
                 Axial::right_stick().with((Scale::splat(2.0), Negate::x())),
-                Spawn((Binding::mouse_motion(), Scale::splat(0.1), Negate::all()))
+                Spawn((Binding::mouse_motion(), Scale::splat(0.01), Negate::all()))
             )),
         ),
         (
@@ -23,7 +25,7 @@ fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Comman
                 (
                     Axial::right_stick(),
                     Spawn(
-                        (Binding::mouse_wheel(), SwizzleAxis::YXZ))
+                        (Binding::mouse_wheel(), Scale::splat(0.1), SwizzleAxis::YXZ))
                 )
             )
         ),
@@ -31,29 +33,24 @@ fn spawn_cam_actions(event: Trigger<OnAdd, ICtxCamDefault>, mut commands: Comman
     ]);
 }
 
-/// Spawns the gameplay camera
-fn track_player(
-    pt: Single<&Transform, (With<PlayerController>, Without<PlayerCam>)>,
-    mut ct: Single<&mut Transform, (With<PlayerCam>, Without<PlayerRoot>)>,
-) {
-    **ct = ct
-        .looking_at(pt.translation, Vec3::Y)
-        .with_translation(pt.translation - Vec3::new(0., -5., -10.));
-}
-
 // observers
 fn on_rotate(
     trigger: Trigger<Fired<PARotateCam>>,
     mut controller: Query<&mut PlayerCamController>,
 ) {
-    info_once!("Got rotatation trigger! value={}", trigger.value);
-    controller.get_mut(trigger.target()).unwrap().rotate =
-        Some(Quat::from_axis_angle(Vec3::Y, trigger.value.x));
+    debug!("Got rotatation trigger! value={}", trigger.value);
+    let mut controller = controller.get_mut(trigger.target()).unwrap();
+    controller.rotation = (controller.rotation + trigger.value.x) % (2. * PI);
 }
 
 fn on_zoom(trigger: Trigger<Fired<PAZoomCam>>, mut controller: Query<&mut PlayerCamController>) {
-    info_once!("Got zoom trigger! value={}", trigger.value);
-    controller.get_mut(trigger.target()).unwrap().zoom = Some(trigger.value);
+    debug!("Got zoom trigger! value={}", trigger.value);
+    let mut controller = controller.get_mut(trigger.target()).unwrap();
+    controller.zoom = f32::clamp(
+        controller.zoom + trigger.value,
+        controller.min_zoom,
+        controller.max_zoom,
+    );
 }
 
 #[cfg_attr(feature = "dev", hot)]
@@ -68,19 +65,16 @@ fn camera_controls(
         return;
     }
     let (ref mut ct, ref mut controller) = *ct;
-    ct.translate_around(Vec3::ZERO, controller.rotate.take().unwrap_or_default());
+    **ct = **pt;
+    ct.rotation = Quat::from_axis_angle(Vec3::Y, controller.rotation);
+    ct.translation = pt.translation + ct.rotation * (Vec3::new(0., 5., 10.) / controller.zoom);
     ct.look_at(pt.translation, Vec3::Y);
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(
-        FixedUpdate,
-        (track_player, camera_controls)
-            .chain()
-            .in_set(PlayerSystems),
-    )
-    .add_input_context::<ICtxCamDefault>()
-    .add_observer(spawn_cam_actions)
-    .add_observer(on_zoom)
-    .add_observer(on_rotate);
+    app.add_systems(FixedUpdate, (camera_controls).chain().in_set(PlayerSystems))
+        .add_input_context::<ICtxCamDefault>()
+        .add_observer(spawn_cam_actions)
+        .add_observer(on_zoom)
+        .add_observer(on_rotate);
 }

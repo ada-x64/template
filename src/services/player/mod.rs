@@ -29,47 +29,37 @@ fn spawn_player_root(
     player_assets: Res<PlayerAssets>,
 ) {
     commands.spawn((
-        Name::new("PlayerRoot"),
-        PlayerRoot,
-        Visibility::Visible,
+        Name::new("Player Controller"),
+        Transform::from_xyz(0., 10., 0.), // TODO: Should be set relative to terrain
+        StateScoped(ScreenStates::InWorld),
+        PlayerController::default(),
+        RigidBody::Dynamic,
+        Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
+        TnuaController::default(),
+        TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS - 0.1, 0.0)),
+        LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
+        Friction::ZERO,
+        SceneRoot(player_assets.model.clone()),
+        ICtxDefault,
+        ContextActivity::<ICtxDefault>::ACTIVE,
+    ));
+    commands.spawn((
+        Name::new("PlayerCam"),
+        PlayerCam,
+        PlayerCamController::default(),
         StateScoped(ScreenStates::InWorld),
         Transform::from_xyz(0., 10., 0.), // TODO: Should be set relative to terrain
-        children![
-            (
-                Name::new("Player Controller"),
-                PlayerController::default(),
-                Transform::IDENTITY,
-                RigidBody::Dynamic,
-                Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
-                TnuaController::default(),
-                TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS - 0.1, 0.0)),
-                LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
-                Friction::ZERO,
-                SceneRoot(player_assets.model.clone()),
-                ICtxDefault,
-                ContextActivity::<ICtxDefault>::ACTIVE,
-            ),
-            (
-                Name::new("PlayerCam"),
-                PlayerCam,
-                PlayerCamController::default(),
-                StateScoped(ScreenStates::InWorld),
-                Transform::IDENTITY,
-                Camera3d::default(),
-                PointLight::default(),
-                #[cfg(feature = "dev")]
-                ShowLightGizmo::default(),
-                Camera {
-                    order: CameraOrder::World.into(),
-                    ..Default::default()
-                },
-                RenderLayers::from(
-                    RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES
-                ),
-                ICtxCamDefault,
-                ContextActivity::<ICtxCamDefault>::ACTIVE,
-            )
-        ],
+        Camera3d::default(),
+        PointLight::default(),
+        #[cfg(feature = "dev")]
+        ShowLightGizmo::default(),
+        Camera {
+            order: CameraOrder::World.into(),
+            ..Default::default()
+        },
+        RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
+        ICtxCamDefault,
+        ContextActivity::<ICtxCamDefault>::ACTIVE,
     ));
 }
 
