@@ -17,27 +17,37 @@ pub struct PlayerSystems;
 pub struct SpawnPlayerRoot;
 
 #[derive(Component, Debug, Default)]
+#[require(Name::new("PlayerCam"))]
 pub struct PlayerCam;
 
 #[derive(Component, Default)]
+#[require(Name::new("PlayerController"))]
 pub struct PlayerController {
     pub last_move: Option<Vec3>,
 }
 
-#[derive(Component)]
+#[derive(Component, Debug)]
+#[require(Name::new("PlayerCamController"))]
 pub struct PlayerCamController {
-    pub rotation: f32, // radians
-    pub zoom: f32,     // percentage
-    pub max_zoom: f32,
-    pub min_zoom: f32,
+    /// In radians.
+    pub rotation: Vec2,
+    /// percentage zoomed out (e.g. value of 1 means outer_radius is at 100% its default length)
+    pub zoom: f32,
+    /// radius of outer sphere. used for zoom and camera collisions.
+    pub outer_radius: f32,
+    /// radius of inner sphere. used for zoom and camera collisions.
+    pub inner_radius: f32,
+    /// Desired translation.
+    pub desired_tl: Vec3,
 }
-impl Default for PlayerCamController {
-    fn default() -> Self {
+impl PlayerCamController {
+    pub fn new(desired_tl: Vec3) -> Self {
         Self {
-            rotation: 0.,
+            rotation: Vec2::ZERO,
             zoom: 1.,
-            max_zoom: 20.,
-            min_zoom: 0.1,
+            outer_radius: 10.,
+            inner_radius: 1.,
+            desired_tl,
         }
     }
 }

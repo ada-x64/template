@@ -7,7 +7,7 @@ SSH_IP = "{{ exec(command=\"echo $SSH_CLIENT | cut -d' ' -f1\") }}"
 SSH_PORT = "{{ exec(command=\"echo $SSH_CLIENT | cut -d' ' -f3\") }}"
 PATH_HASH = "{{exec(command=\"echo $PWD | cksum | cut -d' ' -f1\")}}"
 SSH_OUT = "~/.local/share/rsync/{{env.PATH_HASH}}"
-BUILD_FLAGS = "{% if env.SSH_IP %}-Fdev{% else %}-Fdev -Fdylib{% endif %}"
+FEATURES = "{% if env.SSH_IP %}'dev'{% else %}'dev dylib'{% endif %}"
 CARGO_TERM_COLOR = "always"
 
 [tools]
@@ -160,13 +160,14 @@ run = "cargo run --bin {{arg(name='binary', default='app')}} {{arg(name='rustc-o
 [tasks.build_local]
 env = { "RUSTC_WRAPPER" = "sccache" }
 tools = { "sccache" = "latest" }
-run = "cargo build {{env.BUILD_FLAGS}} --bin {{arg(name='binary', default='app')}} {{arg(name='rustc-opts', var=true, default='--')}}"
+run = "cargo build --features {{env.FEATURES}} --bin {{arg(name='binary', default='app')}} {{arg(name='rustc-opts', var=true, default='--')}}"
 
 [tasks.play_local]
 run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
 
 [tasks.dev_local]
-run = "BEVY_ASSET_ROOT='.' dx serve --hot-patch {{env.BUILD_FLAGS}}"
+raw = true
+run = "BEVY_ASSET_ROOT='.' dx serve --hot-patch --features {{env.FEATURES}}"
 
 
 # SSH #########################################################################

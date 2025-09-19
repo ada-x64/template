@@ -6,7 +6,7 @@ pub(crate) mod camera;
 pub(crate) mod controller;
 pub(crate) mod data;
 
-use crate::data::*;
+use crate::{data::*, services::data::CollisionLayer};
 use avian3d::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_enhanced_input::prelude::ContextActivity;
@@ -28,38 +28,57 @@ fn spawn_player_root(
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
 ) {
+    // TODO: Should be from terrain height.
+    let player_tl = Vec3::new(0., 10., 0.);
+    let cam_tl = player_tl + Vec3::new(0., 5., 5.);
+    let player_tf = Transform::from_translation(player_tl);
+    let cam_tf = Transform::from_translation(cam_tl);
     commands.spawn((
-        Name::new("Player Controller"),
-        Transform::from_xyz(0., 10., 0.), // TODO: Should be set relative to terrain
-        StateScoped(ScreenStates::InWorld),
         PlayerController::default(),
+        StateScoped(ScreenStates::InWorld),
         RigidBody::Dynamic,
         Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
         TnuaController::default(),
         TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS + 0.1, 0.)),
         LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
         Friction::ZERO,
-        SceneRoot(player_assets.model.clone()),
         ICtxDefault,
         ContextActivity::<ICtxDefault>::ACTIVE,
+        SceneRoot(player_assets.model.clone()),
     ));
+    commands.spawn((RayCaster::new(
+        player_tf.translation,
+        Dir3::new((cam_tl - player_tl).normalize()).unwrap(),
+    )
+    .with_query_filter(SpatialQueryFilter::from_mask(
+        CollisionLayer::Camera | CollisionLayer::Default,
+    ))
+    .with_max_hits(1),));
     commands.spawn((
-        Name::new("PlayerCam"),
-        PlayerCam,
-        PlayerCamController::default(),
-        StateScoped(ScreenStates::InWorld),
-        Transform::from_xyz(0., 10., 5.),
-        Camera3d::default(),
-        PointLight::default(),
-        #[cfg(feature = "dev")]
-        ShowLightGizmo::default(),
-        Camera {
-            order: CameraOrder::World.into(),
-            ..Default::default()
-        },
-        RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
-        ICtxCamDefault,
-        ContextActivity::<ICtxCamDefault>::ACTIVE,
+        Name::new("PlayerCamRoot"),
+        (
+            PlayerCamController::new(cam_tl),
+            cam_tf,
+            ICtxCamDefault,
+            ContextActivity::<ICtxCamDefault>::ACTIVE,
+            LockedAxes::new().lock_rotation_z(),
+        ),
+        (
+            PlayerCam,
+            StateScoped(ScreenStates::InWorld),
+            Camera3d::default(),
+            #[cfg(feature = "dev")]
+            ShowLightGizmo::default(),
+            PointLight::default(),
+            Camera {
+                is_active: true,
+                order: CameraOrder::World.into(),
+                ..Default::default()
+            },
+            RenderLayers::from(
+                RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES,
+            ),
+        ),
     ));
 }
 

@@ -1,6 +1,7 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
+pub(crate) mod data;
 pub(crate) mod input;
 pub(crate) mod player;
 pub(crate) mod ui;

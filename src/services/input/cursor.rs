@@ -11,6 +11,7 @@ fn on_capture_cursor(
     mut window: Single<&mut Window>,
     mut commands: Commands,
     ictx_cam_default: Query<
+        // TODO: Replace with generic CameraController so we can toggle controllers separately from views
         (Entity, &Camera),
         (
             With<ContextActivity<ICtxCamDefault>>,
