@@ -1,7 +1,7 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-use crate::data::{CameraOrder, RenderLayer};
+use crate::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
 
 #[derive(Component, Reflect)]

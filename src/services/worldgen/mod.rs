@@ -3,11 +3,10 @@
 // ------------------------------------------
 pub(crate) mod data;
 
+use crate::prelude::*;
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use data::*;
-
-use crate::screens::ScreenStates;
 
 pub mod prelude {
     pub use super::data::*;
@@ -20,7 +19,7 @@ pub fn spawn_worldgen_root(
     _: Trigger<SpawnWorldgenRoot>,
     mut commands: Commands,
     assets: Res<WorldgenHandles>,
-    meshes: Res<Assets<Mesh>>,
+    _meshes: Res<Assets<Mesh>>,
 ) {
     commands.spawn((
         WorldgenRoot,

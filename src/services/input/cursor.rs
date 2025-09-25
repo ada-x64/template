@@ -4,7 +4,7 @@
 use bevy::window::CursorGrabMode;
 
 use super::data::*;
-use crate::prelude::*;
+use crate::{prelude::*, services::input::camera::data::ICtxTrackingCam};
 
 fn on_capture_cursor(
     _: Trigger<Completed<PACaptureCursor>>,
@@ -14,7 +14,7 @@ fn on_capture_cursor(
         // TODO: Replace with generic CameraController so we can toggle controllers separately from views
         (Entity, &Camera),
         (
-            With<ContextActivity<ICtxCamDefault>>,
+            With<ContextActivity<ICtxTrackingCam>>,
             Without<ContextActivity<FlyCam>>,
         ),
     >,
@@ -22,7 +22,7 @@ fn on_capture_cursor(
         (Entity, &Camera),
         (
             With<ContextActivity<FlyCam>>,
-            Without<ContextActivity<ICtxCamDefault>>,
+            Without<ContextActivity<ICtxTrackingCam>>,
         ),
     >,
 ) {
@@ -35,7 +35,7 @@ fn on_capture_cursor(
         if let Ok((ictx, cam)) = ictx_cam_default.single() {
             commands
                 .entity(ictx)
-                .insert(ContextActivity::<ICtxCamDefault>::new(cam.is_active));
+                .insert(ContextActivity::<ICtxTrackingCam>::new(cam.is_active));
         }
         if let Ok((ictx, cam)) = ictx_flycam.single() {
             commands
@@ -54,7 +54,7 @@ fn on_release_cursor(
     _: Trigger<Completed<PAReleaseCursor>>,
     mut window: Single<&mut Window>,
     mut commands: Commands,
-    ictx_cam_default: Query<Entity, With<ContextActivity<ICtxCamDefault>>>,
+    ictx_cam_default: Query<Entity, With<ContextActivity<ICtxTrackingCam>>>,
     #[cfg(feature = "dev")] ictx_flycam: Query<Entity, With<ContextActivity<FlyCam>>>,
 ) {
     info!("release_mouse");
@@ -63,7 +63,7 @@ fn on_release_cursor(
     if let Ok(ictx_default) = ictx_cam_default.single() {
         commands
             .entity(ictx_default)
-            .insert(ContextActivity::<ICtxCamDefault>::INACTIVE);
+            .insert(ContextActivity::<ICtxTrackingCam>::INACTIVE);
     }
     #[cfg(feature = "dev")]
     {

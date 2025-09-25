@@ -14,6 +14,7 @@ use bevy_tnua::prelude::TnuaControllerPlugin;
 use bevy_tnua_avian3d::TnuaAvian3dPlugin;
 
 pub mod prelude {
+    pub use super::data::*;
     pub use super::input::prelude::*;
     pub use super::player::prelude::*;
     pub use super::worldgen::prelude::*;

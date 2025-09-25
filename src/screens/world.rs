@@ -4,20 +4,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use crate::{
-    screens::ScreenStates,
-    services::{
-        player::{assets::PlayerAssets, data::SpawnPlayerRoot},
-        worldgen::data::SpawnWorldgenRoot,
-    },
-};
-
-#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect, Default)]
-pub enum WorldScreenStates {
-    #[default]
-    Loading,
-    Ready,
-}
+use crate::{prelude::*, services::player::assets::PlayerAssets};
 
 pub fn plugin(app: &mut App) {
     app.init_state::<WorldScreenStates>()

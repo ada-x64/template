@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy_enhanced_input::prelude::*;
 use bevy_tnua::prelude::*;
 
-use crate::services::player::data::*;
+use crate::services::{input::camera::data::TrackingCam, player::data::*};
 
 pub fn spawn_player_actions(event: Trigger<OnAdd, ICtxDefault>, mut commands: Commands) {
     commands.entity(event.target()).insert(actions!(
@@ -28,7 +28,7 @@ pub fn on_move(trigger: Trigger<Fired<PAMove>>, mut controller: Single<&mut Play
 
 pub fn update_controller(
     mut query: Single<(&mut TnuaController, &mut PlayerController)>,
-    cam_tf: Single<&Transform, With<PlayerCam>>,
+    cam_tf: Single<&Transform, With<TrackingCam>>,
 ) {
     let (tnua, controller) = &mut *query;
 

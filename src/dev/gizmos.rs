@@ -4,10 +4,7 @@
 use avian3d::prelude::{PhysicsDebugPlugin, PhysicsGizmos};
 use bevy::{color::palettes::css::*, prelude::*, render::view::RenderLayers};
 
-use crate::{
-    data::RenderLayer,
-    prelude::{FlyCam, PlayerCam, PlayerCamController, PlayerController},
-};
+use crate::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(PhysicsDebugPlugin::default())
@@ -69,7 +66,7 @@ fn render_camera_gizmos(
     mut cam_gizmos: Gizmos<CameraGizmoConfigGroup>,
     config_store: Res<GizmoConfigStore>,
     fly_cam: Query<&Transform, With<FlyCam>>,
-    player_cam: Query<(&Transform, &PlayerCamController), With<PlayerCam>>,
+    player_cam: Query<(&Transform, &TrackingCam), With<TrackingCam>>,
     player_tf: Query<&Transform, With<PlayerController>>,
 ) {
     let config = config_store.config::<CameraGizmoConfigGroup>().1;

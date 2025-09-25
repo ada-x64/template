@@ -2,15 +2,18 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 
+pub(crate) mod camera;
 pub(crate) mod cursor;
 pub(crate) mod data;
 
-pub mod prelude {
-    use super::data::*;
-}
 use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_enhanced_input::prelude::*;
-use data::*;
+
+pub mod prelude {
+    pub use super::camera::data::*;
+    pub use super::data::*;
+}
+pub use prelude::*;
 
 pub fn spawn_global_ctx(mut commands: Commands) {
     commands.spawn((
@@ -39,7 +42,7 @@ pub fn exit_app(_: Trigger<Completed<PAQuit>>, mut commands: Commands, win: Sing
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(cursor::plugin)
+    app.add_plugins((cursor::plugin, camera::plugin))
         .add_input_context::<ICtxGlobal>()
         .add_observer(exit_app)
         .add_systems(Startup, spawn_global_ctx);

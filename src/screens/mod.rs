@@ -3,22 +3,16 @@
 // ------------------------------------------
 use bevy::prelude::*;
 
+pub(crate) mod data;
 pub(crate) mod loading;
 pub(crate) mod main_menu;
 pub(crate) mod splash;
 pub(crate) mod world;
 
 pub mod prelude {
-    pub use super::ScreenStates;
+    pub use super::data::*;
 }
-
-/// Loading is handled within the individual screens.
-#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect)]
-pub enum ScreenStates {
-    Splash,
-    MainMenu,
-    InWorld,
-}
+use prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((world::plugin, main_menu::plugin, splash::plugin))

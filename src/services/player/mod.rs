@@ -2,22 +2,16 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 pub(crate) mod assets;
-pub(crate) mod camera;
 pub(crate) mod controller;
 pub(crate) mod data;
 
-use crate::{data::*, services::data::CollisionLayer};
+use crate::{prelude::*, services::player::assets::PlayerAssets};
 use avian3d::prelude::*;
 use bevy::{prelude::*, render::view::RenderLayers};
 use bevy_enhanced_input::prelude::ContextActivity;
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
 use data::*;
-
-use crate::{
-    screens::ScreenStates,
-    services::player::{assets::PlayerAssets, data::SpawnPlayerRoot},
-};
 
 pub mod prelude {
     pub use super::data::*;
@@ -33,19 +27,27 @@ fn spawn_player_root(
     let cam_tl = player_tl + Vec3::new(0., 5., 5.);
     let player_tf = Transform::from_translation(player_tl);
     let cam_tf = Transform::from_translation(cam_tl);
-    commands.spawn((
-        PlayerController::default(),
-        StateScoped(ScreenStates::InWorld),
-        RigidBody::Dynamic,
-        Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
-        TnuaController::default(),
-        TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS + 0.1, 0.)),
-        LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
-        Friction::ZERO,
-        ICtxDefault,
-        ContextActivity::<ICtxDefault>::ACTIVE,
-        SceneRoot(player_assets.model.clone()),
-    ));
+
+    let player_entt = commands
+        .spawn((
+            PlayerController::default(),
+            StateScoped(ScreenStates::InWorld),
+            SceneRoot(player_assets.model.clone()),
+            (
+                RigidBody::Dynamic,
+                Collider::capsule(PLAYER_CAPSULE_RADIUS, PLAYER_CAPSULE_HEIGHT),
+                LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
+                Friction::ZERO,
+            ),
+            (
+                TnuaController::default(),
+                TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS + 0.1, 0.)),
+                ICtxDefault,
+                ContextActivity::<ICtxDefault>::ACTIVE,
+            ),
+        ))
+        .id();
+
     commands.spawn((RayCaster::new(
         player_tf.translation,
         Dir3::new((cam_tl - player_tl).normalize()).unwrap(),
@@ -54,24 +56,23 @@ fn spawn_player_root(
         CollisionLayer::Camera | CollisionLayer::Default,
     ))
     .with_max_hits(1),));
+
     commands.spawn((
-        Name::new("PlayerCamRoot"),
+        CameraName::PlayerCam,
+        StateScoped(ScreenStates::InWorld),
         (
-            PlayerCamController::new(cam_tl),
+            TrackingCam::new(player_entt),
             cam_tf,
-            ICtxCamDefault,
-            ContextActivity::<ICtxCamDefault>::ACTIVE,
+            ContextActivity::<ICtxTrackingCam>::ACTIVE,
             LockedAxes::new().lock_rotation_z(),
         ),
         (
-            PlayerCam,
-            StateScoped(ScreenStates::InWorld),
-            Camera3d::default(),
             #[cfg(feature = "dev")]
             ShowLightGizmo::default(),
             PointLight::default(),
+        ),
+        (
             Camera {
-                is_active: true,
                 order: CameraOrder::World.into(),
                 ..Default::default()
             },
@@ -83,7 +84,7 @@ fn spawn_player_root(
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((controller::plugin, camera::plugin))
+    app.add_plugins(controller::plugin)
         .add_observer(spawn_player_root)
         .configure_sets(
             FixedUpdate,

@@ -1,7 +1,5 @@
-use std::ops::BitOr;
-
-use crate::prelude::*;
 use avian3d::prelude::*;
+use std::ops::BitOr;
 
 #[derive(PhysicsLayer, Copy, Clone, Debug, Default)]
 pub enum CollisionLayer {
