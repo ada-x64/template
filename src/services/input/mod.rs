@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 
-pub(crate) mod camera;
-pub(crate) mod cursor;
-pub(crate) mod data;
+pub mod camera;
+pub mod cursor;
+pub mod data;
 
 use bevy::{prelude::*, window::CursorGrabMode};
 use bevy_enhanced_input::prelude::*;
 
 pub mod prelude {
-    pub use super::camera::data::*;
+    pub use super::camera::prelude::*;
     pub use super::data::*;
 }
 pub use prelude::*;

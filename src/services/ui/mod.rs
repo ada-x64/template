@@ -15,7 +15,7 @@ fn spawn_ui_camera(mut commands: Commands) {
         Camera2d,
         IsDefaultUiCamera,
         Camera {
-            order: CameraOrder::Ui.into(),
+            order: CameraOrder::Ui as isize,
             ..default()
         },
         RenderLayers::from(RenderLayer::DEFAULT),

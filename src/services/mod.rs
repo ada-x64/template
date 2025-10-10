@@ -1,17 +1,15 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-pub(crate) mod data;
-pub(crate) mod input;
+pub mod data;
+pub mod input;
 pub(crate) mod player;
-pub(crate) mod ui;
-pub(crate) mod worldgen;
+pub mod ui;
+pub mod worldgen;
 
 use bevy::prelude::*;
-use bevy_enhanced_input::prelude::*;
-use bevy_rich_text3d::Text3dPlugin;
-use bevy_tnua::prelude::TnuaControllerPlugin;
-use bevy_tnua_avian3d::TnuaAvian3dPlugin;
+
+use crate::third_party;
 
 pub mod prelude {
     pub use super::data::*;
@@ -20,16 +18,17 @@ pub mod prelude {
     pub use super::worldgen::prelude::*;
 }
 
-pub fn plugin(app: &mut App) {
-    // third-party
+pub fn public_plugin(app: &mut App) {
     app.add_plugins((
-        avian3d::PhysicsPlugins::default(),
-        TnuaControllerPlugin::new(FixedUpdate),
-        TnuaAvian3dPlugin::new(FixedUpdate),
-        EnhancedInputPlugin,
-        Text3dPlugin::default(),
+        third_party::plugin,
+        input::plugin,
+        ui::plugin,
+        worldgen::plugin,
     ));
+    #[cfg(feature = "dev")]
+    app.add_plugins(crate::dev::plugin);
+}
 
-    // local
-    app.add_plugins((player::plugin, worldgen::plugin, ui::plugin, input::plugin));
+pub fn private_plugin(app: &mut App) {
+    app.add_plugins(player::plugin);
 }

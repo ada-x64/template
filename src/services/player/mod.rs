@@ -5,9 +5,12 @@ pub(crate) mod assets;
 pub(crate) mod controller;
 pub(crate) mod data;
 
-use crate::{prelude::*, services::player::assets::PlayerAssets};
+use crate::{
+    prelude::*,
+    services::{input::camera::tracking::tracking_cam_bundle, player::assets::PlayerAssets},
+};
 use avian3d::prelude::*;
-use bevy::{prelude::*, render::view::RenderLayers};
+use bevy::prelude::*;
 use bevy_enhanced_input::prelude::ContextActivity;
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dSensorShape;
@@ -21,13 +24,8 @@ fn spawn_player_root(
     _: Trigger<SpawnPlayerRoot>,
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
+    mut camera_list: ResMut<CameraList>,
 ) {
-    // TODO: Should be from terrain height.
-    let player_tl = Vec3::new(0., 10., 0.);
-    let cam_tl = player_tl + Vec3::new(0., 5., 5.);
-    let player_tf = Transform::from_translation(player_tl);
-    let cam_tf = Transform::from_translation(cam_tl);
-
     let player_entt = commands
         .spawn((
             PlayerController::default(),
@@ -48,39 +46,20 @@ fn spawn_player_root(
         ))
         .id();
 
-    commands.spawn((RayCaster::new(
-        player_tf.translation,
-        Dir3::new((cam_tl - player_tl).normalize()).unwrap(),
-    )
-    .with_query_filter(SpatialQueryFilter::from_mask(
-        CollisionLayer::Camera | CollisionLayer::Default,
-    ))
-    .with_max_hits(1),));
-
-    commands.spawn((
-        CameraName::PlayerCam,
-        StateScoped(ScreenStates::InWorld),
-        (
-            TrackingCam::new(player_entt),
-            cam_tf,
-            ContextActivity::<ICtxTrackingCam>::ACTIVE,
-            LockedAxes::new().lock_rotation_z(),
-        ),
-        (
-            #[cfg(feature = "dev")]
-            ShowLightGizmo::default(),
-            PointLight::default(),
-        ),
-        (
-            Camera {
-                order: CameraOrder::World.into(),
-                ..Default::default()
-            },
-            RenderLayers::from(
-                RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES,
+    let cam = commands
+        .spawn((
+            Name::new("PlayerCam"),
+            StateScoped(ScreenStates::InWorld),
+            (LockedAxes::new().lock_rotation_z(),),
+            (
+                #[cfg(feature = "dev")]
+                ShowLightGizmo::default(),
+                PointLight::default(),
             ),
-        ),
-    ));
+            tracking_cam_bundle(player_entt, Vec3::new(0., 1., 1.)),
+        ))
+        .id();
+    camera_list.push(cam);
 }
 
 pub fn plugin(app: &mut App) {

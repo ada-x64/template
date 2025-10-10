@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use bevy::render::view::RenderLayers;
 use bitflags::bitflags;
-use strum::{Display, EnumCount, EnumString, FromRepr, VariantNames};
 
 bitflags! {
     pub struct RenderLayer: u32 {
@@ -25,48 +24,30 @@ impl From<RenderLayer> for RenderLayers {
 
 /// Note: Value increases from top to bottom with highest value drawn last, thus
 /// on top of the others
+#[derive(Debug)]
 pub enum CameraOrder {
     World,
     Player,
     Ui,
 }
-impl From<CameraOrder> for isize {
-    fn from(order: CameraOrder) -> Self {
-        order as isize
-    }
-}
-/// Enumeration of all 3D cameras used throughout the application.
-#[derive(
-    Component, Debug, Display, VariantNames, EnumString, FromRepr, EnumCount, Copy, Clone, PartialEq,
-)]
-pub enum CameraName {
-    /// Fly camera for development.
-    DevCam,
-    /// Player tracking camera.
-    PlayerCam,
-}
-impl From<CameraName> for CameraControllerKind {
-    fn from(val: CameraName) -> Self {
-        match val {
-            CameraName::DevCam => CameraControllerKind::Fly,
-            CameraName::PlayerCam => CameraControllerKind::Tracking,
-        }
-    }
-}
+
+/// A global list of all the cameras in the order they should be presented
+/// for the cycle_cam dev command.
+#[derive(Resource, Debug, Deref, DerefMut, Default)]
+pub struct CameraList(Vec<Entity>);
+
+/// The currently active camera view.
+/// For the cycle_cam dev command.
+#[derive(Resource, Debug, Deref, DerefMut, Default)]
+pub struct ActiveCamera(usize);
 
 /// Tracking camera. Will follow the given entity. Will spawn a CameraController on add.
+/// Prefer to use [tracking_cam_bundle].
 #[derive(Component, Debug)]
-#[require(
-    Camera,
-    Camera3d,
-    CameraController::new(CameraControllerKind::Tracking),
-    ICtxTrackingCam
-)]
+#[require(CameraController::new(CameraControllerKind::Tracking), ICtxTrackingCam)]
 pub struct TrackingCam {
     /// In radians.
     pub rotation: Vec2,
-    /// percentage zoomed out (e.g. value of 1 means outer_radius is at 100% its default length)
-    pub zoom: f32,
     /// radius of outer sphere. used for zoom and camera collisions.
     pub outer_radius: f32,
     /// radius of inner sphere. used for zoom and camera collisions.
@@ -78,7 +59,6 @@ impl TrackingCam {
     pub fn new(entity: Entity) -> Self {
         Self {
             rotation: Vec2::ZERO,
-            zoom: 1.,
             outer_radius: 10.,
             inner_radius: 1.,
             entity,
@@ -87,12 +67,7 @@ impl TrackingCam {
 }
 
 #[derive(Component)]
-#[require(
-    Camera,
-    Camera3d,
-    CameraController::new(CameraControllerKind::Fly),
-    ICtxFlyCam
-)]
+#[require(CameraController::new(CameraControllerKind::Fly), ICtxFlyCam)]
 pub struct FlyCam;
 
 #[derive(Component, Default)]
@@ -112,6 +87,16 @@ pub struct PARotateCam;
 #[action_output(f32)]
 pub struct PAZoomCam;
 
+/// PlayerAction_MoveCam (for [FlyCam])
+#[derive(InputAction, Reflect)]
+#[action_output(Vec2)]
+pub struct PAMoveCam;
+
+/// PlayerAction_MoveCamY (for [FlyCam])
+#[derive(InputAction, Reflect)]
+#[action_output(f32)]
+pub struct PAMoveCamY;
+
 #[derive(Debug, Reflect, Copy, Clone)]
 pub enum CameraControllerKind {
     Fly,
@@ -119,7 +104,7 @@ pub enum CameraControllerKind {
 }
 
 #[derive(Debug, Reflect, Component, Copy, Clone)]
-#[require(Camera, Camera3d)]
+#[require(Camera {is_active: false, ..Default::default()}, Camera3d)]
 #[component(immutable)]
 pub struct CameraController {
     /// Is the controller enabled?

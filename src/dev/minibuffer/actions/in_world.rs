@@ -4,90 +4,79 @@
 use avian3d::prelude::PhysicsGizmos;
 use bevy::prelude::*;
 use bevy_minibuffer::prelude::*;
-use std::str::FromStr;
-use strum::{EnumCount, VariantNames};
 
 use crate::prelude::*;
 
-fn set_view(state: Res<State<ScreenStates>>, mut minibuffer: Minibuffer) {
-    if !matches!(**state, ScreenStates::InWorld) {
-        minibuffer.message("This command requires ScreenStates::InWorld");
-        return;
-    }
-    minibuffer
-        .prompt_map("Which camera?", CameraName::VARIANTS.to_vec())
-        .observe(
-            |mut trigger: Trigger<Submit<String>>,
-             mut commands: Commands,
-             cams: Query<(Entity, &CameraName, &CameraController)>| {
-                let name = r!(trigger
-                    .take_result()
-                    .ok()
-                    .and_then(|res| CameraName::from_str(&res).ok()));
+macro_rules! cam_cmd {
+    ($func:ident, $property:ident) => {
+        fn $func(
+            state: Res<State<ScreenStates>>,
+            mut minibuffer: Minibuffer,
+            cam_list: Res<CameraList>,
+            cams: Query<(&Name, &CameraController)>,
+        ) {
+            if !matches!(**state, ScreenStates::InWorld) {
+                minibuffer.message("This command requires ScreenStates::InWorld");
+                return;
+            }
 
-                for (entity, cam_name, controller) in cams {
-                    commands.trigger(InsertCameraController {
-                        entity,
-                        new_controller: CameraController {
-                            active: name == *cam_name,
-                            ..*controller
-                        },
+            let names = cam_list
+                .iter()
+                .filter_map(|cam| cams.get(*cam).map(|(name, _)| name.clone()).ok())
+                .collect::<Vec<_>>();
+
+            minibuffer.prompt_map("Which camera?", names).observe(
+                |mut trigger: Trigger<Submit<String>>,
+                 mut commands: Commands,
+                 cam_list: Res<CameraList>,
+                 cams: Query<(&Name, &CameraController)>| {
+                    let target_name = r!(trigger.take_result());
+                    cam_list.iter().for_each(|entity| {
+                        if let Ok((name, controller)) = cams.get(*entity) {
+                            commands.trigger(InsertCameraController {
+                                entity: *entity,
+                                new_controller: CameraController {
+                                    $property: **name == target_name,
+                                    ..*controller
+                                },
+                            });
+                        };
                     });
-                }
-            },
-        );
+                },
+            );
+        }
+    };
 }
+cam_cmd!(set_view, active);
+cam_cmd!(set_cam_controller, enabled);
 
-fn set_cam_controller(state: Res<State<ScreenStates>>, mut minibuffer: Minibuffer) {
-    if !matches!(**state, ScreenStates::InWorld) {
-        minibuffer.message("This command requires ScreenStates::InWorld");
-        return;
-    }
-    minibuffer
-        .prompt_map("Which camera?", CameraName::VARIANTS.to_vec())
-        .observe(
-            |mut trigger: Trigger<Submit<String>>,
-             mut commands: Commands,
-             cams: Query<(Entity, &CameraName, &CameraController)>| {
-                let name = r!(trigger
-                    .take_result()
-                    .ok()
-                    .and_then(|res| CameraName::from_str(&res).ok()));
-
-                for (entity, cam_name, controller) in cams {
-                    commands.trigger(InsertCameraController {
-                        entity,
-                        new_controller: CameraController {
-                            enabled: name == *cam_name,
-                            ..*controller
-                        },
-                    });
-                }
-            },
-        );
-}
-
-fn cycle_view(mut commands: Commands, cams: Query<(Entity, &CameraName, &CameraController)>) {
-    // get the currently active view. this could be more efficient if it were a separate component.
-    let (active_entt, active_cam, active_controller) =
-        r!(cams.iter().find(|(_, _, controller)| controller.active));
-    let next_cam = CameraName::from_repr(*active_cam as usize + 1 % CameraName::COUNT).unwrap();
-    let (next_entt, _, next_controller) = r!(cams.iter().find(|(_, name, _)| **name == next_cam));
-
+fn cycle_cam(
+    mut commands: Commands,
+    cams: Res<CameraList>,
+    mut res_active_cam: ResMut<ActiveCamera>,
+    controllers: Query<&CameraController>,
+) {
+    let active_cam = **res_active_cam;
+    let active_controller = r!(controllers.get(cams[active_cam]));
     commands.trigger(InsertCameraController {
-        entity: active_entt,
+        entity: cams[active_cam],
         new_controller: CameraController {
             active: false,
+            enabled: false,
             ..*active_controller
         },
     });
+    let next_cam = (active_cam + 1) % cams.len();
+    let next_controller = r!(controllers.get(cams[next_cam]));
+    **res_active_cam = next_cam;
     commands.trigger(InsertCameraController {
-        entity: next_entt,
+        entity: cams[next_cam],
         new_controller: CameraController {
             active: true,
+            enabled: true,
             ..*next_controller
         },
-    })
+    });
 }
 
 fn toggle_gizmos<T: GizmoConfigGroup>(mut g: ResMut<GizmoConfigStore>, mut minibuffer: Minibuffer) {
@@ -104,7 +93,7 @@ pub fn plugin(app: &mut App) {
     app.add_acts((
         Act::new(set_view),
         Act::new(set_cam_controller),
-        Act::new(cycle_view).bind(vec![KeyCode::Space, KeyCode::Space]),
+        Act::new(cycle_cam).bind(vec![KeyCode::Space, KeyCode::Space]),
         // TODO could use Askyy prompts here
         Act::new(toggle_gizmos::<PhysicsGizmos>).named("toggle_physics_gizmos"),
         Act::new(toggle_gizmos::<LightGizmoConfigGroup>).named("toggle_light_gizmos"),

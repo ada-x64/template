@@ -11,52 +11,51 @@ use crate::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_input_context::<FlyCam>() // All contexts should be registered.
-        .add_observer(apply_movement)
+        .add_observer(on_move)
+        .add_observer(on_move_y)
         .add_observer(rotate)
         .add_observer(zoom)
         .add_systems(
             OnEnter(ScreenStates::InWorld),
-            spawn_flycam.run_if(|q: Query<&FlyCam>| q.is_empty()),
+            (|mut commands: Commands, mut cam_list: ResMut<CameraList>| {
+                let cam = commands.spawn((Name::new("FlyCam"), flycam_bundle())).id();
+                cam_list.push(cam);
+            })
+            .run_if(|q: Query<&FlyCam>| q.is_empty()),
         );
 }
 
-pub fn spawn_flycam(mut commands: Commands) {
-    // Spawn a camera with an input context.
-    commands.spawn((
-        CameraName::DevCam,
-        Camera3d::default(),
-        StateScoped(ScreenStates::InWorld),
-        Camera {
-            is_active: false,
-            ..Default::default()
-        },
-        Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
+/// Don't forget to register this in the CameraList.
+pub fn flycam_bundle() -> impl Bundle {
+    (
         FlyCam,
-        CameraController {
-            active: false,
-            enabled: false,
-            kind: CameraControllerKind::Fly,
-        },
-        ContextActivity::<FlyCam>::INACTIVE,
+        Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
-        // Similar to `related!`, but you only specify the context type.
-        // Actions are related to specific context since a single entity can have multiple contexts.
-        actions!(FlyCam[
+        actions!(ICtxFlyCam[
             (
-                Action::<PAMove>::new(),
-                // Conditions and modifiers as components.
-                DeadZone::default(), // Apply non-uniform normalization that works for both digital and analog inputs, otherwise diagonal movement will be faster.
-                SmoothNudge::default(), // Make movement smooth and independent of the framerate. To only make it framerate-independent, use `DeltaScale`.
-                Scale::splat(0.3), // Additionally multiply by a constant to achieve the desired speed.
-                // Bindings are entities related to actions.
-                // An action can have multiple bindings and will respond to any of them.
+                Action::<PAMoveCam>::new(),
+                DeadZone::default(),
+                SmoothNudge::default(),
+                Scale::splat(0.3),
                 Bindings::spawn((
-                    // Bindings like WASD or sticks are very common,
-                    // so we provide built-in `SpawnableList`s to assign all keys/axes at once.
                     Cardinal::wasd_keys(),
                     Axial::left_stick(),
                 )),
             ),
+        (
+            Action::<PAMoveCamY>::new(),
+            Scale::splat(0.3),
+            Bindings::spawn((
+                Bidirectional::<Binding, Binding> {
+                    positive: KeyCode::Space.into(),
+                    negative: KeyCode::ShiftLeft.into(),
+                },
+                Bidirectional::<Binding, Binding> {
+                    positive: GamepadButton::South.into(),
+                    negative: GamepadButton::West.into(),
+                },
+            )),
+        ),
             (
                 Action::<PARotateCam>::new(),
                 Bindings::spawn((
@@ -77,14 +76,14 @@ pub fn spawn_flycam(mut commands: Commands) {
                 )),
             ),
         ]),
-    ));
+    )
 }
 
-fn apply_movement(trigger: Trigger<Fired<PAMove>>, mut transforms: Query<&mut Transform>) {
-    let mut transform = transforms.get_mut(trigger.target()).unwrap();
+fn on_move(trigger: Trigger<Fired<PAMoveCam>>, mut transforms: Query<&mut Transform>) {
+    let mut transform = r!(transforms.get_mut(trigger.target()));
 
     // Move to the camera direction.
-    let rotation = transform.rotation;
+    let rotation = transform.rotation.to_euler(EulerRot::YXZ);
 
     // Movement consists of X and -Z components, so swap Y and Z with negation.
     // We could do it with modifiers, but it wold be weird for an action to return
@@ -92,7 +91,12 @@ fn apply_movement(trigger: Trigger<Fired<PAMove>>, mut transforms: Query<&mut Tr
     let mut movement = trigger.value.extend(0.0).xzy();
     movement.z = -movement.z;
 
-    transform.translation += rotation * movement
+    transform.translation += Quat::from_euler(EulerRot::YXZ, rotation.0, 0., 0.) * movement
+}
+
+fn on_move_y(trigger: Trigger<Fired<PAMoveCamY>>, mut transforms: Query<&mut Transform>) {
+    let mut tf = r!(transforms.get_mut(trigger.target()));
+    *tf = tf.with_translation(tf.translation.with_y(tf.translation.y + trigger.value));
 }
 
 fn rotate(
@@ -118,5 +122,5 @@ fn zoom(trigger: Trigger<Fired<PAZoomCam>>, mut projections: Query<&mut Projecti
     let Projection::Perspective(projection) = &mut *projection else {
         panic!("camera should be perspective");
     };
-    projection.fov = (projection.fov + trigger.value).clamp(FRAC_PI_8, FRAC_PI_2);
+    projection.fov = (projection.fov - trigger.value).clamp(FRAC_PI_8, FRAC_PI_2);
 }

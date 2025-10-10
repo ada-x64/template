@@ -26,7 +26,7 @@ fn on_capture_cursor(
         ),
     >,
 ) {
-    info!("grab_mouse");
+    // info!("grab_mouse");
     window.cursor_options.visible = false;
     window.cursor_options.grab_mode = CursorGrabMode::Locked;
     #[cfg(feature = "dev")]
@@ -47,7 +47,7 @@ fn on_capture_cursor(
     {
         commands
             .entity(ictx_cam_default.0)
-            .insert(ContextActivity::<ICtxCamDefault>::ENABLED);
+            .insert(ContextActivity::<ICtxTrackingCam>::ENABLED);
     }
 }
 fn on_release_cursor(
@@ -57,7 +57,7 @@ fn on_release_cursor(
     ictx_cam_default: Query<Entity, With<ContextActivity<ICtxTrackingCam>>>,
     #[cfg(feature = "dev")] ictx_flycam: Query<Entity, With<ContextActivity<FlyCam>>>,
 ) {
-    info!("release_mouse");
+    // info!("release_mouse");
     window.cursor_options.visible = true;
     window.cursor_options.grab_mode = CursorGrabMode::None;
     if let Ok(ictx_default) = ictx_cam_default.single() {
@@ -76,7 +76,7 @@ fn on_release_cursor(
 }
 
 fn spawn_capture_cursor_actions(mut commands: Commands) {
-    info!("spawn_capture_cursor_actions");
+    // info!("spawn_capture_cursor_actions");
     commands.spawn((
         Name::new("Cursor capture"),
         ICtxCaptureCursor,
