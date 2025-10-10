@@ -225,14 +225,3 @@ if [ -z "$SSH_CLIENT" ]
     else mise -j1 build_local ::: run_ssh
 fi
 """
-
-[tasks.dev]
-description = "Run the build with hotpatching and dev features enabled"
-raw = true
-run = """
-#!/usr/bin/bash
-if [ -z "$SSH_CLIENT" ];
-    then mise dev_local
-    else echo 'hotpatching not supported on ssh'
-fi
-"""

@@ -78,11 +78,11 @@ fn render_camera_gizmos(
         if let Ok(tf) = player_tf.single()
             && config.render_player_cam_spheres
         {
-            cam_gizmos.sphere(
-                tf.to_isometry(),
-                controller.inner_radius,
-                config.player_cam_sphere_color,
-            );
+            // cam_gizmos.sphere(
+            //     tf.to_isometry(),
+            //     controller.inner_radius,
+            //     config.player_cam_sphere_color,
+            // );
             cam_gizmos.sphere(
                 tf.to_isometry(),
                 controller.outer_radius,

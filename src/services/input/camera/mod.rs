@@ -6,9 +6,10 @@ pub mod fly;
 pub mod tracking;
 
 pub mod prelude {
+    pub use super::controller::prelude::*;
     pub use super::data::*;
-    pub use super::fly::flycam_bundle;
-    pub use super::tracking::tracking_cam_bundle;
+    pub use super::fly::prelude::*;
+    pub use super::tracking::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {

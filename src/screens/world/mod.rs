@@ -1,17 +1,15 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-mod data;
-mod events;
-mod systems;
-
 use crate::prelude::*;
 
+mod data;
+mod state;
+mod systems;
 pub mod prelude {
     pub use super::data::*;
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((systems::plugin, events::plugin))
-        .add_input_context::<ICtxDefault>();
+    app.add_plugins((state::plugin, systems::plugin));
 }

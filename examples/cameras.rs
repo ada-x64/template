@@ -40,7 +40,7 @@ fn init(
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
     let tc = commands
         .spawn((
-            tracking_cam_bundle(cube_entt, Vec3::new(0., 0.5, 0.5), false),
+            tracking_cam_bundle(cube_entt, Vec3::new(0., 0.5, 0.5)),
             Name::new("Tracking Cam"),
         ))
         .id();
@@ -59,7 +59,7 @@ fn update(mut query: Query<&mut Transform, With<Cube>>, time: Res<Time>) {
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, app::plugin))
+    app.add_plugins((DefaultPlugins, ServicesPlugin))
         .add_systems(Startup, init)
         .add_systems(Update, update)
         .run();

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub fn update_camera_controller(
+fn update_camera_controller(
     trigger: Trigger<InsertCameraController>,
     mut commands: Commands,
     mut camera: Query<&mut Camera>,
@@ -14,7 +14,7 @@ pub fn update_camera_controller(
     cam.is_active = trigger.new_controller.active;
     match trigger.new_controller.kind {
         CameraControllerKind::Fly => {
-            info!("setting FlyCam ctx to {}", trigger.new_controller.enabled);
+            info!("ICtxFlyCam => {}", trigger.new_controller.enabled);
             commands
                 .entity(trigger.entity)
                 .insert(ContextActivity::<ICtxFlyCam>::new(
@@ -22,10 +22,7 @@ pub fn update_camera_controller(
                 ));
         }
         CameraControllerKind::Tracking => {
-            info!(
-                "setting TrackingCam ctx to {}",
-                trigger.new_controller.enabled
-            );
+            info!("ICtxTrackingCam => {}", trigger.new_controller.enabled);
             commands
                 .entity(trigger.entity)
                 .insert(ContextActivity::<ICtxTrackingCam>::new(

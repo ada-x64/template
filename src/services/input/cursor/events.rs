@@ -1,10 +1,6 @@
-// ------------------------------------------
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// ------------------------------------------
 use bevy::window::CursorGrabMode;
 
-use super::data::*;
-use crate::{prelude::*, services::input::camera::data::ICtxTrackingCam};
+use crate::prelude::*;
 
 fn on_capture_cursor(
     _: Trigger<Completed<PACaptureCursor>>,
@@ -75,36 +71,7 @@ fn on_release_cursor(
     }
 }
 
-fn spawn_capture_cursor_actions(mut commands: Commands) {
-    // info!("spawn_capture_cursor_actions");
-    commands.spawn((
-        Name::new("Cursor capture"),
-        ICtxCaptureCursor,
-        ContextActivity::<ICtxCaptureCursor>::ACTIVE,
-        // todo: state scope?
-        actions![
-            ICtxCaptureCursor[
-                (
-                    Action::<PACaptureCursor>::new(),
-                    bindings![MouseButton::Left]
-                ),
-                (
-                    Action::<PAReleaseCursor>::new(),
-                    bindings![KeyCode::Escape],
-                    ActionSettings {
-                        consume_input: true,
-                        require_reset: true,
-                        ..Default::default()
-                    }
-                ),
-           ]
-        ],
-    ));
-}
-
 pub fn plugin(app: &mut App) {
-    app.add_input_context::<ICtxCaptureCursor>()
-        .add_observer(on_capture_cursor)
-        .add_observer(on_release_cursor)
-        .add_systems(Startup, spawn_capture_cursor_actions);
+    app.add_observer(on_capture_cursor)
+        .add_observer(on_release_cursor);
 }

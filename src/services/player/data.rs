@@ -1,8 +1,7 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-use bevy::prelude::*;
-use bevy_enhanced_input::prelude::*;
+use crate::prelude::*;
 
 pub const PLAYER_CAPSULE_HEIGHT: f32 = 3.;
 pub const PLAYER_CAPSULE_RADIUS: f32 = 0.5;
@@ -30,3 +29,9 @@ pub struct ICtxDefault;
 #[derive(InputAction, Reflect)]
 #[action_output(Vec3)]
 pub struct PAMove;
+
+#[derive(AssetCollection, Resource)]
+pub struct PlayerAssets {
+    #[asset(path = "models/basil.glb#Scene0")]
+    pub model: Handle<Scene>,
+}

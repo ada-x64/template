@@ -56,6 +56,7 @@ fn cycle_cam(
     mut res_active_cam: ResMut<ActiveCamera>,
     controllers: Query<&CameraController>,
 ) {
+    info!("Cycling cameras. Current idx: {res_active_cam:?}");
     let active_cam = **res_active_cam;
     let active_controller = r!(controllers.get(cams[active_cam]));
     commands.trigger(InsertCameraController {

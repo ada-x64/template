@@ -2,3 +2,5 @@
 *.log
 
 *.ignore.*
+*.diff.*
+diff
