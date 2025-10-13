@@ -39,10 +39,7 @@ fn init(
     ));
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
     let tc = commands
-        .spawn((
-            tracking_cam_bundle(cube_entt, Vec3::new(0., 0.5, 0.5)),
-            Name::new("Tracking Cam"),
-        ))
+        .spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")))
         .id();
     let fc = commands.spawn((flycam_bundle(), Name::new("Fly Cam"))).id();
     **cam_list = vec![fc, tc];

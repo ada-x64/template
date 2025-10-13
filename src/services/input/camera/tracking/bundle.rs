@@ -2,7 +2,7 @@ use bevy::render::view::RenderLayers;
 
 use crate::prelude::*;
 
-pub fn tracking_cam_bundle(tracking: Entity, offset: Vec3) -> impl Bundle {
+pub fn tracking_cam_bundle(tracking: Entity) -> impl Bundle {
     (
         TrackingCam::new(tracking),
         // rendering

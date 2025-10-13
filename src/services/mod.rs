@@ -15,6 +15,8 @@ mod worldgen;
 
 pub mod prelude {
     pub use super::data::*;
+    #[cfg(feature = "dev")]
+    pub use super::dev::prelude::*;
     pub use super::input::prelude::*;
     pub use super::player::prelude::*;
     pub use super::third_party::prelude::*;

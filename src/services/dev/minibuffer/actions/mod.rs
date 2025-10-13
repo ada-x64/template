@@ -1,9 +1,13 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-use bevy::prelude::*;
+use crate::prelude::*;
 
-pub(crate) mod in_world;
+mod in_world;
+
+pub mod prelude {
+    // pub use super::in_world::prelude::*;
+}
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(in_world::plugin);

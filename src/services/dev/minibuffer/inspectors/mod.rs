@@ -1,11 +1,15 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-use bevy::prelude::*;
-use bevy_minibuffer::prelude::*;
+use crate::prelude::*;
 
-pub(crate) mod perf;
-pub(crate) mod world;
+mod perf;
+mod world;
+
+pub mod prelude {
+    pub use super::world::prelude::*;
+    // pub use super::perf::prelude::*;
+}
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((perf::plugin, world::plugin)).add_systems(

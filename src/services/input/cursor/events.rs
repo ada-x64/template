@@ -22,10 +22,8 @@ fn on_capture_cursor(
         ),
     >,
 ) {
-    // info!("grab_mouse");
     window.cursor_options.visible = false;
     window.cursor_options.grab_mode = CursorGrabMode::Locked;
-    #[cfg(feature = "dev")]
     {
         // switch based on active camera
         if let Ok((ictx, cam)) = ictx_cam_default.single() {
@@ -38,12 +36,6 @@ fn on_capture_cursor(
                 .entity(ictx)
                 .insert(ContextActivity::<FlyCam>::new(cam.is_active));
         }
-    }
-    #[cfg(not(feature = "dev"))]
-    {
-        commands
-            .entity(ictx_cam_default.0)
-            .insert(ContextActivity::<ICtxTrackingCam>::ENABLED);
     }
 }
 fn on_release_cursor(

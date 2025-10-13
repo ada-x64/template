@@ -1,20 +1,17 @@
 // ------------------------------------------
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
-pub(crate) mod gizmos;
-pub(crate) mod minibuffer;
+use crate::prelude::*;
 
-use bevy::prelude::*;
-use bevy_simple_subsecond_system::SimpleSubsecondPlugin;
+mod gizmos;
+mod minibuffer;
+
+pub mod prelude {
+    pub use super::gizmos::prelude::*;
+    pub use super::minibuffer::prelude::*;
+}
 
 pub fn plugin(app: &mut App) {
-    // general utils
-    app.add_plugins((
-        bevy_mod_debugdump::CommandLineArgs,
-        SimpleSubsecondPlugin::default(), // TODO: Switch to official hotloading in 0.17
-                                          // bevy_flycam::NoCameraPlayerPlugin, // temp?
-    ));
-
-    // local functionality
+    app.add_plugins((bevy_mod_debugdump::CommandLineArgs,));
     app.add_plugins((minibuffer::plugin, gizmos::plugin));
 }

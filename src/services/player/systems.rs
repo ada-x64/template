@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 use crate::prelude::*;
-use bevy::prelude::*;
-use bevy_enhanced_input::prelude::*;
-use bevy_tnua::prelude::*;
 
 fn update_controller(
     mut query: Single<(&mut TnuaController, &mut PlayerController)>,
@@ -31,6 +28,5 @@ fn update_controller(
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(FixedUpdate, (update_controller).in_set(PlayerSystems))
-        .add_input_context::<ICtxDefault>();
+    app.add_systems(FixedUpdate, (update_controller).in_set(PlayerSystems));
 }

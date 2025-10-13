@@ -1,9 +1,4 @@
-// ------------------------------------------
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// ------------------------------------------
 use avian3d::prelude::PhysicsGizmos;
-use bevy::prelude::*;
-use bevy_minibuffer::prelude::*;
 
 use crate::prelude::*;
 

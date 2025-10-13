@@ -7,6 +7,8 @@ pub mod prelude {
     #[allow(unused_imports, reason = "fix ambiguous import")]
     pub use bevy_enhanced_input::prelude::Completed;
     pub use bevy_enhanced_input::prelude::*;
+    #[cfg(feature = "dev")]
+    pub use bevy_minibuffer::prelude::*;
     pub use bevy_tnua::prelude::*;
     pub use tiny_bail::prelude::*;
 }
@@ -19,5 +21,14 @@ pub fn plugin(app: &mut App) {
         bevy_tnua_avian3d::TnuaAvian3dPlugin::new(FixedUpdate),
         EnhancedInputPlugin,
         bevy_rich_text3d::Text3dPlugin::default(),
+    ));
+
+    #[cfg(feature = "dev")]
+    app.add_plugins((
+        bevy_minibuffer::MinibufferPlugins,
+        bevy_inspector_egui::DefaultInspectorConfigPlugin,
+        bevy_inspector_egui::bevy_egui::EguiPlugin {
+            enable_multipass_for_primary_context: true,
+        },
     ));
 }

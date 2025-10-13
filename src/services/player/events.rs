@@ -25,6 +25,17 @@ fn spawn_player_root(
                 TnuaAvian3dSensorShape(Collider::cylinder(PLAYER_CAPSULE_RADIUS + 0.1, 0.)),
                 ICtxDefault,
                 ContextActivity::<ICtxDefault>::ACTIVE,
+                actions!(
+                    ICtxDefault[(
+                        Action::<PAMove>::new(),
+                        DeadZone::default(),
+                        SmoothNudge::default(),
+                        Scale::splat(PLAYER_DEFAULT_SPEED),
+                        Negate::y(),
+                        SwizzleAxis::XZY,
+                        Bindings::spawn((Cardinal::wasd_keys(), Axial::left_stick())),
+                    )]
+                ),
             ),
         ))
         .id();
@@ -39,24 +50,10 @@ fn spawn_player_root(
                 ShowLightGizmo::default(),
                 PointLight::default(),
             ),
-            tracking_cam_bundle(player_entt, Vec3::new(0., 1., 1.)),
+            tracking_cam_bundle(player_entt),
         ))
         .id();
     camera_list.push(cam);
-}
-
-fn spawn_player_actions(event: Trigger<OnAdd, ICtxDefault>, mut commands: Commands) {
-    commands.entity(event.target()).insert(actions!(
-        ICtxDefault[(
-            Action::<PAMove>::new(),
-            DeadZone::default(),
-            SmoothNudge::default(),
-            Scale::splat(PLAYER_DEFAULT_SPEED),
-            Negate::y(),
-            SwizzleAxis::XZY,
-            Bindings::spawn((Cardinal::wasd_keys(), Axial::left_stick())),
-        )]
-    ));
 }
 
 fn on_move(trigger: Trigger<Fired<PAMove>>, mut controller: Single<&mut PlayerController>) {
@@ -64,7 +61,5 @@ fn on_move(trigger: Trigger<Fired<PAMove>>, mut controller: Single<&mut PlayerCo
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_observer(on_move)
-        .add_observer(spawn_player_actions)
-        .add_observer(spawn_player_root);
+    app.add_observer(on_move).add_observer(spawn_player_root);
 }
