@@ -41,6 +41,6 @@ fn apply(
     caster.direction = Dir3::new(rotation * Vec3::NEG_ONE).unwrap();
 }
 
-pub fn plugin(app: &mut App) {
-    app.add_systems(FixedUpdate, (apply).in_set(PlayerSystems));
+pub fn systems() -> ServiceSystems {
+    ServiceSystems::new(apply)
 }

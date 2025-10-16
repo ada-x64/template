@@ -7,9 +7,4 @@ pub fn plugin(app: &mut App) {
             .continue_to_state(WorldScreenStates::Ready)
             .load_collection::<PlayerAssets>(),
     );
-
-    app.configure_sets(
-        FixedUpdate,
-        PlayerSystems.run_if(in_state(ScreenStates::InWorld)),
-    );
 }
