@@ -11,21 +11,21 @@ the actual functionality for the application.
 ```
 ./src
 ├── screens
-│   ├── world/
-│   ├── splash/
-│   ├── main_menu/
-│   ├── data.rs
-│   └── mod.rs
+│   ├── world/
+│   ├── splash/
+│   ├── main_menu/
+│   ├── data.rs
+│   └── mod.rs
 ├── services
-│   ├── dev/
-│   ├── input/
-│   ├── player/
-│   ├── text/
-│   ├── ui/
-│   ├── worldgen/
-│   ├── data.rs
-│   ├── mod.rs
-│   └── third_party.rs
+│   ├── dev/
+│   ├── input/
+│   ├── player/
+│   ├── text/
+│   ├── ui/
+│   ├── worldgen/
+│   ├── data.rs
+│   ├── mod.rs
+│   └── third_party.rs
 ├── lib.rs
 └── main.rs
 ```
@@ -58,23 +58,23 @@ Each module is organized like this:
 ```
 ./src/services/input/camera
 ├── controller
-│   ├── data.rs
-│   ├── events.rs
-│   └── mod.rs
+│   ├── data.rs
+│   ├── events.rs
+│   └── mod.rs
 ├── data
-│   ├── input_ctx.rs
-│   └── mod.rs
+│   ├── input_ctx.rs
+│   └── mod.rs
 ├── fly
-│   ├── bundle.rs
-│   ├── data.rs
-│   ├── events.rs
-│   └── mod.rs
+│   ├── bundle.rs
+│   ├── data.rs
+│   ├── events.rs
+│   └── mod.rs
 ├── tracking
-│   ├── bundle.rs
-│   ├── data.rs
-│   ├── events.rs
-│   ├── mod.rs
-│   └── systems.rs
+│   ├── bundle.rs
+│   ├── data.rs
+│   ├── events.rs
+│   ├── mod.rs
+│   └── systems.rs
 └── mod.rs
 ```
 

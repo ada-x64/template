@@ -16,15 +16,10 @@ fn on_add<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
     commands.trigger(SpawnPlayerRoot);
     commands.trigger(SpawnWorldgenRoot);
     // scoped observers
-    // commands.entity(ctx.entity).observe();
+    // commands.entity(ctx.entity).observe(player_observers().take());
 }
 
 pub fn plugin(app: &mut App) {
-    // ScreenScope::<WorldScreen>::default()
-    //     .builder(MainSchedule, WorldScreenStates::Ready)
-    //     .add_systems((|| {}))
-    //     .build(app);
-
     ScreenScope::<WorldScreen>::default()
         .builder(WorldSchedule::FixedUpdate, WorldScreenStates::Ready)
         .add_systems((player_systems().take(), tracking_cam_systems().take()))

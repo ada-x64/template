@@ -63,8 +63,7 @@ where
     }
 
     /// Add systems to the schedule scope.
-    /// In order to scope observers, add them to the screen component's
-    /// `on_add` hook.
+    /// In order to scope observers, use `on_enter`
     pub fn add_systems<M>(mut self, systems: impl IntoScheduleConfigs<ScheduleSystem, M>) -> Self {
         self.schedule
             .add_systems(systems.in_set(self.scope.clone()));
