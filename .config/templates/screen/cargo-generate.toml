@@ -1,0 +1,2 @@
+[placeholders]
+name = {type="string", prompt="Screen name?", default="screen"}

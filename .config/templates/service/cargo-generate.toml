@@ -1,0 +1,14 @@
+[placeholders]
+name = {type="string", prompt="Service name?", default="service"}
+use_bundle = {type="bool", prompt="Include a bundle?", default=false}
+use_systems = {type="bool", prompt="Include systems?", default=false}
+use_events = {type="bool", prompt="Include events?", default=true}
+
+[conditional.'!use_bundle']
+ignore= [ 'bundle.rs' ]
+
+[conditional.'!use_systems']
+ignore= [ 'systems.rs' ]
+
+[conditional.'!use_events']
+ignore= [ 'events.rs' ]

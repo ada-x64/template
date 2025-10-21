@@ -1,0 +1,8 @@
+use crate::prelude::*;
+
+// We use functions to initialize bundles because they are more flexible than
+// struct types.
+/// Use this function to initialize a {{ name | title_case }} bundle.
+pub fn bundle() -> impl Bundle {
+    ({{ name | upper_camel_case | append: "BundleMarker" }})
+}

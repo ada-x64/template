@@ -13,7 +13,6 @@ CARGO_TERM_COLOR = "always"
 [tools]
 "mold" = "latest"
 act = "latest"
-"cargo:dioxus-cli" = { version = "0.7.0-alpha.1" }
 
 [tools.rust]
 # keep in sync with bevy_cli
@@ -165,10 +164,6 @@ run = "cargo build --features {{env.FEATURES}} --bin {{arg(name='binary', defaul
 [tasks.play_local]
 run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
 
-[tasks.dev_local]
-raw = true
-run = "BEVY_ASSET_ROOT='.' dx serve --hot-patch --features {{env.FEATURES}}"
-
 
 # SSH #########################################################################
 
@@ -225,3 +220,73 @@ if [ -z "$SSH_CLIENT" ]
     else mise -j1 build_local ::: run_ssh
 fi
 """
+
+[tasks.new]
+raw=true
+alias=['generate', 'n']
+description="Generate a new service or screen."
+tools={"cargo:cargo-generate" = "latest"}
+run='''
+#!/usr/bin/bash
+TEMPLATE={{arg(name="template", i=0)}}
+NAME={{arg(name="name", i=1)}}
+BASENAME=$(basename $NAME)
+DESTINATION="$(realpath src/$TEMPLATE/$(dirname $NAME))"
+
+{% if flag(name="debug") == "true" %}
+cat <<EOF
+DEBUG
+TEMPLATE=$TEMPLATE
+NAME=$NAME
+DESTINATION=$DESTINATION
+EOF
+{% endif %}
+
+catch_err () {
+    if [ $? -ne 0 ]; then
+        echo "Reverting changes on fail..."
+        set -x
+        git restore $DESTINATION/mod.rs
+        rm $DESTINATION/$BASENAME -r
+        exit 1
+    fi
+}
+
+cargo generate \
+    --name "$BASENAME" \
+    -d name="$BASENAME" \
+    --path ".config/templates/$TEMPLATE" \
+    --destination "$DESTINATION";
+
+catch_err
+
+uv run .config/scripts/update_parent_module.py\
+    "$DESTINATION/$BASENAME"\
+    --debug={{flag(name="debug")}};
+
+catch_err
+
+echo "[INFO] Formatting ..."
+cargo fmt -- -l;
+'''
+
+[tasks.delete]
+alias=['del', 'd']
+description="Remove a generated service or screen"
+run='''
+#!/usr/bin/bash
+set -e
+TEMPLATE={{arg(name="template", i=0)}}
+NAME={{arg(name="name", i=1)}}
+DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
+
+rm -r $DESTINATION
+
+uv run .config/scripts/update_parent_module.py\
+    "$DESTINATION" \
+    --remove \
+    --debug={{flag(name="debug")}}
+
+echo "[INFO] Formatting ..."
+cargo fmt -- -l;
+'''

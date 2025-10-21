@@ -1,0 +1,14 @@
+use crate::prelude::*;
+
+#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect, Default)]
+pub enum {{ name | upper_camel_case | append: "ScreenStates" }} {
+    #[default]
+    Loading,
+    Ready,
+}
+
+#[derive(AssetCollection, Resource)]
+pub struct {{name | upper_camel_case | append: "Assets"}} {
+    // sub asset collections, etc
+    // see bevy_asset_loader docs
+}

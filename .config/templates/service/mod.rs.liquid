@@ -1,0 +1,33 @@
+use crate::prelude::*;
+
+{% if use_bundle -%}
+mod bundle;
+{%- endif %}
+{% if use_events -%}
+mod events;
+{%- endif %}
+{% if use_systems -%}
+mod systems;
+{%- endif %}
+mod data;
+
+pub mod prelude {
+    pub use data::*;
+    {% if use_bundle -%}
+    pub use bundle::bundle as {{name | snake_case | append: "_bundle" }};
+    {%- endif %}
+    {% if use_systems -%}
+    pub use systems::systems as {{name | snake_case | append: "_systems" }};
+    {%- endif %}
+    // pub use my_submodule::prelude::*;
+}
+
+pub fn plugin(app: &mut App) {
+    {% if use_events-%}
+    app.add_plugins(
+        events::plugin
+    );
+    {%- else -%}
+    // app.add_plugins(/* ... */);
+    {%- endif %}
+}

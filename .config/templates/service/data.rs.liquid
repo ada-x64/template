@@ -1,0 +1,15 @@
+use crate::prelude::*;
+
+// Add all your data types here.
+// That includes all helper types, components, and their derivatives
+// (e.g. Resources, Events)
+
+{% if use_bundle  -%}
+#[derive(Component, Default, Debug, Reflect)]
+pub struct {{name | upper_camel_case | append: "BundleMarker"}};
+{%- endif %}
+
+{% if use_events  -%}
+#[derive(Event, Default, Debug, Reflect)]
+pub struct {{name | upper_camel_case | append: "Event"}};
+{%- endif %}

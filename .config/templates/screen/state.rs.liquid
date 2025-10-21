@@ -1,0 +1,10 @@
+use crate::prelude::*;
+
+pub fn plugin(app: &mut App) {
+    app.init_state::<{{name | upper_camel_case | append: "ScreenStates"}}>();
+    app.add_loading_state(
+        LoadingState::new({{ name | upper_camel_case | append: "ScreenStates::Loading"}})
+            .continue_to_state({{name |upper_camel_case | append: "ScreenStates::Ready"}})
+            .load_collection::<{{ name | upper_camel_case | append: "Assets"}}>(),
+    );
+}

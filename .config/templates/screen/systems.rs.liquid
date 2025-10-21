@@ -1,0 +1,25 @@
+use crate::prelude::*;
+use bevy::ecs::{component::HookContext, schedule::ScheduleLabel, world::DeferredWorld};
+
+#[derive(ScheduleLabel, SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum {{ name | upper_camel_case | append: "Schedule" }} {
+    FixedUpdate,
+}
+
+#[derive(Component, Debug, Clone, Copy, Default)]
+#[component(on_add = on_add)]
+pub struct {{name | upper_camel_case | append: "Screen;"-}}
+
+fn on_add<'w>(mut world: DeferredWorld<'w>, ctx: HookContext) {
+    // let mut commands = world.commands();
+    // commands.trigger(SpawnPlayerRoot);
+    // commands.trigger(SpawnWorldgenRoot);
+    // commands.entity(ctx.entity).observe(player_observers().take());
+}
+
+pub fn plugin(app: &mut App) {
+    ScreenScope::<{{ name | upper_camel_case | append: "Screen"}}>::default()
+        .builder({{ name | upper_camel_case | append: "Schedule::FixedUpdate"}}, {{name | upper_camel_case | append: "ScreenStates::Ready"}})
+        .add_systems((/* ... */))
+        .build_fixed(app);
+}
