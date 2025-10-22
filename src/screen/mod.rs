@@ -3,22 +3,27 @@
 // ------------------------------------------
 use crate::prelude::*;
 
-pub(crate) mod data;
-pub(crate) mod world;
+mod data;
+mod world;
+
+#[cfg(feature = "dev")]
+mod dev;
 
 pub mod prelude {
     pub use super::data::*;
-    pub use super::world::prelude::*;
 }
 
-pub fn plugin(app: &mut App) {
-    app.add_plugins(world::plugin)
-        .add_systems(Update, log_state_transition)
-        .init_state::<ScreenStates>();
+#[derive(Debug)]
+pub struct ScreenPlugin {
+    pub initial_screen: Screens,
 }
+impl Plugin for ScreenPlugin {
+    fn build(&self, app: &mut App) {
+        info!(?self);
+        app.add_plugins(world::plugin)
+            .insert_state(self.initial_screen);
 
-fn log_state_transition(mut reader: EventReader<StateTransitionEvent<ScreenStates>>) {
-    for ev in reader.read() {
-        info!("{ev:?}");
+        #[cfg(feature = "dev")]
+        app.add_plugins(dev::plugin);
     }
 }

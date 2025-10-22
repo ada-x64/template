@@ -1,5 +1,9 @@
 use std::marker::PhantomData;
 
+use bevy::ecs::{
+    component::{ComponentHook, HookContext, Immutable, StorageType},
+    world::DeferredWorld,
+};
 #[allow(unused_imports, reason = "used for docs")]
 use bevy::{
     app::{FixedMain, FixedMainScheduleOrder, MainScheduleOrder},
@@ -11,15 +15,15 @@ pub use crate::prelude::*;
 /// A utility for scoping systems to a particular state.
 /// See [SceenScopeBuilder] for more details.
 #[derive(Default)]
-pub struct ScreenScope<C: Component + Default> {
-    c: PhantomData<C>,
+pub struct ScreenScope<S: Screen> {
+    c: PhantomData<S>,
 }
-impl<C: Component + Default> ScreenScope<C> {
+impl<S: Screen> ScreenScope<S> {
     pub fn builder<Scope, ReadyState>(
         self,
         scope: Scope,
         ready_state: ReadyState,
-    ) -> ScreenScopeBuilder<C, Scope, ReadyState>
+    ) -> ScreenScopeBuilder<S, Scope, ReadyState>
     where
         Scope: SystemSet + Clone + ScheduleLabel,
         ReadyState: States,
@@ -34,20 +38,20 @@ impl<C: Component + Default> ScreenScope<C> {
 /// Schedules can run in either [Main] or [FixedMain].
 /// By default, the given systems will run after [Update] or [FixedUpdate],
 /// but this can be configured by calling [Self::build_with_order] / [Self::build_with_order_fixed].
-pub struct ScreenScopeBuilder<C, Scope, ReadyState>
+pub struct ScreenScopeBuilder<S, Scope, ReadyState>
 where
-    C: Component + Default,
+    S: Screen,
     Scope: SystemSet + ScheduleLabel + Clone,
     ReadyState: States,
 {
     schedule: Schedule,
     scope: Scope,
-    component: PhantomData<C>,
+    component: PhantomData<S>,
     ready_state: ReadyState,
 }
-impl<Screen, Scope, ReadyState> ScreenScopeBuilder<Screen, Scope, ReadyState>
+impl<S, Scope, ReadyState> ScreenScopeBuilder<S, Scope, ReadyState>
 where
-    Screen: Component + Default,
+    S: Screen,
     Scope: SystemSet + ScheduleLabel + Clone,
     ReadyState: States,
 {
@@ -92,12 +96,12 @@ where
         app.add_systems(
             OnEnter(self.ready_state.clone()),
             |mut commands: Commands| {
-                commands.spawn(Screen::default());
+                commands.spawn(ScreenWrapper(S::default()));
             },
         );
         app.add_systems(
             OnExit(self.ready_state),
-            |mut commands: Commands, e: Single<Entity, With<Screen>>| {
+            |mut commands: Commands, e: Single<Entity, With<ScreenWrapper<S>>>| {
                 commands.entity(*e).despawn();
             },
         );
@@ -122,4 +126,49 @@ where
 pub enum Order<L: ScheduleLabel> {
     Before(L),
     After(L),
+}
+
+/// Implementation trait for Screen components.
+/// ## Lifecycle
+/// Screens have two lifecycle functions.
+///
+/// The first is [Screen::init]
+/// which is called when the screen component's `on_add` hook is fired.
+/// This is meant to register systems and scoped observers.
+///
+/// The second lifecycle function is [Screen::unload]. This function
+/// is called before the screen unloads and is designed to run
+/// any cleanup logic before transitioning.
+pub trait Screen: Sized + Default + Send + Sync + 'static {
+    /// Called during the on_add hook.
+    /// Use this to scope systems and observers.
+    fn init<'w>(_: &mut DeferredWorld<'w>, _: &HookContext) {}
+    /// Called when the screen is about to unload.
+    /// Use this to perform any necessary cleanup before the screen transitions.
+    fn unload(_: &mut World) {}
+
+    /// INTERNAL
+    fn on_unload(_trigger: Trigger<SwitchScreen>, mut commands: Commands) {
+        info!("on_unload");
+        commands.queue(Self::unload);
+        commands.queue(|world: &mut World| world.trigger(FinishUnload));
+    }
+}
+
+pub struct ScreenWrapper<T: Screen>(T);
+
+impl<T> Component for ScreenWrapper<T>
+where
+    T: Screen,
+{
+    const STORAGE_TYPE: StorageType = StorageType::Table;
+    type Mutability = Immutable;
+
+    fn on_add() -> Option<ComponentHook> {
+        info!("ScreenWrapper::on_add");
+        Some(|mut world: DeferredWorld, ctx: HookContext| {
+            T::init(&mut world, &ctx);
+            world.commands().entity(ctx.entity).observe(T::on_unload);
+        })
+    }
 }

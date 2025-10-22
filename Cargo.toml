@@ -65,6 +65,10 @@ serde = { version = "1.0.219", features = ["derive"] }
 anyhow = "1.0.99"
 bevy_rich_text3d = "0.4.2"
 strum = { version = "0.27.2", features = ["derive"] }
+clap = { version = "4.5.50", features = ["derive"], optional = true }
+
+[build-dependencies]
+built = {version = "0.8.0", features=["chrono"]}
 
 [features]
 dev = [
@@ -72,6 +76,6 @@ dev = [
     "dep:bevy_simple_subsecond_system", # Replace with official in 0.17
     "dep:bevy-inspector-egui",          # TODO Replace with Aalo
     "dep:bevy_minibuffer",
+    "dep:clap",
 ]
-
 dylib = ["bevy/dynamic_linking"]

@@ -277,7 +277,7 @@ run='''
 #!/usr/bin/bash
 set -e
 TEMPLATE={{arg(name="template", i=0)}}
-NAME={{arg(name="name", i=1)}}
+NAME={{arg(name="name", i=1) }}
 DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
 
 rm -r $DESTINATION

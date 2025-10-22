@@ -10,7 +10,7 @@ pub enum {{ name | upper_camel_case | append: "Schedule" }} {
 #[component(on_add = on_add)]
 pub struct {{name | upper_camel_case | append: "Screen;"-}}
 
-fn on_add<'w>(mut world: DeferredWorld<'w>, ctx: HookContext) {
+fn on_add<'w>(mut _world: DeferredWorld<'w>, _ctx: HookContext) {
     // let mut commands = world.commands();
     // commands.trigger(SpawnPlayerRoot);
     // commands.trigger(SpawnWorldgenRoot);
@@ -20,6 +20,6 @@ fn on_add<'w>(mut world: DeferredWorld<'w>, ctx: HookContext) {
 pub fn plugin(app: &mut App) {
     ScreenScope::<{{ name | upper_camel_case | append: "Screen"}}>::default()
         .builder({{ name | upper_camel_case | append: "Schedule::FixedUpdate"}}, {{name | upper_camel_case | append: "ScreenStates::Ready"}})
-        .add_systems((/* ... */))
+        // .add_systems(())
         .build_fixed(app);
 }

@@ -12,16 +12,22 @@ if args.module_path is None:
     print("Please provide a module path.\n")
     exit(1)
 
+is_screen = "screen" in args.module_path
+
 use_expr = re.compile(r'(\s*use\s+[\w:]+;\n?)+')
 mod_expr = re.compile(r'(\s*mod\s+\w+;\n?)+')
 prelude_expr = re.compile(r'\s*pub mod prelude {')
 plugin_expr = re.compile(r'app.add_plugins\(\(')
+screens_expr = re.compile(r'enum Screens \{[^}]*')
+
+screens_data_mod = realpath("src/screen/data.rs")
+super_mod = realpath(join(args.module_path, "../mod.rs"))
 mod_name = basename(args.module_path)
 
 mod_str = f"mod {mod_name};"
 prelude_str = f"pub use super::{mod_name}::prelude::*;"
 plugin_str = f"{mod_name}::plugin,"
-super_mod =realpath(join(args.module_path, "../mod.rs"))
+screens_str = mod_name.replace('_', ' ').title().replace(' ','') + ','
 
 if args.debug:
     print("DEBUG")
@@ -70,3 +76,18 @@ else:
 print(f"[INFO] Writing to {super_mod}")
 with open(super_mod, 'w') as buf:
     buf.write(str)
+
+if is_screen:
+    with open(screens_data_mod) as buf:
+        str = buf.read()
+        if args.remove:
+            str = str.replace(screens_str, '')
+        else:
+            if match := screens_expr.search(str, re.MULTILINE):
+                str = insert(str, match.end(), screens_str)
+            else:
+                print("WARN: Could not find Screens enum. Please register the screen manually.")
+
+    print(f"[INFO] Writing to {screens_data_mod}")
+    with open(screens_data_mod, 'w') as buf:
+        buf.write(str)

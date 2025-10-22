@@ -49,4 +49,11 @@ https://www.christopherbiscardi.com/bevy-observer-filters
 
 ## Screen scoping
 
-Screens
+FOR CONSIDERATION: State scoping is a component, but should probably be
+_inserted_ on components that are spawned when a state is up, right? Maybe
+instead of a StateScoped(SomeState) component, we have a more general
+ScreenScoped component that would clear out the entity on transition.
+
+TODO: General architecture for screens is a bit inconsistent. Are we using a
+builder, component hooks, or events for handling lifecycles and scopes?
+Needs some tinkering on the API.

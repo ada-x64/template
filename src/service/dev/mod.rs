@@ -12,6 +12,5 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((bevy_mod_debugdump::CommandLineArgs,));
     app.add_plugins((minibuffer::plugin, gizmos::plugin));
 }

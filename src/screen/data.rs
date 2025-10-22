@@ -1,11 +1,18 @@
 use crate::prelude::*;
 
-/// Loading is handled within the individual screens.
-#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect, Default)]
-pub enum ScreenStates {
-    // #[cfg_attr(not(feature="dev"), default)]
-    Splash,
-    MainMenu,
-    #[default] // #[cfg_attr(feature="dev", default)]
-    InWorld,
+/// Enumeration of all screens within the app.
+/// Screens represent "sub-simulations" which scope
+/// systems, events, and entites. See the docs
+/// for more info.
+#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect)]
+pub enum Screens {
+    Splash(ScreenStatus),
+    MainMenu(ScreenStatus),
+    InWorld(ScreenStatus),
+    CameraTest(ScreenStatus),
+}
+impl Default for Screens {
+    fn default() -> Self {
+        Self::Splash(ScreenStatus::default())
+    }
 }

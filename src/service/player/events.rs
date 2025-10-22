@@ -12,7 +12,7 @@ fn spawn_player_root(
     let player_entt = commands
         .spawn((
             PlayerController::default(),
-            StateScoped(ScreenStates::InWorld),
+            ScreenScoped,
             SceneRoot(player_assets.model.clone()),
             (
                 RigidBody::Dynamic,
@@ -43,7 +43,7 @@ fn spawn_player_root(
     let cam = commands
         .spawn((
             Name::new("PlayerCam"),
-            StateScoped(ScreenStates::InWorld),
+            ScreenScoped,
             (LockedAxes::new().lock_rotation_z(),),
             (
                 #[cfg(feature = "dev")]
