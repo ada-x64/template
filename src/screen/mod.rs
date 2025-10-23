@@ -11,6 +11,8 @@ mod dev;
 
 pub mod prelude {
     pub use super::data::*;
+    #[cfg(feature = "dev")]
+    pub use super::dev::prelude::*;
 }
 
 #[derive(Debug)]

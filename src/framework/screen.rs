@@ -12,8 +12,13 @@ use bevy::{
 
 pub use crate::prelude::*;
 
-/// A utility for scoping systems to a particular state.
-/// See [SceenScopeBuilder] for more details.
+/// On build, this will initialize a new [Schedule]. The newly created schedule
+/// has a [SystemSet] associated with it which is scoped to run only if the
+/// world is in the given ReadyState. Schedules can run in either [Main] or
+/// [FixedMain]. By default, the given systems will run after [Update] or
+/// [FixedUpdate], but this can be configured by calling
+/// [ScreenScopeBuilder::build_with_order] /
+/// [ScreenScopeBuilder::build_with_order_fixed].
 #[derive(Default)]
 pub struct ScreenScope<S: Screen> {
     c: PhantomData<S>,
@@ -32,12 +37,8 @@ impl<S: Screen> ScreenScope<S> {
     }
 }
 
-/// On build, this will initialize a new [Schedule].
-/// The newly created schedule has a [SystemSet] associated with it which is
-/// scoped to run only if the world is in the given ReadyState.
-/// Schedules can run in either [Main] or [FixedMain].
-/// By default, the given systems will run after [Update] or [FixedUpdate],
-/// but this can be configured by calling [Self::build_with_order] / [Self::build_with_order_fixed].
+/// A utility for scoping systems to a particular state.
+/// See [ScreenScope] for more details.
 pub struct ScreenScopeBuilder<S, Scope, ReadyState>
 where
     S: Screen,

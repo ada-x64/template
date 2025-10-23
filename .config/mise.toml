@@ -260,9 +260,9 @@ cargo generate \
 
 catch_err
 
-uv run .config/scripts/update_parent_module.py\
+uv run .config/scripts/new_mod/main.py\
     "$DESTINATION/$BASENAME"\
-    --debug={{flag(name="debug")}};
+    {% if flag(name="debug") == "true" %} --debug {% endif %}
 
 catch_err
 
@@ -280,12 +280,14 @@ TEMPLATE={{arg(name="template", i=0)}}
 NAME={{arg(name="name", i=1) }}
 DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
 
-rm -r $DESTINATION
-
-uv run .config/scripts/update_parent_module.py\
+uv run .config/scripts/new_mod/main.py\
     "$DESTINATION" \
     --remove \
-    --debug={{flag(name="debug")}}
+    {% if flag(name="debug") == "true" %} --debug {% endif %}
+
+set -x
+rm -r $DESTINATION
+set +x
 
 echo "[INFO] Formatting ..."
 cargo fmt -- -l;

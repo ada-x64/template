@@ -4,6 +4,9 @@ mod data;
 mod events;
 mod screen;
 
+#[cfg(test)]
+mod tests;
+
 pub mod prelude {
     pub use super::data::*;
     pub use super::screen::*;

@@ -1,10 +1,11 @@
+{%- assign schedule_name = name | upper_camel_case | append: "Schedule" -%}
+{%- assign screen_name = name | upper_camel_case | append: "Screen" -%}
 use crate::prelude::*;
 
-mod data;
 mod state;
 mod systems;
 pub mod prelude {
-    pub use super::data::*;
+    pub use super::systems::{ {{schedule_name}}, {{screen_name}} };
 }
 
 pub fn plugin(app: &mut App) {

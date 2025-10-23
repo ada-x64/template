@@ -21,7 +21,7 @@ impl ServiceSystems {
 }
 
 /// Scopes an entity to the current screen.
-/// The entity will be cleaned up when the Screens state changes.
+/// The entity will be cleaned up when the [Screens] state changes.
 #[derive(Component, Debug, Reflect)]
 pub struct ScreenScoped;
 

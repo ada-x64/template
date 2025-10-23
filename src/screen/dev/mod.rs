@@ -2,4 +2,4 @@ use crate::prelude::*;
 
 pub mod prelude {}
 
-pub fn plugin(_app: &mut App) {}
+pub fn plugin(app: &mut App) {}
