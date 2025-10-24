@@ -1,32 +1,28 @@
-use bevy::reflect::{DynamicEnum, DynamicTuple, Enum};
-
 use crate::prelude::*;
 
-/// Begins unloading the current screen. Sets the NextScreen.
-/// When the current screen finishes unloading, it will
 fn on_switch_screen(
     trigger: Trigger<SwitchScreen>,
     mut next_screen: ResMut<NextScreen>,
-    state: Res<State<Screens>>,
-    mut next_state: ResMut<NextState<Screens>>,
+    state: Res<State<CurrentScreen>>,
+    mut next_state: ResMut<NextState<CurrentScreen>>,
 ) {
     info!("on_switch_screen");
-    let mut tup = DynamicTuple::default();
-    tup.insert(ScreenStatus::Unloading);
-    let dy = DynamicEnum::new(state.variant_name(), tup);
-    next_state.set(Screens::from_reflect(&dy).unwrap());
-    *next_screen = NextScreen(Some(trigger.screen()));
+    next_state.set(state.unloading());
+    *next_screen = NextScreen(Some(trigger.0));
 }
 
 fn on_finish_unload(
     _trigger: Trigger<FinishUnload>,
     mut next_screen: ResMut<NextScreen>,
-    mut next_state: ResMut<NextState<Screens>>,
+    mut next_state: ResMut<NextState<CurrentScreen>>,
     screen_scoped: Query<Entity, With<ScreenScoped>>,
     mut commands: Commands,
 ) {
     info!("on_finish_unload");
-    next_state.set(next_screen.0.take().unwrap());
+    next_state.set(CurrentScreen {
+        screen: next_screen.0.take().unwrap(),
+        status: ScreenStatus::Loading,
+    });
     for entity in screen_scoped {
         commands.entity(entity).despawn();
     }

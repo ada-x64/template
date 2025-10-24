@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
-pub mod prelude {}
+mod test;
 
-pub fn plugin(app: &mut App) {}
+pub mod prelude {
+    pub use super::test::prelude::*;
+}
+
+pub fn plugin(app: &mut App) {
+    app.add_plugins(test::plugin);
+}

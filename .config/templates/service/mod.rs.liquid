@@ -13,14 +13,14 @@ mod systems;
 mod data;
 
 pub mod prelude {
-    pub use data::*;
+    pub use super::data::*;
     {% if use_bundle -%}
-    pub use bundle::bundle as {{name | append: "_bundle" }};
-    {%- endif %}
+    pub use super::bundle::bundle as {{name | append: "_bundle" }};
+    {%- endif -%}
     {% if use_systems -%}
-    pub use systems::systems as {{name | append: "_systems" }};
-    {%- endif %}
-    // pub use my_submodule::prelude::*;
+    pub use super::systems::systems as {{name | append: "_systems" }};
+    {%- endif -%}
+    // pub use super::my_submodule::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {
@@ -30,5 +30,5 @@ pub fn plugin(app: &mut App) {
     );
     {%- else -%}
     // app.add_plugins(/* ... */);
-    {%- endif %}
+    {%- endif -%}
 }

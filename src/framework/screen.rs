@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use bevy::ecs::{
     component::{ComponentHook, HookContext, Immutable, StorageType},
     world::DeferredWorld,
@@ -19,94 +17,73 @@ pub use crate::prelude::*;
 /// [FixedUpdate], but this can be configured by calling
 /// [ScreenScopeBuilder::build_with_order] /
 /// [ScreenScopeBuilder::build_with_order_fixed].
-#[derive(Default)]
-pub struct ScreenScope<S: Screen> {
-    c: PhantomData<S>,
-}
-impl<S: Screen> ScreenScope<S> {
-    pub fn builder<Scope, ReadyState>(
-        self,
-        scope: Scope,
-        ready_state: ReadyState,
-    ) -> ScreenScopeBuilder<S, Scope, ReadyState>
-    where
-        Scope: SystemSet + Clone + ScheduleLabel,
-        ReadyState: States,
-    {
-        ScreenScopeBuilder::new(scope, ready_state)
-    }
-}
-
-/// A utility for scoping systems to a particular state.
-/// See [ScreenScope] for more details.
-pub struct ScreenScopeBuilder<S, Scope, ReadyState>
+pub struct ScreenScopeBuilder<S>
 where
     S: Screen,
-    Scope: SystemSet + ScheduleLabel + Clone,
-    ReadyState: States,
 {
     schedule: Schedule,
-    scope: Scope,
-    component: PhantomData<S>,
-    ready_state: ReadyState,
+    scope: ScreenScope<S>,
+    fixed: bool,
 }
-impl<S, Scope, ReadyState> ScreenScopeBuilder<S, Scope, ReadyState>
+
+impl<S> Default for ScreenScopeBuilder<S>
 where
     S: Screen,
-    Scope: SystemSet + ScheduleLabel + Clone,
-    ReadyState: States,
 {
-    pub fn new(scope: Scope, ready_state: ReadyState) -> Self {
-        let mut schedule = Schedule::new(scope.clone());
-        schedule.configure_sets(scope.clone().run_if(in_state(ready_state.clone())));
+    fn default() -> Self {
+        Self::new_inner(ScreenScope::<S>::Update, false)
+    }
+}
+impl<S> ScreenScopeBuilder<S>
+where
+    S: Screen,
+{
+    fn new_inner(scope: ScreenScope<S>, fixed: bool) -> Self {
+        let mut schedule = Schedule::new(scope);
+        schedule.configure_sets(scope.run_if(in_state(CurrentScreen::new::<S>())));
         Self {
             schedule,
-            component: PhantomData,
-            ready_state,
             scope,
+            fixed,
         }
+    }
+
+    pub fn fixed() -> Self {
+        Self::new_inner(ScreenScope::<S>::FixedUpdate, true)
     }
 
     /// Add systems to the schedule scope.
     /// In order to scope observers, use `on_enter`
     pub fn add_systems<M>(mut self, systems: impl IntoScheduleConfigs<ScheduleSystem, M>) -> Self {
-        self.schedule
-            .add_systems(systems.in_set(self.scope.clone()));
+        self.schedule.add_systems(systems.in_set(self.scope));
         self
     }
 
-    /// Builds the schedule. It will run after [Update].
+    /// Builds the schedule. It will run after [Update], or [FixedUpdate] if
+    /// fixed.
     pub fn build(self, app: &mut App) {
-        self.build_inner(app, Order::After(Update), false);
-    }
-    /// Builds the schedule. It will run after [FixedUpdate].
-    pub fn build_fixed(self, app: &mut App) {
-        self.build_inner(app, Order::After(FixedUpdate), true);
-    }
-    /// Builds the schedule. It will in [Main] according to the specified [Order].
-    pub fn build_with_order<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
-        self.build_inner(app, order, false);
-    }
-    /// Builds the schedule. It will in [FixedMain] according to the specified [Order].
-    pub fn build_with_order_fixed<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
-        self.build_inner(app, order, true);
+        if self.fixed {
+            self.build_inner(app, Order::After(FixedUpdate));
+        } else {
+            self.build_inner(app, Order::After(Update));
+        };
     }
 
-    fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>, fixed: bool) {
+    fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
         app.add_schedule(self.schedule);
         app.add_systems(
-            OnEnter(self.ready_state.clone()),
+            OnEnter(CurrentScreen::new::<S>()),
             |mut commands: Commands| {
                 commands.spawn(ScreenWrapper(S::default()));
             },
         );
         app.add_systems(
-            OnExit(self.ready_state),
+            OnExit(CurrentScreen::new::<S>()),
             |mut commands: Commands, e: Single<Entity, With<ScreenWrapper<S>>>| {
                 commands.entity(*e).despawn();
             },
         );
-        if fixed {
+        if self.fixed {
             let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
             match order {
                 Order::Before(l) => ms_order.insert_before(l, self.scope),
@@ -140,7 +117,12 @@ pub enum Order<L: ScheduleLabel> {
 /// The second lifecycle function is [Screen::unload]. This function
 /// is called before the screen unloads and is designed to run
 /// any cleanup logic before transitioning.
-pub trait Screen: Sized + Default + Send + Sync + 'static {
+pub trait Screen:
+    Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
+{
+    /// The associated screen name.
+    const NAME: Screens;
+
     /// Called during the on_add hook.
     /// Use this to scope systems and observers.
     fn init<'w>(_: &mut DeferredWorld<'w>, _: &HookContext) {}
@@ -153,6 +135,17 @@ pub trait Screen: Sized + Default + Send + Sync + 'static {
         info!("on_unload");
         commands.queue(Self::unload);
         commands.queue(|world: &mut World| world.trigger(FinishUnload));
+    }
+
+    /// Creates a new [ScreenScopeBuilder] which will run in [Main] after
+    /// [Update]. To run on a fixed schedule, call [Self::builder_fixed] instead.
+    fn builder() -> ScreenScopeBuilder<Self> {
+        ScreenScopeBuilder::<Self>::default()
+    }
+    /// Creates a new [ScreenScopeBuilder] which will run in [FixedMain] after
+    /// [FixedUpdate]. To run on a non-fixed schedule, use [Self::builder] instead.
+    fn builder_fixed() -> ScreenScopeBuilder<Self> {
+        ScreenScopeBuilder::<Self>::fixed()
     }
 }
 

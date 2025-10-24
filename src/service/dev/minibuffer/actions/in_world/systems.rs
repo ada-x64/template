@@ -5,13 +5,13 @@ use crate::prelude::*;
 macro_rules! cam_cmd {
     ($func:ident, $property:ident) => {
         fn $func(
-            state: Res<State<Screens>>,
+            state: Res<State<CurrentScreen>>,
             mut minibuffer: Minibuffer,
             cam_list: Res<CameraList>,
             cams: Query<(&Name, &CameraController)>,
         ) {
-            if !matches!(**state, Screens::InWorld(ScreenStatus::Ready)) {
-                minibuffer.message("This command requires ScreenStates::InWorld");
+            if !matches!(state.screen, Screens::InWorld) {
+                minibuffer.message("This command requires Screens::InWorld");
                 return;
             }
 

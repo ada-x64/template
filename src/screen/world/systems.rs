@@ -1,15 +1,12 @@
-use bevy::ecs::{component::HookContext, schedule::ScheduleLabel, world::DeferredWorld};
+use bevy::ecs::{component::HookContext, world::DeferredWorld};
 
 use crate::prelude::*;
 
-#[derive(ScheduleLabel, SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum WorldSchedule {
-    FixedUpdate,
-}
-
-#[derive(Component, Debug, Clone, Copy, Default)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct WorldScreen;
 impl Screen for WorldScreen {
+    const NAME: Screens = Screens::InWorld;
+
     fn init<'w>(world: &mut DeferredWorld<'w>, _ctx: &HookContext) {
         info!("in world: init");
         let mut commands = world.commands();
@@ -19,12 +16,8 @@ impl Screen for WorldScreen {
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScope::<WorldScreen>::default()
-        .builder(
-            WorldSchedule::FixedUpdate,
-            Screens::InWorld(ScreenStatus::Ready),
-        )
+    WorldScreen::builder_fixed()
         .add_systems(player_systems().take())
         .add_systems(tracking_cam_systems().take())
-        .build_fixed(app);
+        .build(app);
 }

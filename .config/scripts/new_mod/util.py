@@ -53,7 +53,7 @@ def get_vars(args):
         mod_str=f"mod {mod_name};",
         prelude_str=f"pub use super::{mod_name}::prelude::*;",
         plugin_str=f"app.add_plugins({mod_name}::plugin);",
-        screens_str=f"{mod_camel_case}(ScreenStatus),",
+        screens_str=f"{mod_camel_case},",
         file_str="",
         is_screen="src/screen" in args.module_path,
     )
