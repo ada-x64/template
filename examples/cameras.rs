@@ -1,4 +1,4 @@
-use app::prelude::*;
+use app::{AppPlugin, prelude::*};
 use avian3d::prelude::Collider;
 
 #[derive(Component)]
@@ -56,7 +56,7 @@ fn update(mut query: Query<&mut Transform, With<Cube>>, time: Res<Time>) {
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, ServicesPlugin))
+    app.add_plugins((DefaultPlugins, app::AppPlugin::default()))
         .add_systems(Startup, init)
         .add_systems(Update, update)
         .run();

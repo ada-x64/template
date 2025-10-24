@@ -11,6 +11,7 @@ mod systems;
 pub mod prelude {
     pub use super::bundle::tracking_cam_bundle;
     pub use super::data::*;
+    pub use super::systems::systems as tracking_cam_systems;
 }
 
 // The idea:
@@ -23,6 +24,6 @@ pub mod prelude {
 // If there is a collision, then (smoothly) move to the collisions location.
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((systems::plugin, events::plugin))
+    app.add_plugins(events::plugin)
         .add_input_context::<ICtxTrackingCam>();
 }

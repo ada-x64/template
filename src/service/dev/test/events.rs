@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-fn on_event(trigger: Trigger<{{name | upper_camel_case | append: "Event"}}>) {
+fn on_event(trigger: Trigger<TestEvent>) {
     // Replace me!
 }
 
