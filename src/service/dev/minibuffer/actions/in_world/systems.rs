@@ -10,7 +10,7 @@ macro_rules! cam_cmd {
             cam_list: Res<CameraList>,
             cams: Query<(&Name, &CameraController)>,
         ) {
-            if !matches!(state.screen, Screens::InWorld) {
+            if !matches!(state.screen, Screens::World) {
                 minibuffer.message("This command requires Screens::InWorld");
                 return;
             }

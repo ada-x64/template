@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 // ------------------------------------------
 
+#[cfg(not(feature = "dev"))]
+use app::AppSettings;
 use app::prelude::*;
 
 #[cfg(feature = "dev")]

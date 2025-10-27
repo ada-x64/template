@@ -1,4 +1,4 @@
-use crate::{prelude::*, screen::ScreenPlugin};
+use crate::prelude::*;
 
 /// Allows for configuration of the application. When the "dev" feature is set,
 /// this should be handled via command line arguments. Otherwise, it is kept as the
@@ -15,12 +15,11 @@ pub struct AppPlugin {
 }
 impl Plugin for AppPlugin {
     fn build(&self, app: &mut App) {
+        app.world_mut().insert_resource(self.settings.clone());
         app.add_plugins((
             crate::framework::plugin,
             crate::service::plugin,
-            ScreenPlugin {
-                initial_screen: self.settings.initial_screen,
-            },
+            crate::screen::plugin,
         ))
         .insert_resource(self.settings.clone());
     }

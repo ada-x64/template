@@ -9,26 +9,22 @@ mod world;
 #[cfg(feature = "dev")]
 mod dev;
 
+#[cfg(test)]
+mod test;
+
 pub mod prelude {
     pub use super::data::*;
     #[cfg(feature = "dev")]
     pub use super::dev::prelude::*;
+    #[cfg(test)]
+    pub use super::test::prelude::*;
     pub use super::world::prelude::*;
 }
 
-#[derive(Debug)]
-pub struct ScreenPlugin {
-    pub initial_screen: Screens,
-}
-impl Plugin for ScreenPlugin {
-    fn build(&self, app: &mut App) {
-        info!(?self);
-        app.add_plugins(world::plugin).insert_state(CurrentScreen {
-            screen: self.initial_screen,
-            status: ScreenStatus::Loading,
-        });
-
-        #[cfg(feature = "dev")]
-        app.add_plugins(dev::plugin);
-    }
+pub fn plugin(app: &mut App) {
+    #[cfg(feature = "dev")]
+    app.add_plugins(dev::plugin);
+    #[cfg(test)]
+    app.add_plugins(test::plugin);
+    app.add_plugins(world::plugin);
 }

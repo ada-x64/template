@@ -11,3 +11,6 @@ pub struct PACaptureCursor;
 #[derive(InputAction)]
 #[action_output(bool)]
 pub struct PAReleaseCursor;
+
+#[derive(Event)]
+pub struct SpawnCursorCapture;

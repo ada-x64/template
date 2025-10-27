@@ -14,7 +14,7 @@ fn on_capture_cursor(
             Without<ContextActivity<FlyCam>>,
         ),
     >,
-    #[cfg(feature = "dev")] ictx_flycam: Query<
+    ictx_flycam: Query<
         (Entity, &Camera),
         (
             With<ContextActivity<FlyCam>>,
@@ -63,7 +63,35 @@ fn on_release_cursor(
     }
 }
 
+fn spawn_cursor_capture(_trigger: Trigger<SpawnCursorCapture>, mut commands: Commands) {
+    // info!("spawn_capture_cursor_actions");
+    commands.spawn((
+        Name::new("Cursor capture"),
+        ICtxCaptureCursor,
+        ContextActivity::<ICtxCaptureCursor>::ACTIVE,
+        // todo: state scope?
+        actions![
+            ICtxCaptureCursor[
+                (
+                    Action::<PACaptureCursor>::new(),
+                    bindings![MouseButton::Left]
+                ),
+                (
+                    Action::<PAReleaseCursor>::new(),
+                    bindings![KeyCode::Escape],
+                    ActionSettings {
+                        consume_input: true,
+                        require_reset: true,
+                        ..Default::default()
+                    }
+                ),
+           ]
+        ],
+    ));
+}
+
 pub fn plugin(app: &mut App) {
     app.add_observer(on_capture_cursor)
-        .add_observer(on_release_cursor);
+        .add_observer(on_release_cursor)
+        .add_observer(spawn_cursor_capture);
 }

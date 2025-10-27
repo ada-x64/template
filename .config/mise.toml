@@ -143,9 +143,7 @@ run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04 {{arg(name='res
 tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
 run = """
-if [ "$1" = "all" ]
-    then cargo nextest run --workspace
-    else cargo nextest run -p "$1" "${@:2}"
+    cargo nextest run
 fi
 """
 

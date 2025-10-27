@@ -9,7 +9,7 @@ pub enum Screens {
     #[default]
     Splash,
     MainMenu,
-    InWorld,
+    World,
     CameraTest,
     Test,
 }

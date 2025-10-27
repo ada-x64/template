@@ -1,17 +1,29 @@
 use crate::prelude::*;
 use bevy::ecs::{component::HookContext, world::DeferredWorld};
 
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
+pub struct TestScreenSettings {
+    pub entity_name: String,
+}
+
 /// The main [Screen] implementation.
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct TestScreen;
 impl Screen for TestScreen {
     const NAME: Screens = Screens::Test;
+    type SETTINGS = TestScreenSettings;
 
     /// Use this optional function to initialize your screen, e.g. by calling commands
     /// or scoping observers.
     fn init<'w>(world: &mut DeferredWorld<'w>, _ctx: &HookContext) {
         info!("in init");
-        world.commands().spawn(Name::new("Hello"));
+        let settings = world
+            .get_resource::<Self::SETTINGS>()
+            .expect("Settings should be initialized in plugin.")
+            .clone();
+        world
+            .commands()
+            .spawn(Name::new(settings.entity_name.clone()));
     }
 
     /// Use this optional function to handle any unloading logic, e.g.

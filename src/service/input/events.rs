@@ -8,6 +8,26 @@ fn exit_app(_: Trigger<Completed<PAQuit>>, mut commands: Commands, win: Single<&
     }
 }
 
+fn spawn_global_ctx(_: Trigger<SpawnGlobalCtx>, mut commands: Commands) {
+    commands.spawn((
+        ICtxGlobal,
+        ContextActivity::<ICtxGlobal>::ACTIVE,
+        ContextPriority::<ICtxGlobal>::new(1000),
+        actions![
+            ICtxGlobal[(
+                Action::<PAQuit>::new(),
+                bindings![KeyCode::Escape],
+                ActionSettings {
+                    consume_input: false,
+                    require_reset: true,
+                    ..Default::default()
+                }
+            )]
+        ],
+    ));
+}
+
 pub fn plugin(app: &mut App) {
     app.add_observer(exit_app);
+    app.add_observer(spawn_global_ctx);
 }

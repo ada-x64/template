@@ -5,7 +5,8 @@ use crate::prelude::*;
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct WorldScreen;
 impl Screen for WorldScreen {
-    const NAME: Screens = Screens::InWorld;
+    const NAME: Screens = Screens::World;
+    type SETTINGS = EmptySettings;
 
     fn init<'w>(world: &mut DeferredWorld<'w>, _ctx: &HookContext) {
         info!("in world: init");

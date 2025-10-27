@@ -8,7 +8,6 @@ mod camera;
 mod cursor;
 mod data;
 mod events;
-mod systems;
 
 pub mod prelude {
     pub use super::camera::prelude::*;
@@ -17,7 +16,7 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((events::plugin, systems::plugin))
+    app.add_plugins(events::plugin)
         .add_plugins((cursor::plugin, camera::plugin))
         .add_input_context::<ICtxGlobal>();
 }

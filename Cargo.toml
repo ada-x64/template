@@ -46,7 +46,7 @@ inherits = "dev"
 inherits = "dev"
 
 [dependencies]
-bevy = "0.16.1"
+bevy = {version = "0.16.1", features=["bevy_dev_tools"] }
 tiny_bail = "0.5.0"
 itertools = "0.14.0"
 thiserror = "2.0.12"
@@ -66,6 +66,8 @@ anyhow = "1.0.99"
 bevy_rich_text3d = "0.4.2"
 strum = { version = "0.27.2", features = ["derive"] }
 clap = { version = "4.5.50", features = ["derive"], optional = true }
+variadics_please = "1.1.0"
+wgpu = "24"
 
 [build-dependencies]
 built = {version = "0.8.0", features=["chrono"]}
