@@ -13,6 +13,8 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(not(test))]
     app.add_plugins((minibuffer::plugin, gizmos::plugin));
+    #[cfg(test)]
     app.add_plugins(test::plugin);
 }

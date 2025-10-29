@@ -1,12 +1,11 @@
 use crate::prelude::*;
 
 mod data;
-mod events;
 mod screen;
 mod sysparams;
 
 #[cfg(test)]
-mod tests;
+pub mod tests;
 
 pub mod prelude {
     pub use super::data::*;
@@ -15,5 +14,5 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((events::plugin, screen::plugin));
+    app.add_plugins(screen::plugin);
 }

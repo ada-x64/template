@@ -143,7 +143,7 @@ run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04 {{arg(name='res
 tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
 run = """
-    cargo nextest run
+    RUST_LOG=app=debug cargo nextest run -F dev
 fi
 """
 
@@ -165,12 +165,17 @@ run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
 
 # SSH #########################################################################
 
+# The idea with this section is to sync files using a server/client protocol.
+# The server then opens the app at the specified path, assuming it has the right
+# auth. Ideally, we would just use a game stream host like Moonlight/Sunshine
+# instead, but my GPU isn't strong enough for that.
+
 [tasks.rsync]
 run = """
 if [ -n "SSH_IP" ]; then
     rsync -avzr --progress --mkpath \
         ./assets \
-        ./target/debug/app \
+        ./target/debug/{{arg(name="bin", default="app")}} \
         "$SSH_IP:$SSH_OUT"
 fi
 """
@@ -179,7 +184,7 @@ fi
 depends = ["rsync"]
 run = """
 if [ -n "SSH_IP" ]; then
-    curl $SSH_IP:9995 -sd '{"auth": "{{env.auth}}", "path": "{{env.SSH_OUT}}/app"}'
+    curl $SSH_IP:9995 -sd '{"auth": "{{env.auth}}", "path": "{{env.SSH_OUT}}/{{arg(name="bin", default="app")}}"}'
 fi
 """
 
@@ -192,7 +197,7 @@ run = """
 #!/usr/bin/bash
 if [ -z "$SSH_CLIENT" ]
     then mise run_local
-    else mise -j1 build_local ::: run_ssh
+    else mise -j1 build_local ::: run_ssh {{arg(name="bin", default="app")}}
 fi
 """
 
@@ -226,8 +231,8 @@ description="Generate a new service or screen."
 tools={"cargo:cargo-generate" = "latest"}
 run='''
 #!/usr/bin/bash
-TEMPLATE={{arg(name="template", i=0)}}
-NAME={{arg(name="name", i=1)}}
+TEMPLATE={{arg(name="template")}}
+NAME={{arg(name="name")}}
 BASENAME=$(basename $NAME)
 DESTINATION="$(realpath src/$TEMPLATE/$(dirname $NAME))"
 

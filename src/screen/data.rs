@@ -10,6 +10,8 @@ pub enum Screens {
     Splash,
     MainMenu,
     World,
-    CameraTest,
-    Test,
+    #[cfg(test)]
+    NamedEntity,
+    #[cfg(test)]
+    Empty,
 }

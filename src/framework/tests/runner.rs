@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use bevy::{
     app::ScheduleRunnerPlugin,
     core_pipeline::CorePipelinePlugin,
@@ -9,11 +7,7 @@ use bevy::{
     prelude::*,
     render::{
         RenderPlugin,
-        renderer::{
-            RenderAdapter, RenderAdapterInfo, RenderDevice, RenderInstance, RenderQueue,
-            WgpuWrapper,
-        },
-        settings::{RenderCreation, RenderResources},
+        settings::{RenderCreation, WgpuSettings},
     },
     scene::ScenePlugin,
     state::app::StatesPlugin,
@@ -21,7 +15,6 @@ use bevy::{
     time::TimePlugin,
     window::ExitCondition,
 };
-use wgpu::{DeviceDescriptor, InstanceDescriptor, RequestAdapterOptions};
 
 /// Runs a headless instance. In order to succesfully exit the app, make sure
 /// you send an AppExit event. This can be accomplished with an
@@ -73,16 +66,16 @@ impl Runner {
         block_on(async {
             debug!("Initializing headless app.");
 
-            let instance = wgpu::Instance::new(&InstanceDescriptor::default());
-            let adapter = instance
-                .request_adapter(&RequestAdapterOptions::default())
-                .await
-                .expect("Failed to get wgpu adapter.");
-            let (device, queue) = adapter
-                .request_device(&DeviceDescriptor::default(), None)
-                .await
-                .expect("Failed to get wpu device.");
-            let adapter_info = adapter.get_info();
+            // let instance = wgpu::Instance::new(&InstanceDescriptor::default());
+            // let adapter = instance
+            //     .request_adapter(&RequestAdapterOptions::default())
+            //     .await
+            //     .expect("Failed to get wgpu adapter.");
+            // let (device, queue) = adapter
+            //     .request_device(&DeviceDescriptor::default(), None)
+            //     .await
+            //     .expect("Failed to get wpu device.");
+            // let adapter_info = adapter.get_info();
 
             let mut app = App::new();
             app.add_plugins((
@@ -105,13 +98,17 @@ impl Runner {
                 },
                 AssetPlugin::default(),
                 RenderPlugin {
-                    render_creation: RenderCreation::Manual(RenderResources(
-                        RenderDevice::new(WgpuWrapper::new(device)),
-                        RenderQueue(Arc::new(WgpuWrapper::new(queue))),
-                        RenderAdapterInfo(WgpuWrapper::new(adapter_info)),
-                        RenderAdapter(Arc::new(WgpuWrapper::new(adapter))),
-                        RenderInstance(Arc::new(WgpuWrapper::new(instance))),
-                    )),
+                    // render_creation: RenderCreation::Manual(RenderResources(
+                    //     RenderDevice::new(WgpuWrapper::new(device)),
+                    //     RenderQueue(Arc::new(WgpuWrapper::new(queue))),
+                    //     RenderAdapterInfo(WgpuWrapper::new(adapter_info)),
+                    //     RenderAdapter(Arc::new(WgpuWrapper::new(adapter))),
+                    //     RenderInstance(Arc::new(WgpuWrapper::new(instance))),
+                    // )),
+                    render_creation: RenderCreation::Automatic(WgpuSettings {
+                        backends: None,
+                        ..Default::default()
+                    }),
                     ..Default::default()
                 },
                 ImagePlugin::default(),

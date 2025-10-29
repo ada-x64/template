@@ -14,7 +14,7 @@ fn update_camera_controller(
     cam.is_active = trigger.new_controller.active;
     match trigger.new_controller.kind {
         CameraControllerKind::Fly => {
-            info!("ICtxFlyCam => {}", trigger.new_controller.enabled);
+            debug!("ICtxFlyCam => {}", trigger.new_controller.enabled);
             commands
                 .entity(trigger.entity)
                 .insert(ContextActivity::<ICtxFlyCam>::new(
@@ -22,7 +22,7 @@ fn update_camera_controller(
                 ));
         }
         CameraControllerKind::Tracking => {
-            info!("ICtxTrackingCam => {}", trigger.new_controller.enabled);
+            debug!("ICtxTrackingCam => {}", trigger.new_controller.enabled);
             commands
                 .entity(trigger.entity)
                 .insert(ContextActivity::<ICtxTrackingCam>::new(

@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use bevy::{
     app::{FixedMainScheduleOrder, MainScheduleOrder},
     ecs::{schedule::ScheduleLabel, system::ScheduleSystem},
@@ -64,20 +66,21 @@ where
     }
 
     fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
+        debug!("Building screen '{:?}'", S::NAME);
         app.add_schedule(self.schedule);
         app.init_resource::<S::SETTINGS>();
+        app.add_systems(OnEnter(CurrentScreen(S::NAME)), |mut commands: Commands| {
+            debug!("OnEnter({:?})", S::NAME);
+            commands.spawn(ScreenWrapper(S::default()));
+        });
         app.add_systems(
-            OnEnter(CurrentScreen::new::<S>()),
-            |mut commands: Commands| {
-                commands.spawn(ScreenWrapper(S::default()));
-            },
-        );
-        app.add_systems(
-            OnExit(CurrentScreen::new::<S>()),
+            OnExit(CurrentScreen(S::NAME)),
             |mut commands: Commands, e: Single<Entity, With<ScreenWrapper<S>>>| {
+                debug!("OnExit({:?})", S::NAME);
                 commands.entity(*e).despawn();
             },
         );
+        app.add_observer(on_switch_screen::<S>);
         if self.fixed {
             let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
             match order {
@@ -91,6 +94,19 @@ where
                 Order::After(l) => ms_order.insert_after(l, self.scope),
             }
         }
+
+        app.add_schedule(Schedule::new(UnloadSchedule::<S>::default()));
+        if let Some(unload) = S::unload() {
+            app.add_systems(
+                UnloadSchedule::<S>::default(),
+                (unload, on_finish_unload).run_if(in_state(CurrentScreen(S::NAME))),
+            );
+        } else {
+            app.add_systems(
+                UnloadSchedule::<S>::default(),
+                on_finish_unload.run_if(in_state(CurrentScreen(S::NAME))),
+            );
+        }
     }
 }
 
@@ -99,4 +115,52 @@ where
 pub enum Order<L: ScheduleLabel> {
     Before(L),
     After(L),
+}
+
+// Manuallly triggered schedule which is called when the screen is unloaded.
+#[derive(ScheduleLabel, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
+struct UnloadSchedule<T: Screen>(PhantomData<T>);
+
+// TODO: Would be nice to not have duplicates of this function.
+// Unfortunately, it seems impossible to convert from Screens to impl Screen
+// (Screen is not dyn compatible)
+fn on_switch_screen<T: Screen>(
+    trigger: Trigger<SwitchToScreen>,
+    mut commands: Commands,
+    current_screen: Res<State<CurrentScreen>>,
+    mut next_screen: ResMut<NextScreen>,
+    mut next_state: ResMut<NextState<CurrentScreenStatus>>,
+) {
+    debug!("on_switch_screen ({:?})", T::NAME);
+    if ***current_screen == T::NAME {
+        next_state.set(CurrentScreenStatus(ScreenStatus::Unloading));
+        *next_screen = NextScreen(Some(**trigger));
+        commands.run_schedule(UnloadSchedule::<T>::default());
+    }
+}
+
+fn on_finish_unload(
+    mut next_screen: ResMut<NextScreen>,
+    mut current_screen: ResMut<NextState<CurrentScreen>>,
+    mut current_status: ResMut<NextState<CurrentScreenStatus>>,
+    // Any entity which is (explicitly marked as ScreenScoped, or is _not_ marked
+    // as persistent) _and_ is not a top-level observer
+    screen_scoped: Query<
+        Entity,
+        (
+            Or<(
+                With<ScreenScoped>,  // is explicitly screen-scoped
+                Without<Persistent>, // is explicitly persistent
+            )>,
+            Not<(With<Observer>, Without<ChildOf>)>, // top-level observer
+        ),
+    >,
+    mut commands: Commands,
+) {
+    debug!("on_finish_unload");
+    current_screen.set(next_screen.0.take().unwrap().into());
+    current_status.set(ScreenStatus::Loading.into());
+    screen_scoped.iter().for_each(|e| {
+        commands.entity(e).despawn();
+    });
 }

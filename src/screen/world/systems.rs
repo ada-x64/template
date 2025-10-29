@@ -8,8 +8,8 @@ impl Screen for WorldScreen {
     const NAME: Screens = Screens::World;
     type SETTINGS = EmptySettings;
 
-    fn init<'w>(world: &mut DeferredWorld<'w>, _ctx: &HookContext) {
-        info!("in world: init");
+    fn init<'w>(mut world: DeferredWorld, _ctx: HookContext) {
+        debug!("in world: init");
         let mut commands = world.commands();
         commands.trigger(SpawnPlayerRoot);
         commands.trigger(SpawnWorldgenRoot);
@@ -17,7 +17,7 @@ impl Screen for WorldScreen {
 }
 
 pub fn plugin(app: &mut App) {
-    WorldScreen::builder_fixed()
+    ScreenScopeBuilder::<WorldScreen>::fixed()
         .add_systems(player_systems().take())
         .add_systems(tracking_cam_systems().take())
         .build(app);

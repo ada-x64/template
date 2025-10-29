@@ -2,7 +2,7 @@ use crate::prelude::*;
 use bevy::window::CursorGrabMode;
 
 fn exit_app(_: Trigger<Completed<PAQuit>>, mut commands: Commands, win: Single<&Window>) {
-    info!("exit_app");
+    debug!("exit_app");
     if matches!(win.cursor_options.grab_mode, CursorGrabMode::None) {
         commands.send_event(AppExit::Success);
     }

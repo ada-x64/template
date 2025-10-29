@@ -1,7 +1,11 @@
-use std::marker::PhantomData;
-
 use crate::prelude::*;
 use bevy::ecs::schedule::ScheduleLabel;
+use std::marker::PhantomData;
+
+/// Component wrapper around a screen type.
+#[derive(Deref, Component)]
+#[component(on_add = T::init)]
+pub struct ScreenWrapper<T: Screen>(pub T);
 
 /// Scopes an entity to the current screen. The entity will be cleaned up when
 /// the [Screens] state changes. By default, all entities _except_ top-level
@@ -15,35 +19,19 @@ pub struct ScreenScoped;
 #[derive(Component, Debug, Reflect)]
 pub struct Persistent;
 
-#[derive(Default, States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Copy)]
-pub struct CurrentScreen {
-    pub screen: Screens,
-    pub status: ScreenStatus,
+#[derive(Default, States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Copy, Deref)]
+pub struct CurrentScreen(pub Screens);
+impl From<Screens> for CurrentScreen {
+    fn from(value: Screens) -> Self {
+        Self(value)
+    }
 }
-impl CurrentScreen {
-    pub fn new<T: Screen>() -> Self {
-        Self {
-            screen: T::NAME,
-            status: ScreenStatus::Ready,
-        }
-    }
-    pub fn loading(self) -> Self {
-        Self {
-            status: ScreenStatus::Loading,
-            ..self
-        }
-    }
-    pub fn ready(self) -> Self {
-        Self {
-            status: ScreenStatus::Ready,
-            ..self
-        }
-    }
-    pub fn unloading(self) -> Self {
-        Self {
-            status: ScreenStatus::Unloading,
-            ..self
-        }
+
+#[derive(Default, States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Copy, Deref)]
+pub struct CurrentScreenStatus(pub ScreenStatus);
+impl From<ScreenStatus> for CurrentScreenStatus {
+    fn from(value: ScreenStatus) -> Self {
+        Self(value)
     }
 }
 
@@ -57,7 +45,7 @@ pub struct NextScreen(pub Option<Screens>);
 pub struct FinishUnload;
 
 /// Call this when you want to switch screens.
-#[derive(Event, Deref, Debug, PartialEq, Eq, Clone)]
+#[derive(Event, Debug, PartialEq, Eq, Clone, Copy, Deref)]
 pub struct SwitchToScreen(pub Screens);
 
 /// Enumerates possible screen states.
@@ -86,4 +74,33 @@ pub enum ScreenScope<T: Screen> {
     _Ghost(PhantomData<T>),
     Update,
     FixedUpdate,
+}
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub struct FullScreenState {
+//     screen: Screen,
+//     status: Status,
+// }
+// impl<T: Screen> ComputedStates for FullScreenState<T> {
+//     type SourceStates = (CurrentScreen, CurrentScreenStatus);
+
+//     fn compute(sources: Self::SourceStates) -> Option<Self> {
+//         if T::NAME == *sources.0 {
+//             match *sources.1 {
+//                 ScreenStatus::Loading => Some(Self::Loading),
+//                 ScreenStatus::Ready => Some(Self::Ready),
+//                 _ => None,
+//             }
+//         } else {
+//             None
+//         }
+//     }
+// }
+
+#[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum ScreenLoadingState<T: Screen> {
+    #[default]
+    Loading,
+    Ready,
+    _Phantom(PhantomData<T>),
 }
