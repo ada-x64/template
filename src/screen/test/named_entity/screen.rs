@@ -13,10 +13,7 @@ impl Screen for NamedEntityScreen {
     type SETTINGS = NamedEntityScreenSettings;
     fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
         debug!("in init (Test)");
-        let settings = world
-            .get_resource::<Self::SETTINGS>()
-            .expect("Settings should be initialized in plugin.")
-            .clone();
+        let settings = world.resource::<Self::SETTINGS>().clone();
         world
             .commands()
             .spawn(Name::new(settings.entity_name.clone()));

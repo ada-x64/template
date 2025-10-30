@@ -6,20 +6,22 @@ use crate::prelude::*;
 mod data;
 #[cfg(feature = "dev")]
 mod dev;
-mod splash;
-mod world;
 
+mod splash;
 #[cfg(test)]
 mod test;
+mod world;
 
 pub mod prelude {
     pub use super::data::*;
+
+    pub use super::splash::prelude::*;
+    pub use super::world::prelude::*;
+
     #[cfg(feature = "dev")]
     pub use super::dev::prelude::*;
-    pub use super::splash::prelude::*;
     #[cfg(test)]
     pub use super::test::prelude::*;
-    pub use super::world::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {

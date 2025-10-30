@@ -1,13 +1,15 @@
 import argparse
-from util import get_vars, add_module, remove_module
+from util import get_vars, add_module, remove_module, Args
 import util
+from typing import cast
 
 # parse args
 parser = argparse.ArgumentParser(prog="update_parent_module")
-parser.add_argument("module_path")
-parser.add_argument("--debug", type=bool)
-parser.add_argument("--remove", action="store_true")
+_ = parser.add_argument("module_path")
+_ = parser.add_argument("--debug", type=bool)
+_ = parser.add_argument("--remove", action="store_true")
 args = parser.parse_args()
+args = cast(Args, args)
 
 get_vars(args)
 vars = util.vars

@@ -1,19 +1,30 @@
+from os import PathLike, fspath
 import re
 from dataclasses import dataclass, asdict
 from os.path import basename, join, realpath
 from re import Match, Pattern
 from pprint import pformat
 import logging
+import argparse
+
+type Expr = Pattern[str]
+
+
+@dataclass
+class Args(argparse.Namespace):
+    module_path: PathLike[str] | None
+    remove: bool
+    debug: bool
 
 
 @dataclass
 class Vars:
-    use_expr: Pattern
-    mod_expr: Pattern
-    prelude_expr: Pattern
-    plugin_expr: Pattern
-    screens_expr: Pattern
-    screens_exists_expr: Pattern
+    use_expr: Expr
+    mod_expr: Expr
+    prelude_expr: Expr
+    plugin_expr: Expr
+    screens_expr: Expr
+    screens_exists_expr: Expr
     screens_data_mod: str
     super_mod: str
     mod_name: str
@@ -25,7 +36,7 @@ class Vars:
     is_screen: bool
 
 
-def get_vars(args):
+def get_vars(args: Args):
     global vars, logger
 
     logging.basicConfig(
@@ -46,7 +57,7 @@ def get_vars(args):
         prelude_expr=re.compile(r"\s*pub mod prelude \{"),
         plugin_expr=re.compile(r"\s*pub fn plugin\(_?\w+: &mut App\) \{[^}]*"),
         screens_expr=re.compile(r"enum Screens \{[^}]*"),
-        screens_exists_expr=re.compile(rf"\s+{mod_camel_case}\(ScreenStatus\),?\s+"),
+        screens_exists_expr=re.compile(rf"\s+{mod_camel_case},?\s+"),
         screens_data_mod=realpath("src/screen/data.rs"),
         super_mod=realpath(join(args.module_path, "../mod.rs")),
         mod_name=mod_name,
@@ -55,7 +66,7 @@ def get_vars(args):
         plugin_str=f"app.add_plugins({mod_name}::plugin);",
         screens_str=f"{mod_camel_case},",
         file_str="",
-        is_screen="src/screen" in args.module_path,
+        is_screen="src/screen" in fspath(args.module_path),
     )
 
     if args.debug:
@@ -88,7 +99,7 @@ def remove_module():
     replace(vars.plugin_str, "")
 
 
-def insert(pos, inserted_str):
+def insert(pos: int, inserted_str: str):
     global vars
     vars.file_str = vars.file_str[:pos] + inserted_str + vars.file_str[pos:]
 
@@ -103,28 +114,28 @@ def write(file: str):
     global vars
     with open(file, "w") as buf:
         logger.info(f"Writing to {file}")
-        buf.write(vars.file_str)
+        _ = buf.write(vars.file_str)
 
 
 def replace(match: str, replace: str):
     vars.file_str = vars.file_str.replace(match, replace)
 
 
-def re_replace(pattern: Pattern, replace: str, msg_on_err: str):
+def re_replace(pattern: Expr, replace: str, msg_on_err: str):
     if match := find([pattern]):
         vars.file_str = vars.file_str.replace(match.group(0), replace)
     else:
         logger.warning(msg_on_err)
 
 
-def find(exprs: list[Pattern]) -> Match | None:
+def find(exprs: list[Expr]) -> Match[str] | None:
     for expr in exprs:
         if match := expr.search(vars.file_str, re.MULTILINE):
             return match
     return None
 
 
-def try_insert_after(exprs: list[Pattern], replace: str) -> bool:
+def try_insert_after(exprs: list[Expr], replace: str) -> bool:
     global vars
     if match := find(exprs):
         insert(match.end(), replace)
@@ -132,7 +143,7 @@ def try_insert_after(exprs: list[Pattern], replace: str) -> bool:
     return False
 
 
-def insert_after(exprs: list[Pattern], replace: str, msg_on_err: str):
+def insert_after(exprs: list[Expr], replace: str, msg_on_err: str):
     global vars
     if match := find(exprs):
         insert(match.end(), replace)
