@@ -1,2 +1,3 @@
 [placeholders]
 name = {type="string", prompt="Screen name?", default="screen"}
+pedantic = {type='bool', prompt="Add pedantic comments?"}

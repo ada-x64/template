@@ -5,5 +5,5 @@ fn on_event(trigger: Trigger<{{name | upper_camel_case | append: "Event"}}>) {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_observer(my_event);
+    app.add_observer(on_event);
 }

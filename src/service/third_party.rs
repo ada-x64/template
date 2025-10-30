@@ -20,9 +20,11 @@ pub fn plugin(app: &mut App) {
         TnuaControllerPlugin::new(FixedUpdate),
         bevy_tnua_avian3d::TnuaAvian3dPlugin::new(FixedUpdate),
         EnhancedInputPlugin,
+        #[cfg(not(test))]
         bevy_rich_text3d::Text3dPlugin::default(),
     ));
 
+    #[cfg(not(test))]
     #[cfg(feature = "dev")]
     app.add_plugins((
         bevy_minibuffer::MinibufferPlugins,

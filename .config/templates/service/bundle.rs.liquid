@@ -1,8 +1,10 @@
+{%- assign title = name | title_case -%}
+{%- assign bundle_marker = name | upper_camel_case | append: "BundleMarker" -%}
 use crate::prelude::*;
 
 // We use functions to initialize bundles because they are more flexible than
 // struct types.
-/// Use this function to initialize a {{ name | title_case }} bundle.
+/// Use this function to initialize a {{title}} bundle.
 pub fn bundle() -> impl Bundle {
-    ({{ name | upper_camel_case | append: "BundleMarker" }})
+    ({{bundle_marker}})
 }

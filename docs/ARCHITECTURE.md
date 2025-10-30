@@ -11,21 +11,21 @@ the actual functionality for the application.
 ```
 ./src
 ├── screens
-│   ├── world/
-│   ├── splash/
-│   ├── main_menu/
-│   ├── data.rs
-│   └── mod.rs
+│   ├── world/
+│   ├── splash/
+│   ├── main_menu/
+│   ├── data.rs
+│   └── mod.rs
 ├── services
-│   ├── dev/
-│   ├── input/
-│   ├── player/
-│   ├── text/
-│   ├── ui/
-│   ├── worldgen/
-│   ├── data.rs
-│   ├── mod.rs
-│   └── third_party.rs
+│   ├── dev/
+│   ├── input/
+│   ├── player/
+│   ├── text/
+│   ├── ui/
+│   ├── worldgen/
+│   ├── data.rs
+│   ├── mod.rs
+│   └── third_party.rs
 ├── lib.rs
 └── main.rs
 ```
@@ -58,23 +58,23 @@ Each module is organized like this:
 ```
 ./src/services/input/camera
 ├── controller
-│   ├── data.rs
-│   ├── events.rs
-│   └── mod.rs
+│   ├── data.rs
+│   ├── events.rs
+│   └── mod.rs
 ├── data
-│   ├── input_ctx.rs
-│   └── mod.rs
+│   ├── input_ctx.rs
+│   └── mod.rs
 ├── fly
-│   ├── bundle.rs
-│   ├── data.rs
-│   ├── events.rs
-│   └── mod.rs
+│   ├── bundle.rs
+│   ├── data.rs
+│   ├── events.rs
+│   └── mod.rs
 ├── tracking
-│   ├── bundle.rs
-│   ├── data.rs
-│   ├── events.rs
-│   ├── mod.rs
-│   └── systems.rs
+│   ├── bundle.rs
+│   ├── data.rs
+│   ├── events.rs
+│   ├── mod.rs
+│   └── systems.rs
 └── mod.rs
 ```
 
@@ -82,10 +82,10 @@ Modules may have the following files:
 
 - `mod.rs` - the entrypoint. Should contain a prelude and a plugin.
 - `data.rs` - Components, Assets, and other datatypes required for the module.
-  - If necessary, this can be split up.
+    - If necessary, this can be split up.
 - `systems.rs` - Systems which run directly in schedules.
 - `events.rs` - Event observers.
-  - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
+    - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
 - `bundle.rs` - A function which returns a bundle.
 - `state.rs` - State management. Typically handles asset loading and screen scoping.
 
@@ -210,10 +210,19 @@ and scheduled systems for implementing the global simulation.
 
 use crate::prelude::*;
 
-fn apply(/* ... */) {}
+fn init(/* ... */) {}
 
+fn apply() {}
+
+/// global startup code should be here, if it's always running
 pub fn plugin(app: &mut App) {
-    app.add_systems(FixedUpdate, (apply).in_set(PlayerSystems));
+    app.add_systems(Startup, apply);
+}
+
+/// to scope things, place them like this, then integrate them
+/// into the screen's systems module
+pub fn systems() -> ServiceSystems {
+    ServiceSystems::new(apply)
 }
 ```
 
@@ -231,10 +240,6 @@ pub fn plugin(app: &mut App) {
         LoadingState::new(WorldScreenStates::Loading)
             .continue_to_state(WorldScreenStates::Ready)
             .load_collection::<PlayerAssets>(),
-    );
-    app.configure_sets(
-        FixedUpdate,
-        PlayerSystems.run_if(in_state(ScreenStates::InWorld)),
     );
 }
 ```

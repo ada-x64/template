@@ -5,13 +5,13 @@ use crate::prelude::*;
 macro_rules! cam_cmd {
     ($func:ident, $property:ident) => {
         fn $func(
-            state: Res<State<ScreenStates>>,
+            state: Res<State<CurrentScreen>>,
             mut minibuffer: Minibuffer,
             cam_list: Res<CameraList>,
             cams: Query<(&Name, &CameraController)>,
         ) {
-            if !matches!(**state, ScreenStates::InWorld) {
-                minibuffer.message("This command requires ScreenStates::InWorld");
+            if !matches!(***state, Screens::World) {
+                minibuffer.message("This command requires Screens::InWorld");
                 return;
             }
 
@@ -51,7 +51,7 @@ fn cycle_cam(
     mut res_active_cam: ResMut<ActiveCamera>,
     controllers: Query<&CameraController>,
 ) {
-    info!("Cycling cameras. Current idx: {res_active_cam:?}");
+    debug!("Cycling cameras. Current idx: {res_active_cam:?}");
     let active_cam = **res_active_cam;
     let active_controller = r!(controllers.get(cams[active_cam]));
     commands.trigger(InsertCameraController {

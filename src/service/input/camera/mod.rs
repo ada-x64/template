@@ -1,9 +1,9 @@
 use crate::prelude::*;
 
-pub(crate) mod controller;
-pub mod data;
-pub mod fly;
-pub mod tracking;
+mod controller;
+mod data;
+mod fly;
+mod tracking;
 
 pub mod prelude {
     pub use super::controller::prelude::*;

@@ -1,10 +1,14 @@
+{%- assign name = name | upper_camel_case | append: "Screen" -%}
 use crate::prelude::*;
 
+{% if pedantic -%}
+/// This plugin controls how the state transitions from Loading to Ready.
+/// It does not have to use [bevy_asset_loader], but it's helpful to do so.
+{%- endif %}
 pub fn plugin(app: &mut App) {
-    app.init_state::<{{name | upper_camel_case | append: "ScreenStates"}}>();
     app.add_loading_state(
-        LoadingState::new({{ name | upper_camel_case | append: "ScreenStates::Loading"}})
-            .continue_to_state({{name |upper_camel_case | append: "ScreenStates::Ready"}})
-            .load_collection::<{{ name | upper_camel_case | append: "Assets"}}>(),
+        LoadingState::new(ScreenLoadingState::<{{-name-}}>::Loading)
+            .continue_to_state(ScreenLoadingState::<{{-name-}}>::Ready)
+            .load_collection::<EmptyAssetCollection>(),
     );
 }
