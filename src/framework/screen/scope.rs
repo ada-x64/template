@@ -139,6 +139,7 @@ fn on_switch_screen<T: Screen>(
     }
 }
 
+/// This function clears out all the non-screen-scoped entities.
 fn on_finish_unload(
     mut next_screen: ResMut<NextScreen>,
     mut current_screen: ResMut<NextState<CurrentScreen>>,
@@ -152,7 +153,7 @@ fn on_finish_unload(
                 With<ScreenScoped>,  // is explicitly screen-scoped
                 Without<Persistent>, // is explicitly persistent
             )>,
-            Not<(With<Observer>, Without<ChildOf>)>, // top-level observer
+            Not<(Or<(With<Observer>, With<Window>)>, Without<ChildOf>)>, // top-level items
         ),
     >,
     mut commands: Commands,

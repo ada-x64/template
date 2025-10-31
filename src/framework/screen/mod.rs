@@ -18,4 +18,7 @@ pub fn plugin(app: &mut App) {
     app.insert_state::<CurrentScreenStatus>(ScreenStatus::Loading.into());
     app.init_resource::<NextScreen>();
     app.add_plugins(events::plugin);
+
+    app.register_propagatable_type::<Persistent>();
+    app.register_propagatable_type::<ScreenScoped>();
 }

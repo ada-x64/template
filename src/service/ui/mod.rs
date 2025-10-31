@@ -11,6 +11,7 @@ pub(crate) struct UiCamera;
 fn spawn_ui_camera(mut commands: Commands) {
     commands.spawn((
         Name::new("UI Camera"),
+        Persistent,
         UiCamera,
         Camera2d,
         IsDefaultUiCamera,

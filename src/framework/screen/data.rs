@@ -7,18 +7,6 @@ use std::marker::PhantomData;
 #[component(on_add = T::init)]
 pub struct ScreenWrapper<T: Screen>(pub T);
 
-/// Scopes an entity to the current screen. The entity will be cleaned up when
-/// the [Screens] state changes. By default, all entities _except_ top-level
-/// observers are automatically marked for cleanup.
-#[derive(Component, Debug, Reflect)]
-pub struct ScreenScoped;
-
-/// Marks an entity as screen-persistent, i.e., this entity will _not_ be
-/// automatically cleaned up when the screen changes. By default, all entities
-/// _except_ top-level observers are automtically marked for cleanup.
-#[derive(Component, Debug, Reflect)]
-pub struct Persistent;
-
 #[derive(Default, States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Copy, Deref)]
 pub struct CurrentScreen(pub Screens);
 impl From<Screens> for CurrentScreen {
@@ -76,27 +64,8 @@ pub enum ScreenScope<T: Screen> {
     FixedUpdate,
 }
 
-// #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub struct FullScreenState {
-//     screen: Screen,
-//     status: Status,
-// }
-// impl<T: Screen> ComputedStates for FullScreenState<T> {
-//     type SourceStates = (CurrentScreen, CurrentScreenStatus);
-
-//     fn compute(sources: Self::SourceStates) -> Option<Self> {
-//         if T::NAME == *sources.0 {
-//             match *sources.1 {
-//                 ScreenStatus::Loading => Some(Self::Loading),
-//                 ScreenStatus::Ready => Some(Self::Ready),
-//                 _ => None,
-//             }
-//         } else {
-//             None
-//         }
-//     }
-// }
-
+/// [LoadingState] for a [Screen]. See the [bevy_asset_loader] docs for more
+/// info.
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum ScreenLoadingState<T: Screen> {
     #[default]
@@ -104,3 +73,21 @@ pub enum ScreenLoadingState<T: Screen> {
     Ready,
     _Phantom(PhantomData<T>),
 }
+
+/// Scopes an entity to the current screen. The entity will be cleaned up when
+/// the [Screens] state changes. By default, all entities _except_ top-level
+/// observers are automatically marked for cleanup.
+///
+/// Note that _children of this entity will not automatically be marked [Persistent]._
+/// In order to propogate persistence, use the [Propogate] component.
+#[derive(Component, Debug, Reflect, Clone, Copy, Default)]
+pub struct ScreenScoped;
+
+/// Marks an entity as screen-persistent, i.e., this entity will _not_ be
+/// automatically cleaned up when the screen changes. By default, all entities
+/// _except_ top-level [Observer]s and the [Window] are automtically marked for cleanup.
+///
+/// Note that _children of this entity will not automatically be marked [Persistent]._
+/// In order to propogate persistence, use the [Propogate] component.
+#[derive(Component, Debug, Reflect, Clone, Copy, Default)]
+pub struct Persistent;
