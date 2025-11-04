@@ -6,9 +6,11 @@ How are the modules arranged?
 
 Generally, the crate is split between _screens_ and _services._ Screens handle
 initialization, asset loading, and define simualation scopes. Services provide
-the actual functionality for the application.
+the actual functionality for the application. While
+[Screens](crate::prelude::Screen) have a special trait implementation, services
+are simple Bevy [Plugins](bevy::prelude::Plugin).
 
-```
+```text
 ./src
 ├── screens
 │   ├── world/
@@ -32,15 +34,20 @@ the actual functionality for the application.
 
 ### Screens
 
-These are the equivalent of scenes or rooms in other game engines. Not to be
-confused with Bevy's
-[Scene](https://docs.rs/bevy/latest/bevy/prelude/struct.Scene.html) concept,
-which is just a serialized world.
+These are the equivalent of scenes or rooms in other game engines. This is not
+to be confused with Bevy's [Scene](bevy::prelude::Scene) concept, which is just
+a serialized world.
 
 Screens define a simulation's _scope_ and gates off functionality behind
-_states._ For example, `WorldScreenStates` may be `Loading` or `Ready` depending
-on whether or not all of the assets have finished loading. We use
-`bevy_asset_loader` for this.
+_states._ Screens can easily be added and removed from the project by using the
+CLI. See [crate::docs::cli] for more info.
+
+```bash
+mise add screen MY_SCREEN
+```
+
+For more information on how screens work, check out their
+[documentation](crate::prelude::Screen).
 
 ### Services
 
@@ -55,7 +62,7 @@ is simulation.
 
 Each module is organized like this:
 
-```
+```text
 ./src/services/input/camera
 ├── controller
 │   ├── data.rs
@@ -82,10 +89,10 @@ Modules may have the following files:
 
 - `mod.rs` - the entrypoint. Should contain a prelude and a plugin.
 - `data.rs` - Components, Assets, and other datatypes required for the module.
-    - If necessary, this can be split up.
+  - If necessary, this can be split up.
 - `systems.rs` - Systems which run directly in schedules.
 - `events.rs` - Event observers.
-    - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
+  - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
 - `bundle.rs` - A function which returns a bundle.
 - `state.rs` - State management. Typically handles asset loading and screen scoping.
 
@@ -273,11 +280,6 @@ pub fn plugin(app: &mut App) {
 }
 ```
 
-The top-level service module itself exposes _two_ plugins, one for public
-functionality and one for private functionality.
-
-And finally, we have the standard `lib.rs` and `main.rs`. We split the crate
-into a library and executable so that we can have "example" executables for
-testing service functionality. `lib.rs` simply exposes the `ScreenPlugin` and
-`ServicesPlugin` as well as the prelude. `main.rs` adds them all and runs the
-application.
+And finally, we have the standard `lib.rs` and `main.rs`. `lib.rs` simply
+exposes the `ScreenPlugin` and `ServicesPlugin` as well as the prelude.
+`main.rs` adds them all and runs the application.

@@ -45,15 +45,4 @@ event, you should have a system which queries for the `MyEventListener`
 component and, on trigger, forwards the event to the entities.
 
 TODO: This would be better as a relationship.
-https://www.christopherbiscardi.com/bevy-observer-filters
-
-## Screen scoping
-
-FOR CONSIDERATION: State scoping is a component, but should probably be
-_inserted_ on components that are spawned when a state is up, right? Maybe
-instead of a StateScoped(SomeState) component, we have a more general
-ScreenScoped component that would clear out the entity on transition.
-
-TODO: Check that state transition works as expected.
-Need to test it manually and write unit tests for it.
-Keep the tests in the framework module. We'll want to move that into a library eventually.
+<https://www.christopherbiscardi.com/bevy-observer-filters>

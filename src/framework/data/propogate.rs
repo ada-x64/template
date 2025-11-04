@@ -1,25 +1,31 @@
 use crate::prelude::*;
 use std::marker::PhantomData;
 
+/// Extends the [App] with propogation registration functionality.
 pub trait PropogateExt {
     fn register_propagatable_type<T: Propogatable>(&mut self) -> &mut Self;
 }
 impl PropogateExt for App {
+    /// Registers a type as [Propogatable]. Use [`Propogate<T>`] to duplicate a
+    /// component down the parent-child hierarchy.
     fn register_propagatable_type<T: Propogatable>(&mut self) -> &mut Self {
         self.add_systems(PostUpdate, read_propogate_message::<T>)
             .add_event::<PropogateMessage<T>>()
     }
 }
 
-/// Marks a component as able to propogate.
-/// Do not forget to register your type using [App::register_propogatable_type].
+/// Marks a component as able to propogate. Use [`Propogate<T>`] to duplicate a
+/// component down the parent-child hierarchy.
+///
+/// __NOTE: Propogatable types must be registered using [App::register_propagatable_type].__
 pub trait Propogatable: Component + Clone + Default + std::fmt::Debug {}
 impl<T> Propogatable for T where T: Component + Clone + Default + std::fmt::Debug {}
 
-/// Inserts the inner component and propogates the passed component to all of
-/// its children.
+/// Inserts the inner component and recursively clones the passed component to
+/// all of its children. Use the [BlockPropogation] component to end
+/// propogation.
 ///
-/// Use the [BlockPropogate] to end propogation.
+/// __NOTE: Propogatable types must be registered using [App::register_propagatable_type].__
 #[derive(Component, Clone, Debug, Default)]
 #[component(on_insert = send_propogate_event::<T>)]
 #[component(immutable)]
@@ -40,6 +46,8 @@ fn send_propogate_event<'w, T: Propogatable>(mut world: DeferredWorld<'w>, ctx: 
     });
 }
 
+/// Ensures that [propogation](Propogate) of components of type T stops at this child.
+/// Note that this does not stop _all_ propogation, but _only_ propogation of the specific type.
 #[derive(Component, Clone, Debug, Default)]
 #[component(immutable)]
 pub struct BlockPropogation<T: Propogatable>(PhantomData<T>);

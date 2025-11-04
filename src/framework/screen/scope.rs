@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+#[allow(unused_imports, reason = "used in docs")]
+use bevy::app::FixedMain;
 use bevy::{
     app::{FixedMainScheduleOrder, MainScheduleOrder},
     ecs::{schedule::ScheduleLabel, system::ScheduleSystem},
@@ -10,10 +12,8 @@ pub use crate::prelude::*;
 /// On build, this will initialize a new [Schedule]. The newly created schedule
 /// has a [SystemSet] associated with it which is scoped to run only if the
 /// world is in the given ReadyState. Schedules can run in either [Main] or
-/// [FixedMain]. By default, the given systems will run after [Update] or
-/// [FixedUpdate], but this can be configured by calling
-/// [ScreenScopeBuilder::build_with_order] /
-/// [ScreenScopeBuilder::build_with_order_fixed].
+/// [FixedMain]. The given systems will run after [Update] or
+/// [FixedUpdate].
 pub struct ScreenScopeBuilder<S>
 where
     S: Screen,

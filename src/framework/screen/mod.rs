@@ -1,3 +1,5 @@
+#![doc = include_str!("./doc.md")]
+
 use crate::{AppSettings, prelude::*};
 
 mod data;

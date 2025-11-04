@@ -2,8 +2,12 @@ use crate::prelude::*;
 use bevy::ecs::query::QueryFilter;
 use variadics_please::all_tuples;
 
+/// A system parameter which acts as a negation flag. [Thanks to @gibimicro on
+/// Discord for this
+/// solution.](https://discord.com/channels/691052431525675048/742569353878437978/1432104694024769546)
 pub type Not<T> = <T as NotImpl>::Not;
 
+#[doc(hidden)]
 pub trait NotImpl {
     type Not: QueryFilter;
 }

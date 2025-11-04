@@ -229,21 +229,37 @@ raw=true
 alias=['generate', 'n']
 description="Generate a new service or screen."
 tools={"cargo:cargo-generate" = "latest"}
+usage = '''
+arg "<template>" help="The template to generate." {
+    choices "screen" "service"
+}
+
+arg "<name>" help="Name of the generated module." long_help="""
+The chosen template will be output to the src directory corresponding to the
+template, postfixed with given template name. For example, calling
+'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
+"""
+
+flag "--debug" help="Enable debug output."
+'''
 run='''
 #!/usr/bin/bash
-TEMPLATE={{arg(name="template")}}
-NAME={{arg(name="name")}}
+TEMPLATE=${usage_template?}
+NAME=${usage_name?}
+DEBUG=${usage_debug:+--debug}
+
 BASENAME=$(basename $NAME)
 DESTINATION="$(realpath src/$TEMPLATE/$(dirname $NAME))"
 
-{% if flag(name="debug") == "true" %}
+if [[ -n "$DEBUG" ]]; then
 cat <<EOF
 DEBUG
-TEMPLATE=$TEMPLATE
-NAME=$NAME
-DESTINATION=$DESTINATION
+TEMPLATE="$TEMPLATE"
+NAME="$NAME"
+BASENAME="$BASENAME"
+DESTINATION="$DESTINATION"
 EOF
-{% endif %}
+fi
 
 catch_err () {
     if [ $? -ne 0 ]; then
@@ -265,7 +281,7 @@ catch_err
 
 uv run .config/scripts/new_mod/main.py\
     "$DESTINATION/$BASENAME"\
-    {% if flag(name="debug") == "true" %} --debug {% endif %}
+    "$DEBUG"
 
 catch_err
 
@@ -276,17 +292,31 @@ cargo fmt -- -l;
 [tasks.delete]
 alias=['del', 'd']
 description="Remove a generated service or screen"
+usage = '''
+arg "<template>" help="The template to remove." {
+    choices "screen" "service"
+}
+
+arg "<name>" help="Name of the generated module." long_help="""
+The chosen template will be removed from the src directory corresponding to the
+template, postfixed with given template name. For example, calling
+'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
+"""
+
+flag "--debug" help="Enable debug output."
+'''
 run='''
 #!/usr/bin/bash
 set -e
-TEMPLATE={{arg(name="template", i=0)}}
-NAME={{arg(name="name", i=1) }}
+TEMPLATE=${usage_template?}
+NAME=${usage_name?}
 DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
+DEBUG=${usage_debug:+--debug}
 
 uv run .config/scripts/new_mod/main.py\
     "$DESTINATION" \
     --remove \
-    {% if flag(name="debug") == "true" %} --debug {% endif %}
+    $DEBUG
 
 set -x
 rm -r $DESTINATION

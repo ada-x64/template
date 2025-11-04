@@ -8,6 +8,7 @@ mod data;
 #[cfg(feature = "dev")]
 #[cfg(not(test))]
 mod dev;
+
 mod input;
 mod player;
 mod third_party;
@@ -19,6 +20,7 @@ pub mod prelude {
     #[cfg(feature = "dev")]
     #[cfg(not(test))]
     pub use super::dev::prelude::*;
+
     pub use super::input::prelude::*;
     pub use super::player::prelude::*;
     pub use super::third_party::prelude::*;

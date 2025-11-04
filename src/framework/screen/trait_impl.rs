@@ -21,10 +21,10 @@ pub use crate::prelude::*;
 pub trait Screen:
     Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
 {
-    /// The associated screen name.
+    /// The associated screen name. Must be populated in the crate's [Screens] enum.
     const NAME: Screens;
 
-    /// The associated settings type. Set as () for no settings.
+    /// The associated settings type. Set as [EmptySettings] for no settings.
     type SETTINGS: Resource + FromWorld;
 
     /// Used as the component wrapper's [on_add

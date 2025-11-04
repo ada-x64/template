@@ -1,15 +1,18 @@
 use crate::prelude::*;
 
-mod data;
-mod screen;
+/// General utility types
+pub mod data;
+/// Screen implementation
+pub mod screen;
+
 #[cfg(test)]
-pub mod tests;
-mod util;
+mod tests;
 
 pub mod prelude {
+    pub use super::data::prelude::*;
     pub use super::data::*;
     pub use super::screen::prelude::*;
-    pub use super::util::prelude::*;
+    #[doc(hidden)]
     pub use bevy::ecs::{component::HookContext, world::DeferredWorld};
 }
 

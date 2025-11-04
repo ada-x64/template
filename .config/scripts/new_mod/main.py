@@ -6,7 +6,7 @@ from typing import cast
 # parse args
 parser = argparse.ArgumentParser(prog="update_parent_module")
 _ = parser.add_argument("module_path")
-_ = parser.add_argument("--debug", type=bool)
+_ = parser.add_argument("--debug", action="store_true")
 _ = parser.add_argument("--remove", action="store_true")
 args = parser.parse_args()
 args = cast(Args, args)

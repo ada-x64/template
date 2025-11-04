@@ -1,9 +1,12 @@
-// ------------------------------------------
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// ------------------------------------------
+//! tfw-app template.
+//! For general information on how to use this template, see the [docs] module.
+#[cfg(doc)]
+pub mod docs;
 
 pub mod framework;
+/// See [framework::screen]
 pub mod screen;
+/// See [docs::architecture#modules]
 pub mod service;
 
 mod plugin;
