@@ -1,0 +1,41 @@
+# SSH #########################################################################
+
+# The idea with this section is to sync files using a server/client protocol.
+# The server then opens the app at the specified path, assuming it has the right
+# auth. Ideally, we would just use a game stream host like Moonlight/Sunshine
+# instead, but my GPU isn't strong enough for that.
+
+[env]
+_.file = {path = ".config/.env.json", redact = true }
+
+[tools]
+sops = "latest"
+age = "latest"
+
+[tasks.rsync]
+hide = true
+usage = """
+    arg "<bin>" default="app"
+"""
+run = """
+#!/bin/bash
+rsync -avzr --progress --mkpath \
+    ./assets \
+    ./target/debug/${usage_bin} \
+    "$SSH_IP:$SSH_OUT"
+"""
+
+[tasks.play]
+raw=true
+description="Run the application (SSH)"
+usage = """
+    arg "<bin>" default="app"
+    arg "<auth>" env="auth"
+"""
+run = """
+#!/bin/bash
+mise build
+mise rsync
+JSON="\\"auth\\": \\"${usage_auth}\\",\\"path\\": \\"$SSH_OUT/${usage_bin}\\""
+curl $SSH_IP:9995 -sd "{$JSON}"
+"""
