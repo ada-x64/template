@@ -28,7 +28,7 @@ are simple Bevy [Plugins](bevy::prelude::Plugin).
 └── main.rs
 ```
 
-### Screens
+## Screens
 
 These are the equivalent of scenes or rooms in other game engines. This is not
 to be confused with Bevy's [Scene](bevy::prelude::Scene) concept, which is just
@@ -45,16 +45,29 @@ mise add screen MY_SCREEN
 For more information on how screens work, check out their
 [documentation](crate::prelude::Screen).
 
-### Services
+## Services
 
 Services are the meat of the framework. They contain modularized plugins for
 defining simulation state. In other words, they provide the functionality
-which makes the up the game itself. Note that there is really no strict
-architectural difference between services and screens, but we treat them
-as such because doing so allows us to be clear about what is state and what
-is simulation.
+which makes the up the game itself.
 
-## Modules
+While Services are simple Bevy Plugins, this may not always be the case, and
+they do come with some boilerplate. It is recommended to use the mise cli.
+
+```bash
+mise add service MY_SERVICE
+```
+
+Services are typically collections of [Observers](crate::prelude::Observer)
+alongside relevant data (such as [Components](crate::prelude::Component),
+[Resources](crate::prelude::Resource), and [Assets](crate::prelude::Asset)). In
+addition, services may wrap a [Bundle](crate::prelude::Bundle) for easy
+prefab-like spawning, and may include [Systems](crate::prelude::System) for
+relevant functionality.
+
+It is generally recommended to use observers over systems wherever possible. For the reasoning behind this, see [events_systems_scopes](./events_systems_scopes.md)
+
+### Service Modules
 
 Each module is organized like this:
 
@@ -81,16 +94,14 @@ Each module is organized like this:
 └── mod.rs
 ```
 
-Modules may have the following files:
+Service modules may have the following files:
 
 - `mod.rs` - the entrypoint. Should contain a prelude and a plugin.
 - `data.rs` - Components, Assets, and other datatypes required for the module.
     - If necessary, this can be split up.
-- `systems.rs` - Systems which run directly in schedules.
+- `systems.rs` - Systems which run directly in schedules. Prefer using observers when possible. [Message](crate::prelude::Message) handlers should go here, as well.
 - `events.rs` - Event observers.
-    - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
 - `bundle.rs` - A function which returns a bundle.
-- `state.rs` - State management. Typically handles asset loading and screen scoping.
 
 ### `mod.rs`
 
