@@ -57,6 +57,7 @@ pub struct EmptySettings;
 /// A screen's [Schedule]. All systems added to this schedule, using the
 /// [ScreenScope] below, will be scoped to this screen's lifetime. That is,
 /// they will only run when the screen is in [ScreenStatus::Ready].
+#[allow(bevy::unconventional_naming)]
 #[derive(ScheduleLabel, SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ScreenScope<T: Screen> {
     _Ghost(PhantomData<T>),

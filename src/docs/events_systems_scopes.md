@@ -1,5 +1,3 @@
-# Events, Sytems, and Scopes
-
 ## When should I use events, and when should I use systems?
 
 You should prefer to use events over sytems whenever possible.

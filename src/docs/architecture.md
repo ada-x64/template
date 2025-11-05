@@ -1,7 +1,3 @@
-# Architecture
-
-How are the modules arranged?
-
 ## Top-level architecture
 
 Generally, the crate is split between _screens_ and _services._ Screens handle
@@ -89,10 +85,10 @@ Modules may have the following files:
 
 - `mod.rs` - the entrypoint. Should contain a prelude and a plugin.
 - `data.rs` - Components, Assets, and other datatypes required for the module.
-  - If necessary, this can be split up.
+    - If necessary, this can be split up.
 - `systems.rs` - Systems which run directly in schedules.
 - `events.rs` - Event observers.
-  - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
+    - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
 - `bundle.rs` - A function which returns a bundle.
 - `state.rs` - State management. Typically handles asset loading and screen scoping.
 

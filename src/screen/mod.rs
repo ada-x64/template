@@ -15,6 +15,7 @@ pub mod prelude {
     pub use super::splash::prelude::*;
     pub use super::world::prelude::*;
 
+    #[allow(unused_imports)] // TEMP
     #[cfg(feature = "dev")]
     pub use super::dev::prelude::*;
     #[cfg(test)]
