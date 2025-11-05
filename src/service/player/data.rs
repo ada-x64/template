@@ -1,6 +1,3 @@
-// ------------------------------------------
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// ------------------------------------------
 use crate::prelude::*;
 
 pub const PLAYER_CAPSULE_HEIGHT: f32 = 3.;
