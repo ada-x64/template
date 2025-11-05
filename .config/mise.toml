@@ -143,9 +143,7 @@ run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04 {{arg(name='res
 tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
 run = """
-if [ "$1" = "all" ]
-    then cargo nextest run --workspace
-    else cargo nextest run -p "$1" "${@:2}"
+    RUST_LOG=app=debug cargo nextest run -F dev
 fi
 """
 
@@ -167,12 +165,17 @@ run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
 
 # SSH #########################################################################
 
+# The idea with this section is to sync files using a server/client protocol.
+# The server then opens the app at the specified path, assuming it has the right
+# auth. Ideally, we would just use a game stream host like Moonlight/Sunshine
+# instead, but my GPU isn't strong enough for that.
+
 [tasks.rsync]
 run = """
 if [ -n "SSH_IP" ]; then
     rsync -avzr --progress --mkpath \
         ./assets \
-        ./target/debug/app \
+        ./target/debug/{{arg(name="bin", default="app")}} \
         "$SSH_IP:$SSH_OUT"
 fi
 """
@@ -181,7 +184,7 @@ fi
 depends = ["rsync"]
 run = """
 if [ -n "SSH_IP" ]; then
-    curl $SSH_IP:9995 -sd '{"auth": "{{env.auth}}", "path": "{{env.SSH_OUT}}/app"}'
+    curl $SSH_IP:9995 -sd '{"auth": "{{env.auth}}", "path": "{{env.SSH_OUT}}/{{arg(name="bin", default="app")}}"}'
 fi
 """
 
@@ -194,7 +197,7 @@ run = """
 #!/usr/bin/bash
 if [ -z "$SSH_CLIENT" ]
     then mise run_local
-    else mise -j1 build_local ::: run_ssh
+    else mise -j1 build_local ::: run_ssh {{arg(name="bin", default="app")}}
 fi
 """
 
@@ -226,21 +229,37 @@ raw=true
 alias=['generate', 'n']
 description="Generate a new service or screen."
 tools={"cargo:cargo-generate" = "latest"}
+usage = '''
+arg "<template>" help="The template to generate." {
+    choices "screen" "service"
+}
+
+arg "<name>" help="Name of the generated module." long_help="""
+The chosen template will be output to the src directory corresponding to the
+template, postfixed with given template name. For example, calling
+'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
+"""
+
+flag "--debug" help="Enable debug output."
+'''
 run='''
 #!/usr/bin/bash
-TEMPLATE={{arg(name="template", i=0)}}
-NAME={{arg(name="name", i=1)}}
+TEMPLATE=${usage_template?}
+NAME=${usage_name?}
+DEBUG=${usage_debug:+--debug}
+
 BASENAME=$(basename $NAME)
 DESTINATION="$(realpath src/$TEMPLATE/$(dirname $NAME))"
 
-{% if flag(name="debug") == "true" %}
+if [[ -n "$DEBUG" ]]; then
 cat <<EOF
 DEBUG
-TEMPLATE=$TEMPLATE
-NAME=$NAME
-DESTINATION=$DESTINATION
+TEMPLATE="$TEMPLATE"
+NAME="$NAME"
+BASENAME="$BASENAME"
+DESTINATION="$DESTINATION"
 EOF
-{% endif %}
+fi
 
 catch_err () {
     if [ $? -ne 0 ]; then
@@ -260,9 +279,9 @@ cargo generate \
 
 catch_err
 
-uv run .config/scripts/update_parent_module.py\
+uv run .config/scripts/new_mod/main.py\
     "$DESTINATION/$BASENAME"\
-    --debug={{flag(name="debug")}};
+    "$DEBUG"
 
 catch_err
 
@@ -273,19 +292,35 @@ cargo fmt -- -l;
 [tasks.delete]
 alias=['del', 'd']
 description="Remove a generated service or screen"
+usage = '''
+arg "<template>" help="The template to remove." {
+    choices "screen" "service"
+}
+
+arg "<name>" help="Name of the generated module." long_help="""
+The chosen template will be removed from the src directory corresponding to the
+template, postfixed with given template name. For example, calling
+'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
+"""
+
+flag "--debug" help="Enable debug output."
+'''
 run='''
 #!/usr/bin/bash
 set -e
-TEMPLATE={{arg(name="template", i=0)}}
-NAME={{arg(name="name", i=1)}}
+TEMPLATE=${usage_template?}
+NAME=${usage_name?}
 DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
+DEBUG=${usage_debug:+--debug}
 
-rm -r $DESTINATION
-
-uv run .config/scripts/update_parent_module.py\
+uv run .config/scripts/new_mod/main.py\
     "$DESTINATION" \
     --remove \
-    --debug={{flag(name="debug")}}
+    $DEBUG
+
+set -x
+rm -r $DESTINATION
+set +x
 
 echo "[INFO] Formatting ..."
 cargo fmt -- -l;

@@ -26,7 +26,7 @@ pub fn spawn_worldgen_root(
         GlobalTransform::IDENTITY,
         Visibility::Hidden,
         Name::new("WorldgenRoot"),
-        StateScoped(ScreenStates::InWorld),
+        ScreenScoped,
         children![(
             Name::new("World Mesh"),
             // Collider::convex_hull_from_mesh(meshes.get(&assets.mesh).unwrap()).unwrap(),

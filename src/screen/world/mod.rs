@@ -1,13 +1,10 @@
-// ------------------------------------------
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// ------------------------------------------
 use crate::prelude::*;
 
-mod data;
 mod state;
 mod systems;
+
 pub mod prelude {
-    pub use super::data::*;
+    pub use super::systems::WorldScreen;
 }
 
 pub fn plugin(app: &mut App) {

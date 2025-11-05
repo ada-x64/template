@@ -1,11 +1,17 @@
 use crate::prelude::*;
 
-/// Loading is handled within the individual screens.
-#[derive(States, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect, Default)]
-pub enum ScreenStates {
-    // #[cfg_attr(not(feature="dev"), default)]
+/// Enumeration of all screens within the app.
+/// Screens represent "sub-simulations" which scope
+/// systems, events, and entites. See the docs
+/// for more info.
+#[derive(Default, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect)]
+pub enum Screens {
+    #[default]
     Splash,
     MainMenu,
-    #[default] // #[cfg_attr(feature="dev", default)]
-    InWorld,
+    World,
+    #[cfg(test)]
+    NamedEntity,
+    #[cfg(test)]
+    Empty,
 }

@@ -27,6 +27,6 @@ fn update_controller(
     });
 }
 
-pub fn plugin(app: &mut App) {
-    app.add_systems(FixedUpdate, (update_controller).in_set(PlayerSystems));
+pub fn systems() -> ServiceSystems {
+    ServiceSystems::new(update_controller)
 }
