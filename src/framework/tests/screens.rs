@@ -95,7 +95,6 @@ fn observer_cleanup() {
             },
         },));
 
-        log_hierarchy(app);
         {
             app.world_mut().spawn((
                 Name::new("Parent"),
@@ -107,6 +106,7 @@ fn observer_cleanup() {
                 )],
             ));
         }
+        log_hierarchy(app);
         assert!(find_entity(app, "Parent"));
         assert!(find_entity(app, "Child"));
 

@@ -3,6 +3,7 @@ use bevy::{
     core_pipeline::CorePipelinePlugin,
     diagnostic::FrameCountPlugin,
     log::LogPlugin,
+    mesh::MeshPlugin,
     pbr::PbrPlugin,
     prelude::*,
     render::{
@@ -114,6 +115,7 @@ impl Runner {
                 },
                 ImagePlugin::default(),
                 CorePipelinePlugin,
+                MeshPlugin,
                 PbrPlugin {
                     prepass_enabled: false,
                     add_default_deferred_lighting_plugin: false,
