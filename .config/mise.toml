@@ -98,7 +98,12 @@ run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04"
 [tasks.test]
 tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
-run = "RUST_LOG=app=debug cargo nextest run -F dev"
+usage = """
+    flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
+"""
+run = """
+    RUST_LOG=${usage_rust_log?} cargo nextest run -F dev
+"""
 
 # LOCAL #######################################################################
 
