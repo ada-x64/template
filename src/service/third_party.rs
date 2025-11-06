@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{AppSettings, prelude::*};
 
 pub mod prelude {
     pub use avian3d::prelude::*;
@@ -14,11 +14,15 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
-    // third-party
+    let settings = app.world().resource::<AppSettings>();
+    if settings.use_physics {
+        app.add_plugins((
+            avian3d::PhysicsPlugins::default(),
+            TnuaControllerPlugin::new(FixedUpdate),
+            bevy_tnua_avian3d::TnuaAvian3dPlugin::new(FixedUpdate),
+        ));
+    }
     app.add_plugins((
-        avian3d::PhysicsPlugins::default(),
-        TnuaControllerPlugin::new(FixedUpdate),
-        bevy_tnua_avian3d::TnuaAvian3dPlugin::new(FixedUpdate),
         EnhancedInputPlugin,
         #[cfg(not(test))]
         bevy_rich_text3d::Text3dPlugin::default(),

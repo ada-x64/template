@@ -6,6 +6,7 @@ fn screen_transitions() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::Empty,
+                ..Default::default()
             },
         },));
 
@@ -40,6 +41,7 @@ fn persistent_entities() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::NamedEntity,
+                ..Default::default()
             },
         },));
         {
@@ -89,9 +91,9 @@ fn observer_cleanup() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::Empty,
+                ..Default::default()
             },
-        },))
-            .init_resource::<Count>();
+        },));
 
         log_hierarchy(app);
         {

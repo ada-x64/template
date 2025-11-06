@@ -1,14 +1,5 @@
-# ------------------------------------------
-# SPDX-License-Identifier: MIT OR Apache-2.0
-# ------------------------------------------
 [env]
-_.file = {path = ".config/.env.json", redact = true}
-SSH_IP = "{{ exec(command=\"echo $SSH_CLIENT | cut -d' ' -f1\") }}"
-SSH_PORT = "{{ exec(command=\"echo $SSH_CLIENT | cut -d' ' -f3\") }}"
-PATH_HASH = "{{exec(command=\"echo $PWD | cksum | cut -d' ' -f1\")}}"
-SSH_OUT = "~/.local/share/rsync/{{env.PATH_HASH}}"
-FEATURES = "{% if env.SSH_IP %}'dev'{% else %}'dev dylib'{% endif %}"
-CARGO_TERM_COLOR = "always"
+_.source = ".config/env.sh"
 
 [tools]
 "mold" = "latest"
@@ -44,84 +35,49 @@ cargo deny --workspace \
     --hide-inclusion-graph
 """
 
-[tasks."check:headers"]
-alias = "check-headers"
-depends = ["fix:headers --fail-on-fix"]
-
 [tasks.bevy_lint]
 hide = true
 depends = ["install_bevy_lint"]
+usage = """
+    arg "<pkg>" var=#true default=app
+    flag "--fix"
+"""
 run = """
-    # bevy_lint
-
-    # TEMP: Disable sccache in ci
-    if [ -n $CI ];
-        then RUSTC_WRAPPER=""
-        else
-            RUSTC_WRAPPER="sccache"
-            CARGO=$(rustup which --toolchain nightly-2025-06-26 cargo) bevy_lint
-    fi
-    if [ '{{flag(name="fix")}}' = 'true' ]
-        then FIX=" --fix";
-    fi
-
-    bevy_lint --locked --all-features \
-        $FIX \
-        {{arg(name="package", var=true)}};
+RUSTC_WRAPPER="sccache"
+CARGO=$(rustup which --toolchain nightly-2025-06-26 cargo) bevy_lint
+FIX=${usage_fix:+--fix}
+bevy_lint --locked --all-features \
+    $FIX -p ${usage_pkg}
 """
 
 [tasks.clippy]
 hide = true
+usage = """
+    arg "<pkg>" var=#true default=app
+    flag "--fix"
+"""
 run = """
-# clippy
-
-# TEMP: Disable sccache in ci
-if [ -n $CI ];
-    then RUSTC_WRAPPER="";
-    else RUSTC_WRAPPER="sccache"
-fi
-if [ '{{flag(name="fix")}}' = 'true' ];
-    then FIX=" --fix";
-fi
-
+RUSTC_WRAPPER="sccache"
+FIX=${usage_fix:+--fix}
 cargo --color=always clippy --locked --all-features \
-    $FIX \
-    {{arg(name="package", var=true)}};
+    $FIX -p ${usage_pkg}
 """
 
 [tasks.check]
+description = "Lint package(s) with Clippy and bevy_lint. (Default: app)"
 alias = "check-app"
-depends = ["clippy -p app", "bevy_lint -p app"]
 sources = ["src"]
+usage = """
+    arg "<pkg>" var=#true default=app
+"""
+raw = true
+run = """
+mise clippy -p ${usage_pkg}
+mise bevy_lint -p ${usage_pkg}
+"""
 
 
 ## FIXES ######################################################################
-
-[tasks."fix:headers"]
-alias = "fix-headers"
-tools = { "uv" = "latest", "pipx:add_header_comment" = "latest" }
-description = "Check file headers"
-run = """
-# Checking headers
-
-if [ '{{flag(name="fail-on-fix")}}' = 'true' ]
-    then FAIL_ON_FIX=" --fail-on-fix";
-fi
-
-HEADER_PATH=".config/header.txt"
-
-shopt -s globstar
-
-uv run add-header-comment --header-filepath $HEADER_PATH \
-    $FAIL_ON_FIX \
-    ./.config/*.toml \
-    ./*.toml;
-
-uv run add-header-comment --header-filepath $HEADER_PATH\
-    $FAIL_ON_FIX \
-    --comment-style='//' \
-    src/**/*.rs;
-"""
 
 [tasks."fix:rust"]
 alias = "fix-rust"
@@ -130,99 +86,54 @@ depends = ["check --fix"]
 
 [tasks.fix]
 description = "Fix all fixable issues."
-depends = ["fix:rust", "fix:headers"]
+depends = ["fix:rust"]
 
 ## BUILD AND DEPLOY ###########################################################
 
 [tasks.ci]
 tools = { "act" = "latest" }
 description = "Test CI locally with nektos/act"
-run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04 {{arg(name='rest', default='--', var=true)}}"
+run = "act -P ubuntu-24.04=ghcr.io/catthehacker/ubuntu:act-24.04"
 
 [tasks.test]
 tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
+usage = """
+    flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
+"""
 run = """
-    RUST_LOG=app=debug cargo nextest run -F dev
-fi
+    RUST_LOG=${usage_rust_log?} cargo nextest run -F dev
 """
 
 # LOCAL #######################################################################
-
-[tasks.run_local]
-env = { "RUSTC_WRAPPER" = "sccache" }
-tools = { "sccache" = "latest" }
-run = "cargo run --bin {{arg(name='binary', default='app')}} {{arg(name='rustc-opts', var=true, default='--')}}"
-
-[tasks.build_local]
-env = { "RUSTC_WRAPPER" = "sccache" }
-tools = { "sccache" = "latest" }
-run = "cargo build --features {{env.FEATURES}} --bin {{arg(name='binary', default='app')}} {{arg(name='rustc-opts', var=true, default='--')}}"
-
-[tasks.play_local]
-run = "cargo run --bin app {{arg(name='inputs', var=true, default='-F dev')}}"
-
-
-# SSH #########################################################################
-
-# The idea with this section is to sync files using a server/client protocol.
-# The server then opens the app at the specified path, assuming it has the right
-# auth. Ideally, we would just use a game stream host like Moonlight/Sunshine
-# instead, but my GPU isn't strong enough for that.
-
-[tasks.rsync]
-run = """
-if [ -n "SSH_IP" ]; then
-    rsync -avzr --progress --mkpath \
-        ./assets \
-        ./target/debug/{{arg(name="bin", default="app")}} \
-        "$SSH_IP:$SSH_OUT"
-fi
-"""
-
-[tasks.run_ssh]
-depends = ["rsync"]
-run = """
-if [ -n "SSH_IP" ]; then
-    curl $SSH_IP:9995 -sd '{"auth": "{{env.auth}}", "path": "{{env.SSH_OUT}}/{{arg(name="bin", default="app")}}"}'
-fi
-"""
-
-# LOCAL #######################################################################
-
-[tasks.run]
-description = "Run the specified workspace binary"
-raw = true
-run = """
-#!/usr/bin/bash
-if [ -z "$SSH_CLIENT" ]
-    then mise run_local
-    else mise -j1 build_local ::: run_ssh {{arg(name="bin", default="app")}}
-fi
-"""
 
 [tasks.build]
-description = "Build the specified workspace binary"
-raw = true
-run = """
-#!/usr/bin/bash
-if [ -z "$SSH_CLIENT" ]
-    then mise build_local
-    else mise -j1 build_local ::: rsync
-fi
+description = "Build the specified workspace binary. (Default: 'app')"
+env = { "RUSTC_WRAPPER" = "sccache" }
+tools = { "sccache" = "latest" }
+usage = """
+    arg "<bin>" default="app"
+    arg "[rustc_opts]" var=#true
 """
-
+run = "cargo build --features $FEATURES --bin ${usage_bin} -- ${usage_rustc_opts}"
 
 [tasks.play]
-description = "Play the game"
-raw = true
-run = """
-#!/usr/bin/bash
-if [ -z "$SSH_CLIENT" ]
-    then mise play_local
-    else mise -j1 build_local ::: run_ssh
-fi
+description = "Run the specified workspace binary. (Default: 'app')"
+usage = """
+    arg "<bin>" default="app"
+    arg "[rest]" var=#true default="--features $FEATURES"
 """
+run = "cargo run --bin ${usage_bin} ${usage_rest}"
+
+# LOCAL #######################################################################
+
+# to be executed in the local environment
+[tasks.listen]
+description = "Run a local server to listen for rsync'd application files."
+raw = true
+run = "uv run .config/scripts/listen.py"
+
+# GENERATION ##################################################################
 
 [tasks.new]
 raw=true

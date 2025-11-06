@@ -74,7 +74,7 @@ pub fn find_entity_filtered<F: QueryFilter>(app: &mut App, name: impl ToString) 
         .any(|ename| (**ename).eq(&name.to_string()))
 }
 /// Searches for an entity with the given [Name] and component C.
-pub fn find_entity_with<C: Component + PartialEq>(
+pub fn _find_entity_with<C: Component + PartialEq>(
     app: &mut App,
     name: impl ToString,
     value: C,
@@ -83,6 +83,3 @@ pub fn find_entity_with<C: Component + PartialEq>(
     q.iter(app.world())
         .any(|(ename, c)| (**ename).eq(&name.to_string()) && *c == value)
 }
-
-#[derive(Resource, Debug, Default)]
-pub struct Count(pub u32);

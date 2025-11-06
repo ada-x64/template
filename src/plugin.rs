@@ -3,9 +3,29 @@ use crate::prelude::*;
 /// Allows for configuration of the application. When the "dev" feature is set,
 /// this should be handled via command line arguments. Otherwise, it is kept as the
 /// default value.
-#[derive(Resource, Default, Clone, Debug)]
+#[derive(Resource, Clone, Debug)]
 pub struct AppSettings {
     pub initial_screen: Screens,
+    pub use_physics: bool,
+}
+#[allow(clippy::derivable_impls)]
+impl Default for AppSettings {
+    fn default() -> Self {
+        #[cfg(not(test))]
+        {
+            Self {
+                initial_screen: Default::default(),
+                use_physics: true,
+            }
+        }
+        #[cfg(test)]
+        {
+            Self {
+                initial_screen: Default::default(),
+                use_physics: false,
+            }
+        }
+    }
 }
 
 /// The main exported plugin for the application.
