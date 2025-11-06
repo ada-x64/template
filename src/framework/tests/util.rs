@@ -57,7 +57,8 @@ pub fn switch_screen(app: &mut App, screen: Screens) {
     log_hierarchy(app);
 }
 
-/// Searches for an entity with the given [Name] component
+/// Searches for an entity with the given [Name] component.
+/// This _will not_ show entities marked with [Internal], including Observers.
 pub fn find_entity(app: &mut App, name: impl ToString) -> bool {
     let mut q = app.world_mut().query::<(Entity, &Name)>();
     q.iter(app.world()).for_each(|(entity, ename)| {

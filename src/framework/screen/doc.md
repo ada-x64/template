@@ -12,7 +12,7 @@ understanding.
 | Screen        | A type of world-state which can help determine behavior.                                                                   |
 | Screen-scoped | This entity will be despawned when the screen changes.                                                                     |
 | Persistent    | This entity will _not_ be despawned when the screen changes.                                                               |
-| Propogate     | A propogating component will descend the parent/child hierarchy and clone its inner component onto its recursive children. |
+| Propagate     | A propogating component will descend the parent/child hierarchy and clone its inner component onto its recursive children. |
 | Top-level     | An entity without any parents.                                                                                             |
 
 By default, all entities are screen-scoped. This means that, whenever the screen
