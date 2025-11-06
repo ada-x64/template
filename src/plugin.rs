@@ -3,9 +3,18 @@ use crate::prelude::*;
 /// Allows for configuration of the application. When the "dev" feature is set,
 /// this should be handled via command line arguments. Otherwise, it is kept as the
 /// default value.
-#[derive(Resource, Default, Clone, Debug)]
+#[derive(Resource, Clone, Debug)]
 pub struct AppSettings {
     pub initial_screen: Screens,
+    pub use_physics: bool,
+}
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            initial_screen: Default::default(),
+            use_physics: true,
+        }
+    }
 }
 
 /// The main exported plugin for the application.

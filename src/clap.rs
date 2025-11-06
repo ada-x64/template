@@ -39,5 +39,8 @@ pub fn parse_args() -> AppSettings {
         })
         .unwrap_or_default();
 
-    AppSettings { initial_screen }
+    AppSettings {
+        initial_screen,
+        ..Default::default()
+    }
 }

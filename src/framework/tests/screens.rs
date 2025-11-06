@@ -6,6 +6,7 @@ fn screen_transitions() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::Empty,
+                use_physics: false,
             },
         },));
 
@@ -40,6 +41,7 @@ fn persistent_entities() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::NamedEntity,
+                use_physics: false,
             },
         },));
         {
@@ -89,6 +91,7 @@ fn observer_cleanup() {
         app.add_plugins((AppPlugin {
             settings: AppSettings {
                 initial_screen: Screens::Empty,
+                use_physics: false,
             },
         },))
             .init_resource::<Count>();
