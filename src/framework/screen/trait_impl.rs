@@ -1,4 +1,3 @@
-use bevy::ecs::{component::HookContext, system::FunctionSystem, world::DeferredWorld};
 #[allow(unused_imports, reason = "used for docs")]
 use bevy::{
     app::{FixedMain, FixedMainScheduleOrder, MainScheduleOrder},
@@ -35,7 +34,7 @@ pub trait Screen:
 
     /// Called when the screen is about to unload.
     /// Use this to perform any necessary cleanup before the screen transitions.
-    fn unload() -> Option<impl System<In = (), Out = ()>> {
-        None::<FunctionSystem<fn(), fn()>>
+    fn unload() -> impl System<In = (), Out = ()> {
+        IntoSystem::into_system(|| {})
     }
 }

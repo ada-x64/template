@@ -76,19 +76,22 @@ pub enum ScreenLoadingState<T: Screen> {
 }
 
 /// Scopes an entity to the current screen. The entity will be cleaned up when
-/// the [Screens] state changes. By default, all entities _except_ top-level
-/// observers are automatically marked for cleanup.
+/// the [Screens] state changes. By default, all entities _except_ those listed
+/// in the [module documentation](crate::framework::screen) are screen-scoped.
 ///
-/// Note that _children of this entity will not automatically be marked [Persistent]._
-/// In order to propogate persistence, use the [Propogate] component.
+/// Note: This is effectively used to stop the downward propagation of the
+/// [Persistent] component. Since screen scoping is the default behavior, it
+/// should not be necessary to add this component in other cases.
 #[derive(Component, Debug, Reflect, Clone, Copy, Default)]
 pub struct ScreenScoped;
 
 /// Marks an entity as screen-persistent, i.e., this entity will _not_ be
-/// automatically cleaned up when the screen changes. By default, all entities
-/// _except_ top-level [Observer]s and the [Window] are automtically marked for cleanup.
+/// automatically cleaned up when the screen changes. By default, all entites
+/// _except_ those listed in the [module
+/// documentation](crate::framework::screen) are screen-scoped.
 ///
-/// Note that _children of this entity will not automatically be marked [Persistent]._
-/// In order to propogate persistence, use the [Propogate] component.
+/// The children of this entity will _also_ be marked as [Persistent]. In order
+/// to stop downward propogation of this component, use the [ScreenScoped]
+/// component.
 #[derive(Component, Debug, Reflect, Clone, Copy, Default)]
 pub struct Persistent;

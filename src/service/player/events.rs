@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 // TODO: Split this out into a bundle
 fn spawn_player_root(
-    _: Trigger<SpawnPlayerRoot>,
+    _: On<SpawnPlayerRoot>,
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
     mut camera_list: ResMut<CameraList>,
@@ -56,7 +56,7 @@ fn spawn_player_root(
     camera_list.push(cam);
 }
 
-fn on_move(trigger: Trigger<Fired<PAMove>>, mut controller: Single<&mut PlayerController>) {
+fn on_move(trigger: On<Fire<PAMove>>, mut controller: Single<&mut PlayerController>) {
     controller.last_move = Some(trigger.value);
 }
 

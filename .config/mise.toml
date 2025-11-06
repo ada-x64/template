@@ -46,7 +46,7 @@ run = """
 RUSTC_WRAPPER="sccache"
 CARGO=$(rustup which --toolchain nightly-2025-06-26 cargo) bevy_lint
 FIX=${usage_fix:+--fix}
-bevy_lint --locked --all-features \
+bevy_lint --locked --all-features --target-dir=target/bevy_lint \
     $FIX -p ${usage_pkg}
 """
 
@@ -59,7 +59,7 @@ usage = """
 run = """
 RUSTC_WRAPPER="sccache"
 FIX=${usage_fix:+--fix}
-cargo --color=always clippy --locked --all-features \
+cargo --color=always clippy --locked --all-features --target-dir=target/clippy \
     $FIX -p ${usage_pkg}
 """
 
@@ -72,8 +72,7 @@ usage = """
 """
 raw = true
 run = """
-mise clippy -p ${usage_pkg}
-mise bevy_lint -p ${usage_pkg}
+mise clippy -p ${usage_pkg} ::: bevy_lint -p ${usage_pkg}
 """
 
 

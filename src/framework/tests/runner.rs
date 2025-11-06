@@ -3,6 +3,7 @@ use bevy::{
     core_pipeline::CorePipelinePlugin,
     diagnostic::FrameCountPlugin,
     log::LogPlugin,
+    mesh::MeshPlugin,
     pbr::PbrPlugin,
     prelude::*,
     render::{
@@ -93,6 +94,7 @@ impl Runner {
                         desired_maximum_frame_latency: None,
                         ..Default::default()
                     }),
+                    primary_cursor_options: None,
                     close_when_requested: true,
                     exit_condition: ExitCondition::OnPrimaryClosed,
                 },
@@ -113,6 +115,7 @@ impl Runner {
                 },
                 ImagePlugin::default(),
                 CorePipelinePlugin,
+                MeshPlugin,
                 PbrPlugin {
                     prepass_enabled: false,
                     add_default_deferred_lighting_plugin: false,
@@ -126,7 +129,7 @@ impl Runner {
             let timeout = self.timeout;
             app.add_systems(
                 Update,
-                move |time: Res<Time<Real>>, mut events: EventWriter<AppExit>| {
+                move |time: Res<Time<Real>>, mut events: MessageWriter<AppExit>| {
                     let elapsed = time.elapsed_secs();
                     if elapsed > timeout {
                         error!("Timeout after {elapsed}s");

@@ -1,3 +1,5 @@
+use bevy::ecs::entity_disabling::Internal;
+
 use crate::{AppPlugin, AppSettings, framework::tests::*, prelude::*};
 
 #[test]
@@ -49,12 +51,12 @@ fn persistent_entities() {
             settings.entity_name = "1".into();
             app.world_mut().spawn((
                 Name::new("Persistent"),
-                Propogate(Persistent),
+                Propagate(Persistent),
                 children![(
                     Name::new("Child"),
                     children![(
                         Name::new("Grandchild"),
-                        BlockPropogation::<Persistent>::default(),
+                        BlockPropagation::<Persistent>::default(),
                         children![Name::new("Great Grandchild")]
                     )]
                 )],
@@ -84,7 +86,12 @@ fn persistent_entities() {
     .run();
 }
 
-// Child observers should be removed, but top-level observers should remain.
+#[derive(Component)]
+struct Empty;
+
+/// Child observers should be removed, but top-level observers should remain.
+/// NOTE: Child observers _probably_ shouldn't exist. This functionality has been
+/// replaced with [EntityEvent]
 #[test]
 fn observer_cleanup() {
     Runner::new(|app| {
@@ -95,24 +102,25 @@ fn observer_cleanup() {
             },
         },));
 
-        log_hierarchy(app);
         {
             app.world_mut().spawn((
                 Name::new("Parent"),
                 children![(
                     Name::new("Child"),
-                    Observer::new(|trigger: Trigger<SwitchToScreen>| {
+                    Observer::new(|trigger: On<SwitchToScreen>| {
                         info!("Observer ({:?})", *trigger)
-                    })
+                    }),
+                    Empty
                 )],
             ));
         }
+        log_hierarchy(app);
         assert!(find_entity(app, "Parent"));
-        assert!(find_entity(app, "Child"));
+        assert!(find_entity_filtered::<Allow<Internal>>(app, "Child"));
 
         switch_screen(app, Screens::NamedEntity);
         assert!(!find_entity(app, "Parent"));
-        assert!(!find_entity(app, "Child"));
+        assert!(!find_entity_filtered::<Allow<Internal>>(app, "Child"));
         AppExit::Success
     })
     .run();

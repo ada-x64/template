@@ -1,6 +1,3 @@
-# ------------------------------------------
-# SPDX-License-Identifier: MIT OR Apache-2.0
-# ------------------------------------------
 [package]
 name = "app"
 version = "0.1.0"
@@ -46,28 +43,27 @@ inherits = "dev"
 inherits = "dev"
 
 [dependencies]
-bevy = {version = "0.16.1", features=["bevy_dev_tools"] }
-tiny_bail = "0.5.0"
+# bevy
+bevy = { version="0.17", features=["bevy_dev_tools"]}
+bevy_enhanced_input = "0.19"
+bevy_asset_loader = "0.24.0-rc.1"
+bevy_mod_debugdump = { optional = true, version = "0.14" }
+avian3d = "0.4"
+bevy-tnua = "0.26"
+bevy-tnua-avian3d = "0.7"
+bevy_rich_text3d = "0.5"
+bevy-inspector-egui = { optional = true, version = "0.35" }
+
+# not bevy
+tiny_bail = "0.7"
 itertools = "0.14.0"
 thiserror = "2.0.12"
-bevy_enhanced_input = "0.18.0"
-bevy_asset_loader = "0.23.0"
-bevy_mod_debugdump = { optional = true, version = "0.13.0" }
-bevy_simple_subsecond_system = { optional = true, version = "0.2.0" }
-iyes_perf_ui = "0.5.0"
-bevy_minibuffer = { optional = true, version = "0.4.1" }
-bevy-inspector-egui = { optional = true, version = "0.31" }
-avian3d = "0.3.1"
-bevy-tnua = "0.25.0"
-bevy-tnua-avian3d = "0.6.0"
 bitflags = "2.9.3"
 serde = { version = "1.0.219", features = ["derive"] }
 anyhow = "1.0.99"
-bevy_rich_text3d = "0.4.2"
 strum = { version = "0.27.2", features = ["derive"] }
 clap = { version = "4.5.50", features = ["derive"], optional = true }
 variadics_please = "1.1.0"
-wgpu = "24"
 
 [build-dependencies]
 built = {version = "0.8.0", features=["chrono"]}
@@ -75,9 +71,7 @@ built = {version = "0.8.0", features=["chrono"]}
 [features]
 dev = [
     "dep:bevy_mod_debugdump",
-    "dep:bevy_simple_subsecond_system", # Replace with official in 0.17
-    "dep:bevy-inspector-egui",          # TODO Replace with Aalo
-    "dep:bevy_minibuffer",
+    "dep:bevy-inspector-egui",
     "dep:clap",
 ]
 dylib = ["bevy/dynamic_linking"]

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use bevy::ecs::{component::HookContext, world::DeferredWorld};
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
 pub struct NamedEntityScreenSettings {

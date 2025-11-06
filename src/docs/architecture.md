@@ -28,7 +28,7 @@ are simple Bevy [Plugins](bevy::prelude::Plugin).
 └── main.rs
 ```
 
-### Screens
+## Screens
 
 These are the equivalent of scenes or rooms in other game engines. This is not
 to be confused with Bevy's [Scene](bevy::prelude::Scene) concept, which is just
@@ -45,16 +45,31 @@ mise add screen MY_SCREEN
 For more information on how screens work, check out their
 [documentation](crate::prelude::Screen).
 
-### Services
+## Services
 
 Services are the meat of the framework. They contain modularized plugins for
 defining simulation state. In other words, they provide the functionality
-which makes the up the game itself. Note that there is really no strict
-architectural difference between services and screens, but we treat them
-as such because doing so allows us to be clear about what is state and what
-is simulation.
+which makes the up the game itself.
 
-## Modules
+While Services are simple Bevy Plugins, this may not always be the case, and
+they do come with some boilerplate. It is recommended to use the mise cli.
+
+```bash
+mise add service MY_SERVICE
+```
+
+Services are typically collections of [Observers](crate::prelude::Observer)
+alongside relevant data (such as [Components](crate::prelude::Component),
+[Resources](crate::prelude::Resource), and [Assets](crate::prelude::Asset)). In
+addition, services may wrap a [Bundle](crate::prelude::Bundle) for easy
+prefab-like spawning, and may include [Systems](crate::prelude::System) for
+relevant functionality.
+
+It is generally recommended to use observers over systems wherever possible. For
+the reasoning behind this, see
+[events_systems_scopes](crate::docs::events_systems_scopes).
+
+### Service Modules
 
 Each module is organized like this:
 
@@ -81,16 +96,16 @@ Each module is organized like this:
 └── mod.rs
 ```
 
-Modules may have the following files:
+Service modules may have the following files:
 
 - `mod.rs` - the entrypoint. Should contain a prelude and a plugin.
 - `data.rs` - Components, Assets, and other datatypes required for the module.
-    - If necessary, this can be split up.
-- `systems.rs` - Systems which run directly in schedules.
+  - If necessary, this can be split up.
+- `systems.rs` - Systems which run directly in schedules. Prefer using observers
+  when possible. [Message](crate::prelude::Message) handlers should go here, as
+  well.
 - `events.rs` - Event observers.
-    - NOTE: Buffered event handling should go in `systems.rs`, as it involves updating at a particular schedule.
 - `bundle.rs` - A function which returns a bundle.
-- `state.rs` - State management. Typically handles asset loading and screen scoping.
 
 ### `mod.rs`
 
@@ -183,6 +198,9 @@ pub mod prelude {
 You can think of bundles as something like a prefab in Unity or an actor in
 Unreal.
 
+_Note: When [next gen scenes](https://github.com/bevyengine/bevy/pull/20158)
+land, this will likely be replaced with a `scene` module._
+
 ### `events.rs`
 
 This should include every observer event. Note that before 0.17, `Message`s were
@@ -231,7 +249,8 @@ pub fn systems() -> ServiceSystems {
 
 ### `state.rs`
 
-Handles states, like asset loading. When possible, **services should not have state.**
+Handles states, like asset loading. When possible, **services should not have
+state.**
 
 ```rust
 // state.rs
@@ -251,6 +270,8 @@ You may be tempted to set up system scopes within a service. Do not do this!
 Only call `app.config_sets` within `state.rs` - i.e., within a screen module.
 
 ## Special modules
+
+### Third-party Crates
 
 Outside of services and screens, we need to integrate with third-party modules
 and create an application.
@@ -276,6 +297,12 @@ pub fn plugin(app: &mut App) {
 }
 ```
 
+### The Application Module
+
 And finally, we have the standard `lib.rs` and `main.rs`. `lib.rs` simply
 exposes the `ScreenPlugin` and `ServicesPlugin` as well as the prelude.
 `main.rs` adds them all and runs the application.
+
+Additionally, we have a top-level `plugin` and `clap` module in order to handle
+[AppSettings](crate::plugin::AppSettings) and [command line
+arguments](crate::docs::cli) for development.

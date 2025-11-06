@@ -42,10 +42,7 @@ pub fn log_hierarchy(app: &mut App) {
         extra_state: &mut (),
     };
 
-    let mut root_query = h
-        .world
-        .query_filtered::<Entity, (Without<ChildOf>, Without<Observer>)>();
-
+    let mut root_query = h.world.query_filtered::<Entity, Without<ChildOf>>();
     let entities: Vec<_> = root_query.iter(h.world).collect();
     let mut output = String::new();
     log_hierarchy_inner(app, &mut output, entities, 0);
@@ -60,11 +57,15 @@ pub fn switch_screen(app: &mut App, screen: Screens) {
     log_hierarchy(app);
 }
 
-/// Searches for an entity with the given [Name] component
+/// Searches for an entity with the given [Name] component.
+/// This _will not_ show entities marked with [Internal], including Observers.
 pub fn find_entity(app: &mut App, name: impl ToString) -> bool {
-    let mut q = app.world_mut().query::<&Name>();
+    let mut q = app.world_mut().query::<(Entity, &Name)>();
+    q.iter(app.world()).for_each(|(entity, ename)| {
+        debug!("found entity '{ename}' ({entity:?})");
+    });
     q.iter(app.world())
-        .any(|ename| (**ename).eq(&name.to_string()))
+        .any(|(_, ename)| (**ename).eq(&name.to_string()))
 }
 
 /// Searches for an entity with the given [Name] component

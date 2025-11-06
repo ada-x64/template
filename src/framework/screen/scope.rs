@@ -96,17 +96,10 @@ where
         }
 
         app.add_schedule(Schedule::new(UnloadSchedule::<S>::default()));
-        if let Some(unload) = S::unload() {
-            app.add_systems(
-                UnloadSchedule::<S>::default(),
-                (unload, on_finish_unload).run_if(in_state(CurrentScreen(S::NAME))),
-            );
-        } else {
-            app.add_systems(
-                UnloadSchedule::<S>::default(),
-                on_finish_unload.run_if(in_state(CurrentScreen(S::NAME))),
-            );
-        }
+        app.add_systems(
+            UnloadSchedule::<S>::default(),
+            (S::unload(), on_finish_unload).run_if(in_state(CurrentScreen(S::NAME))),
+        );
     }
 }
 
@@ -125,7 +118,7 @@ struct UnloadSchedule<T: Screen>(PhantomData<T>);
 // Unfortunately, it seems impossible to convert from Screens to impl Screen
 // (Screen is not dyn compatible)
 fn on_switch_screen<T: Screen>(
-    trigger: Trigger<SwitchToScreen>,
+    trigger: On<SwitchToScreen>,
     mut commands: Commands,
     current_screen: Res<State<CurrentScreen>>,
     mut next_screen: ResMut<NextScreen>,

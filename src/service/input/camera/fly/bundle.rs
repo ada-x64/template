@@ -1,5 +1,4 @@
 pub use crate::prelude::*;
-use bevy::render::view::RenderLayers;
 
 /// Don't forget to register this in the CameraList.
 pub fn flycam_bundle() -> impl Bundle {

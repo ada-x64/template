@@ -1,5 +1,3 @@
-use bevy::ecs::{component::HookContext, world::DeferredWorld};
-
 use crate::prelude::*;
 
 /// Tracking camera. Will follow the given entity. Will spawn a CameraController on add.

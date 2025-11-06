@@ -1,10 +1,10 @@
-use bevy::window::CursorGrabMode;
+use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 
 use crate::prelude::*;
 
 fn on_capture_cursor(
-    _: Trigger<Completed<PACaptureCursor>>,
-    mut window: Single<&mut Window>,
+    _: On<Complete<PACaptureCursor>>,
+    mut cursor: Single<&mut CursorOptions, With<PrimaryWindow>>,
     mut commands: Commands,
     ictx_cam_default: Query<
         // TODO: Replace with generic CameraController so we can toggle controllers separately from views
@@ -22,8 +22,8 @@ fn on_capture_cursor(
         ),
     >,
 ) {
-    window.cursor_options.visible = false;
-    window.cursor_options.grab_mode = CursorGrabMode::Locked;
+    cursor.visible = false;
+    cursor.grab_mode = CursorGrabMode::Locked;
     {
         // switch based on active camera
         if let Ok((ictx, cam)) = ictx_cam_default.single() {
@@ -39,15 +39,15 @@ fn on_capture_cursor(
     }
 }
 fn on_release_cursor(
-    _: Trigger<Completed<PAReleaseCursor>>,
-    mut window: Single<&mut Window>,
+    _: On<Complete<PAReleaseCursor>>,
+    mut cursor: Single<&mut CursorOptions, With<PrimaryWindow>>,
     mut commands: Commands,
     ictx_cam_default: Query<Entity, With<ContextActivity<ICtxTrackingCam>>>,
     #[cfg(feature = "dev")] ictx_flycam: Query<Entity, With<ContextActivity<FlyCam>>>,
 ) {
     debug!("release_mouse");
-    window.cursor_options.visible = true;
-    window.cursor_options.grab_mode = CursorGrabMode::None;
+    cursor.visible = true;
+    cursor.grab_mode = CursorGrabMode::None;
     if let Ok(ictx_default) = ictx_cam_default.single() {
         commands
             .entity(ictx_default)
@@ -63,7 +63,7 @@ fn on_release_cursor(
     }
 }
 
-fn spawn_cursor_capture(_trigger: Trigger<SpawnCursorCapture>, mut commands: Commands) {
+fn spawn_cursor_capture(_trigger: On<SpawnCursorCapture>, mut commands: Commands) {
     debug!("spawn_capture_cursor_actions");
     commands.spawn((
         Name::new("Cursor capture"),
