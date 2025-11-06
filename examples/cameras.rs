@@ -56,7 +56,7 @@ fn update(mut query: Query<&mut Transform, With<Cube>>, time: Res<Time>) {
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, app::AppPlugin::default()))
+    app.add_plugins((DefaultPlugins, AppPlugin::default()))
         .add_systems(Startup, init)
         .add_systems(Update, update)
         .run();
