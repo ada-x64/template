@@ -93,6 +93,7 @@ impl Runner {
                         desired_maximum_frame_latency: None,
                         ..Default::default()
                     }),
+                    primary_cursor_options: None,
                     close_when_requested: true,
                     exit_condition: ExitCondition::OnPrimaryClosed,
                 },
@@ -126,7 +127,7 @@ impl Runner {
             let timeout = self.timeout;
             app.add_systems(
                 Update,
-                move |time: Res<Time<Real>>, mut events: EventWriter<AppExit>| {
+                move |time: Res<Time<Real>>, mut events: MessageWriter<AppExit>| {
                     let elapsed = time.elapsed_secs();
                     if elapsed > timeout {
                         error!("Timeout after {elapsed}s");

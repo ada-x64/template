@@ -1,13 +1,11 @@
 use crate::prelude::*;
 
 mod gizmos;
-mod minibuffer;
 pub mod prelude {
     pub use super::gizmos::prelude::*;
-    pub use super::minibuffer::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {
     #[cfg(not(test))]
-    app.add_plugins((minibuffer::plugin, gizmos::plugin));
+    app.add_plugins(gizmos::plugin);
 }

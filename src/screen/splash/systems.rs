@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use bevy::ecs::{component::HookContext, world::DeferredWorld};
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct SplashScreen;

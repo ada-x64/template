@@ -1,14 +1,18 @@
 use crate::prelude::*;
-use bevy::window::CursorGrabMode;
+use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 
-fn exit_app(_: Trigger<Completed<PAQuit>>, mut commands: Commands, win: Single<&Window>) {
+fn exit_app(
+    _: On<Complete<PAQuit>>,
+    mut commands: Commands,
+    cursor: Single<&CursorOptions, With<PrimaryWindow>>,
+) {
     debug!("exit_app");
-    if matches!(win.cursor_options.grab_mode, CursorGrabMode::None) {
-        commands.send_event(AppExit::Success);
+    if matches!(cursor.grab_mode, CursorGrabMode::None) {
+        commands.write_message(AppExit::Success);
     }
 }
 
-fn spawn_global_ctx(_: Trigger<SpawnGlobalCtx>, mut commands: Commands) {
+fn spawn_global_ctx(_: On<SpawnGlobalCtx>, mut commands: Commands) {
     commands.spawn((
         ICtxGlobal,
         ContextActivity::<ICtxGlobal>::ACTIVE,

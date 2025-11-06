@@ -10,7 +10,7 @@ impl PropogateExt for App {
     /// component down the parent-child hierarchy.
     fn register_propagatable_type<T: Propogatable>(&mut self) -> &mut Self {
         self.add_systems(PostUpdate, read_propogate_message::<T>)
-            .add_event::<PropogateMessage<T>>()
+            .add_message::<PropogateMessage<T>>()
     }
 }
 
@@ -40,7 +40,7 @@ fn send_propogate_event<'w, T: Propogatable>(mut world: DeferredWorld<'w>, ctx: 
     } else {
         error!("Could not insert propogate on entity {}", ctx.entity);
     }
-    world.send_event(PropogateMessage {
+    world.write_message(PropogateMessage {
         target: ctx.entity,
         _marker: PhantomData::<T>,
     });
@@ -52,7 +52,7 @@ fn send_propogate_event<'w, T: Propogatable>(mut world: DeferredWorld<'w>, ctx: 
 #[component(immutable)]
 pub struct BlockPropogation<T: Propogatable>(PhantomData<T>);
 
-#[derive(Event, Clone, Debug, Deref)]
+#[derive(Event, Clone, Debug, Deref, Message)]
 struct PropogateMessage<T> {
     #[deref]
     target: Entity,
@@ -60,7 +60,7 @@ struct PropogateMessage<T> {
 }
 
 fn read_propogate_message<T: Propogatable>(
-    mut reader: EventReader<PropogateMessage<T>>,
+    mut reader: MessageReader<PropogateMessage<T>>,
     mut commands: Commands,
     query: Query<(&Propogate<T>, &Children)>,
 ) {

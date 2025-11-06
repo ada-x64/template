@@ -1,11 +1,11 @@
 use crate::prelude::*;
-use bevy::window::CursorGrabMode;
+use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 
 fn apply(
     tracked_tf: Query<&Transform, Without<TrackingCam>>,
     mut cam_tf: Single<(&mut Transform, &mut TrackingCam), Without<PlayerController>>,
     mut caster_q: Single<(&mut RayCaster, &RayHits)>,
-    window: Single<&Window>,
+    cursor: Single<&CursorOptions, With<PrimaryWindow>>,
 ) {
     // TODO relationship
     // commands.entity(tracking).add_child((
@@ -18,7 +18,7 @@ fn apply(
     //         .with_solidness(true),
     // ));
     // do this, but also disable ctx when flycam is enabled
-    if window.cursor_options.grab_mode != CursorGrabMode::Locked {
+    if cursor.grab_mode != CursorGrabMode::Locked {
         return;
     }
     let (ref mut caster, hits) = *caster_q;

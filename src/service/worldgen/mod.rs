@@ -13,7 +13,7 @@ pub mod prelude {
 #[reflect(Component)]
 pub struct WorldgenRoot;
 pub fn spawn_worldgen_root(
-    _: Trigger<SpawnWorldgenRoot>,
+    _: On<SpawnWorldgenRoot>,
     mut commands: Commands,
     assets: Res<WorldgenHandles>,
     _meshes: Res<Assets<Mesh>>,

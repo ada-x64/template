@@ -101,7 +101,7 @@ fn observer_cleanup() {
                 Name::new("Parent"),
                 children![(
                     Name::new("Child"),
-                    Observer::new(|trigger: Trigger<SwitchToScreen>| {
+                    Observer::new(|trigger: On<SwitchToScreen>| {
                         info!("Observer ({:?})", *trigger)
                     })
                 )],

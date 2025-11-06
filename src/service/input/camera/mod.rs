@@ -10,6 +10,8 @@ pub mod prelude {
     pub use super::data::*;
     pub use super::fly::prelude::*;
     pub use super::tracking::prelude::*;
+    #[doc(hidden)]
+    pub use bevy::camera::visibility::RenderLayers;
 }
 
 pub fn plugin(app: &mut App) {

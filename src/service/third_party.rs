@@ -4,11 +4,9 @@ pub mod prelude {
     pub use avian3d::prelude::*;
     pub use bevy::prelude::*;
     pub use bevy_asset_loader::prelude::*;
-    #[allow(unused_imports, reason = "fix ambiguous import")]
-    pub use bevy_enhanced_input::prelude::Completed;
     pub use bevy_enhanced_input::prelude::*;
-    #[cfg(feature = "dev")]
-    pub use bevy_minibuffer::prelude::*;
+    // fix ambiguous glob exports
+    pub use bevy_enhanced_input::prelude::{Cancel, Press, Release};
     pub use bevy_tnua::prelude::*;
     pub use tiny_bail::prelude::*;
 }
@@ -31,10 +29,7 @@ pub fn plugin(app: &mut App) {
     #[cfg(not(test))]
     #[cfg(feature = "dev")]
     app.add_plugins((
-        bevy_minibuffer::MinibufferPlugins,
         bevy_inspector_egui::DefaultInspectorConfigPlugin,
-        bevy_inspector_egui::bevy_egui::EguiPlugin {
-            enable_multipass_for_primary_context: true,
-        },
+        bevy_inspector_egui::bevy_egui::EguiPlugin::default(),
     ));
 }

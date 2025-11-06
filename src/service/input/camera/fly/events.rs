@@ -1,9 +1,11 @@
 use std::f32::consts::{FRAC_PI_2, FRAC_PI_8};
 
+use bevy::window::{CursorOptions, PrimaryWindow};
+
 use crate::prelude::*;
 
-fn on_move(trigger: Trigger<Fired<PAMoveCam>>, mut transforms: Query<&mut Transform>) {
-    let mut transform = r!(transforms.get_mut(trigger.target()));
+fn on_move(trigger: On<Fire<PAMoveCam>>, mut transforms: Query<&mut Transform>) {
+    let mut transform = r!(transforms.get_mut(trigger.event().event_target()));
 
     // Move to the camera direction.
     let rotation = transform.rotation.to_euler(EulerRot::YXZ);
@@ -17,21 +19,21 @@ fn on_move(trigger: Trigger<Fired<PAMoveCam>>, mut transforms: Query<&mut Transf
     transform.translation += Quat::from_euler(EulerRot::YXZ, rotation.0, 0., 0.) * movement
 }
 
-fn on_move_y(trigger: Trigger<Fired<PAMoveCamY>>, mut transforms: Query<&mut Transform>) {
-    let mut tf = r!(transforms.get_mut(trigger.target()));
+fn on_move_y(trigger: On<Fire<PAMoveCamY>>, mut transforms: Query<&mut Transform>) {
+    let mut tf = r!(transforms.get_mut(trigger.event().event_target()));
     *tf = tf.with_translation(tf.translation.with_y(tf.translation.y + trigger.value));
 }
 
 fn rotate(
-    trigger: Trigger<Fired<PARotateCam>>,
+    trigger: On<Fire<PARotateCam>>,
     mut transforms: Query<&mut Transform>,
-    window: Single<&Window>,
+    cursor: Single<&CursorOptions, With<PrimaryWindow>>,
 ) {
-    if window.cursor_options.visible {
+    if cursor.visible {
         return;
     }
 
-    let mut transform = transforms.get_mut(trigger.target()).unwrap();
+    let mut transform = transforms.get_mut(trigger.event().event_target()).unwrap();
     let (mut yaw, mut pitch, _) = transform.rotation.to_euler(EulerRot::YXZ);
 
     yaw += trigger.value.x.to_radians();
@@ -40,8 +42,8 @@ fn rotate(
     transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, 0.0);
 }
 
-fn zoom(trigger: Trigger<Fired<PAZoomCam>>, mut projections: Query<&mut Projection>) {
-    let mut projection = projections.get_mut(trigger.target()).unwrap();
+fn zoom(trigger: On<Fire<PAZoomCam>>, mut projections: Query<&mut Projection>) {
+    let mut projection = projections.get_mut(trigger.event().event_target()).unwrap();
     let Projection::Perspective(projection) = &mut *projection else {
         panic!("camera should be perspective");
     };

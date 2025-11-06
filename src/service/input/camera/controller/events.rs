@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 fn update_camera_controller(
-    trigger: Trigger<InsertCameraController>,
+    trigger: On<InsertCameraController>,
     mut commands: Commands,
     mut camera: Query<&mut Camera>,
 ) {
