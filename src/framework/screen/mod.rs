@@ -1,5 +1,7 @@
 #![doc = include_str!("./doc.md")]
 
+use bevy::app::HierarchyPropagatePlugin;
+
 use crate::{AppSettings, prelude::*};
 
 mod data;
@@ -18,6 +20,8 @@ pub fn plugin(app: &mut App) {
     app.insert_state::<CurrentScreenStatus>(ScreenStatus::Loading.into());
     app.init_resource::<NextScreen>();
 
-    app.register_propagatable_type::<Persistent>();
-    app.register_propagatable_type::<ScreenScoped>();
+    app.add_plugins((
+        HierarchyPropagatePlugin::<Persistent>::new(PostUpdate),
+        HierarchyPropagatePlugin::<ScreenScoped>::new(PostUpdate),
+    ));
 }

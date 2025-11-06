@@ -51,12 +51,12 @@ fn persistent_entities() {
             settings.entity_name = "1".into();
             app.world_mut().spawn((
                 Name::new("Persistent"),
-                Propagate(Persistent),
+                bevy::app::Propagate(Persistent),
                 children![(
                     Name::new("Child"),
                     children![(
                         Name::new("Grandchild"),
-                        BlockPropagation::<Persistent>::default(),
+                        bevy::app::PropagateStop::<Persistent>::default(),
                         children![Name::new("Great Grandchild")]
                     )]
                 )],

@@ -82,7 +82,7 @@ pub enum ScreenLoadingState<T: Screen> {
 /// Note: This is effectively used to stop the downward propagation of the
 /// [Persistent] component. Since screen scoping is the default behavior, it
 /// should not be necessary to add this component in other cases.
-#[derive(Component, Debug, Reflect, Clone, Copy, Default)]
+#[derive(Component, Debug, Reflect, Clone, Copy, Default, PartialEq)]
 pub struct ScreenScoped;
 
 /// Marks an entity as screen-persistent, i.e., this entity will _not_ be
@@ -90,8 +90,7 @@ pub struct ScreenScoped;
 /// _except_ those listed in the [module
 /// documentation](crate::framework::screen) are screen-scoped.
 ///
-/// The children of this entity will _also_ be marked as [Persistent]. In order
-/// to stop downward propogation of this component, use the [ScreenScoped]
-/// component.
-#[derive(Component, Debug, Reflect, Clone, Copy, Default)]
+/// In order to mark the children of this component as Persistent, you should
+/// use the [Propagate] component.
+#[derive(Component, Debug, Reflect, Clone, Copy, Default, PartialEq)]
 pub struct Persistent;
