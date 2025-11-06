@@ -33,6 +33,12 @@ jobs:
             - name: Install dependencies
               run: sudo apt-get update; sudo apt-get install -y --no-install-recommends libasound2-dev libudev-dev
 
+            - name: Install rust
+              uses: actions-rust-lang/setup-rust-toolchain@v1
+              with:
+                  toolchain: nightly-2025-06-26
+                  components: rustc-codegen-cranelift-preview,rustc-dev,llvm-tools-preview,clippy
+
             - uses: jdx/mise-action@v3
               with:
                   log_level: info
