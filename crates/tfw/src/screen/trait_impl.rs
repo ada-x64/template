@@ -20,11 +20,11 @@ pub use crate::prelude::*;
 pub trait Screen:
     Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
 {
-    /// The associated screen name. Must be populated in the crate's [Screens] enum.
-    const NAME: ScreenType;
-
     /// The associated settings type. Set as [EmptySettings] for no settings.
     type SETTINGS: Resource + FromWorld;
+
+    /// Used to get the screen name.
+    fn name() -> ScreenType;
 
     /// Used as the component wrapper's [on_add
     /// hook.](https://docs.rs/bevy/latest/bevy/prelude/trait.Component.html#adding-components-hooks)

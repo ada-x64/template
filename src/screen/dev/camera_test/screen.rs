@@ -7,18 +7,19 @@ pub struct CameraTestSettings;
 pub struct CameraTestScreen;
 impl Screen for CameraTestScreen {
     type SETTINGS = CameraTestSettings;
-    const NAME: ScreenType = Screens::CameraTest.as_screen_type();
+
+    fn name() -> ScreenType {
+        Screens::CameraTest.into()
+    }
 
     fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        let _settings = world.resource::<Self::SETTINGS>().clone();
-        // ...
-        // spawn the scene
-        // note this is temp, ideally load the scene from file
-        // then spawn it
         world.commands().run_system_cached(init);
     }
 }
 
+/// spawn the scene.
+/// this is temp, ideally load the scene from file
+/// then spawn it
 fn init(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,

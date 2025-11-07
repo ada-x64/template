@@ -1,3 +1,4 @@
+use bevy::reflect::enum_hash;
 use bevy_asset_loader::asset_collection::AssetCollection;
 
 use crate::prelude::*;
@@ -8,18 +9,9 @@ pub enum Screens {
     Empty,
     NamedEntity,
 }
-impl Screens {
-    pub const fn as_screen_type(self) -> ScreenType {
-        let val = match self {
-            Screens::Empty => "empty",
-            Screens::NamedEntity => "named_entity",
-        };
-        ScreenType(val)
-    }
-}
 impl From<Screens> for ScreenType {
     fn from(value: Screens) -> Self {
-        value.as_screen_type()
+        enum_hash(&value).unwrap().into()
     }
 }
 
