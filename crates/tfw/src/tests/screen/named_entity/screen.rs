@@ -8,7 +8,7 @@ pub struct NamedEntityScreenSettings {
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct NamedEntityScreen;
 impl Screen for NamedEntityScreen {
-    const NAME: Screens = Screens::NamedEntity;
+    const NAME: ScreenType = Screens::NamedEntity.as_screen_type();
     type SETTINGS = NamedEntityScreenSettings;
     fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
         debug!("in init (Test)");

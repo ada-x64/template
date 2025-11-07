@@ -50,9 +50,10 @@ pub fn log_hierarchy(app: &mut App) {
 }
 
 /// Triggers [SwitchToScreen], then calls update and logs the world hierarchy.
-pub fn switch_screen(app: &mut App, screen: Screens) {
-    app.world_mut().trigger(SwitchToScreen(screen));
+pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>) {
+    let screen = screen.into();
     info!("SwitchToScreen({screen:?}) (about to update)");
+    app.world_mut().trigger(SwitchToScreen(screen));
     app.update();
     log_hierarchy(app);
 }

@@ -21,7 +21,7 @@ pub trait Screen:
     Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
 {
     /// The associated screen name. Must be populated in the crate's [Screens] enum.
-    const NAME: Screens;
+    const NAME: ScreenType;
 
     /// The associated settings type. Set as [EmptySettings] for no settings.
     type SETTINGS: Resource + FromWorld;

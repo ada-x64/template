@@ -2,15 +2,23 @@ use crate::prelude::*;
 use bevy::ecs::schedule::ScheduleLabel;
 use std::marker::PhantomData;
 
+#[derive(Deref, DerefMut, Copy, Clone, Debug, PartialEq, Eq, Hash, Reflect)]
+pub struct ScreenType(pub &'static str);
+impl From<&'static str> for ScreenType {
+    fn from(value: &'static str) -> Self {
+        Self(value)
+    }
+}
+
 /// Component wrapper around a screen type.
 #[derive(Deref, Component)]
 #[component(on_add = T::init)]
 pub struct ScreenWrapper<T: Screen>(pub T);
 
-#[derive(Default, States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Copy, Deref)]
-pub struct CurrentScreen(pub Screens);
-impl From<Screens> for CurrentScreen {
-    fn from(value: Screens) -> Self {
+#[derive(States, Debug, PartialEq, Eq, Reflect, Hash, Clone, Deref)]
+pub struct CurrentScreen(pub ScreenType);
+impl From<ScreenType> for CurrentScreen {
+    fn from(value: ScreenType) -> Self {
         Self(value)
     }
 }
@@ -25,7 +33,7 @@ impl From<ScreenStatus> for CurrentScreenStatus {
 
 /// Stores next [Screens] state for unload logic.
 #[derive(Resource, Default)]
-pub struct NextScreen(pub Option<Screens>);
+pub struct NextScreen(pub Option<ScreenType>);
 
 /// Triggered when a [Screen] finishes unloading and is
 /// ready to transition.
@@ -33,8 +41,8 @@ pub struct NextScreen(pub Option<Screens>);
 pub struct FinishUnload;
 
 /// Call this when you want to switch screens.
-#[derive(Event, Debug, PartialEq, Eq, Clone, Copy, Deref)]
-pub struct SwitchToScreen(pub Screens);
+#[derive(Event, Debug, PartialEq, Eq, Clone, Deref)]
+pub struct SwitchToScreen(pub ScreenType);
 
 /// Enumerates possible screen states.
 #[derive(PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect, Default)]
@@ -44,11 +52,6 @@ pub enum ScreenStatus {
     Ready,
     Unloading,
 }
-
-/// An empty asset collection. Indicates that a
-/// screen should automatically transition from Loading to Ready.
-#[derive(AssetCollection, Resource)]
-pub struct EmptyAssetCollection {}
 
 /// An empty settings parameter.
 #[derive(Resource, Default)]
