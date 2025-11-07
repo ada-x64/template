@@ -130,7 +130,7 @@ run = "cargo run --bin ${usage_bin} ${usage_rest}"
 [tasks.listen]
 description = "Run a local server to listen for rsync'd application files."
 raw = true
-run = "uv run .config/scripts/listen.py"
+run = "uv run .config/scripts/listen/listen.py"
 
 # GENERATION ##################################################################
 

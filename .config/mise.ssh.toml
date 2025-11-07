@@ -14,11 +14,11 @@ age = "latest"
 
 [tasks.rsync]
 hide = true
+raw=true
 usage = """
     arg "<bin>" default="app"
 """
 run = """
-#!/bin/bash
 rsync -avzr --progress --mkpath \
     ./assets \
     ./target/debug/${usage_bin} \
@@ -29,13 +29,17 @@ rsync -avzr --progress --mkpath \
 raw=true
 description="Run the application (SSH)"
 usage = """
-    arg "<bin>" default="app"
-    arg "<auth>" env="auth"
+    arg "[bin]" default="app"
+    flag "--args <args>" env="ARGS"
+    flag "--auth <auth>" env="auth"
 """
 run = """
-#!/bin/bash
 mise build
 mise rsync
-JSON="\\"auth\\": \\"${usage_auth}\\",\\"path\\": \\"$SSH_OUT/${usage_bin}\\""
-curl $SSH_IP:9995 -sd "{$JSON}"
+AUTH="\\"auth\\": \\"${usage_auth}\\""
+PATH="\\"path\\": \\"$SSH_OUT/${usage_bin}\\""
+ARGS="\\"args\\": \\"${usage_args}\\""
+JSON="{$AUTH, $PATH, $ARGS}"
+echo $JSON
+/usr/bin/curl $SSH_IP:9995 -sd "$JSON"
 """
