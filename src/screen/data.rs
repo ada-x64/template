@@ -10,10 +10,12 @@ pub enum Screens {
     Splash,
     MainMenu,
     World,
+    CameraTest,
 }
 impl Screens {
     pub const fn as_screen_type(self) -> ScreenType {
         let val = match self {
+            Screens::CameraTest => "camera_test",
             Screens::Splash => "splash",
             Screens::MainMenu => "main_menu",
             Screens::World => "world",
