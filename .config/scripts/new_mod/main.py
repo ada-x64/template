@@ -31,10 +31,20 @@ if vars.is_screen:
             "",
             "Could not find screen name in Screens enum. Please remove the screen manually, if it exists.",
         )
+        util.re_replace(
+            vars.screens_pat_expr,
+            "",
+            "Could not find screen name in Screens impl. Please remove the screen manually, if it exists.",
+        )
     else:
         util.insert_after(
             [vars.screens_expr],
             vars.screens_str,
             "Could not find Screens enum. Please register the screen manually.",
+        )
+        util.insert_after(
+            [vars.screens_match_expr],
+            vars.screens_pat,
+            "Could not find screen conversion fn. Please insert manually.",
         )
     util.write(vars.screens_data_mod)

@@ -6,8 +6,7 @@
 //!
 //! This crate is split into three modules: the [screen] module for the creation
 //! of screens, the [service] module for the creation of services, and the
-//! [framework] module for the underlying implementation. (NOTE: Framework will
-//! likely be moved to its own crate shortly.)
+//! [framework] module for the underlying implementation.
 //!
 //! For general information on how to use this template, see
 //! the [docs] module.
@@ -17,7 +16,6 @@
 #[cfg(doc)]
 pub mod docs;
 
-pub mod framework;
 /// See [framework::screen]
 pub mod screen;
 /// See [docs::architecture#modules]
@@ -27,7 +25,7 @@ mod plugin;
 pub use plugin::{AppPlugin, AppSettings};
 
 pub mod prelude {
-    pub use super::framework::prelude::*;
     pub use super::screen::prelude::*;
     pub use super::service::prelude::*;
+    pub use tfw::prelude::*;
 }

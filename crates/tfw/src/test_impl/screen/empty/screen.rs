@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct EmptyScreen;
 impl Screen for EmptyScreen {
-    const NAME: Screens = Screens::Empty;
+    const NAME: ScreenType = Screens::Empty.as_screen_type();
     type SETTINGS = EmptySettings;
     fn init<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {
         debug!("in init (empty)");

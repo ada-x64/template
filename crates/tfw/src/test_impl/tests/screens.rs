@@ -1,14 +1,13 @@
 use bevy::ecs::entity_disabling::Internal;
 
-use crate::{AppPlugin, AppSettings, framework::tests::*, prelude::*};
+use crate::{TfwPlugin, TfwSettings, prelude::*};
 
 #[test]
 fn screen_transitions() {
     Runner::new(|app| {
-        app.add_plugins((AppPlugin {
-            settings: AppSettings {
-                initial_screen: Screens::Empty,
-                ..Default::default()
+        app.add_plugins((TfwPlugin {
+            settings: TfwSettings {
+                initial_screen: Screens::Empty.into(),
             },
         },));
 
@@ -40,10 +39,9 @@ fn screen_transitions() {
 #[test]
 fn persistent_entities() {
     Runner::new(|app| {
-        app.add_plugins((AppPlugin {
-            settings: AppSettings {
-                initial_screen: Screens::NamedEntity,
-                ..Default::default()
+        app.add_plugins((TfwPlugin {
+            settings: TfwSettings {
+                initial_screen: Screens::NamedEntity.into(),
             },
         },));
         {
@@ -95,10 +93,9 @@ struct Empty;
 #[test]
 fn observer_cleanup() {
     Runner::new(|app| {
-        app.add_plugins((AppPlugin {
-            settings: AppSettings {
-                initial_screen: Screens::Empty,
-                ..Default::default()
+        app.add_plugins((TfwPlugin {
+            settings: TfwSettings {
+                initial_screen: Screens::Empty.into(),
             },
         },));
 

@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct WorldScreen;
 impl Screen for WorldScreen {
-    const NAME: Screens = Screens::World;
+    const NAME: ScreenType = Screens::World.as_screen_type();
     type SETTINGS = EmptySettings;
 
     fn init<'w>(mut world: DeferredWorld, _ctx: HookContext) {

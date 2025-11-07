@@ -127,7 +127,7 @@ fn on_switch_screen<T: Screen>(
     debug!("on_switch_screen ({:?})", T::NAME);
     if ***current_screen == T::NAME {
         next_state.set(CurrentScreenStatus(ScreenStatus::Unloading));
-        *next_screen = NextScreen(Some(**trigger));
+        *next_screen = NextScreen(Some(trigger.0));
         commands.run_schedule(UnloadSchedule::<T>::default());
     }
 }

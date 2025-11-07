@@ -101,7 +101,7 @@ usage = """
     flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
 """
 run = """
-    RUST_LOG=${usage_rust_log?} cargo nextest run -F dev
+    RUST_LOG=${usage_rust_log?} cargo nextest run --workspace -F dev
 """
 
 # LOCAL #######################################################################
@@ -190,8 +190,7 @@ cargo generate \
 catch_err
 
 uv run .config/scripts/new_mod/main.py\
-    "$DESTINATION/$BASENAME"\
-    "$DEBUG"
+    "$DESTINATION/$BASENAME"
 
 catch_err
 

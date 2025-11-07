@@ -249,6 +249,7 @@ dependencies = [
  "itertools 0.14.0",
  "serde",
  "strum",
+ "tfw",
  "thiserror 2.0.17",
  "tiny_bail",
  "variadics_please",
@@ -5495,6 +5496,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "tfw"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_asset_loader",
+ "bitflags 2.10.0",
+ "itertools 0.14.0",
+ "serde",
+ "strum",
+ "thiserror 2.0.17",
+ "tiny_bail",
+ "variadics_please",
 ]
 
 [[package]]

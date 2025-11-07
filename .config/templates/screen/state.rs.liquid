@@ -1,5 +1,11 @@
 {%- assign name = name | upper_camel_case | append: "Screen" -%}
+{%- assign collection = name | upper_camel_case | append: "AssetCollection" -%}
 use crate::prelude::*;
+
+#[derive(AssetCollection, Resource)]
+struct {{collection}} {
+
+}
 
 {% if pedantic -%}
 /// This plugin controls how the state transitions from Loading to Ready.
@@ -9,6 +15,6 @@ pub fn plugin(app: &mut App) {
     app.add_loading_state(
         LoadingState::new(ScreenLoadingState::<{{-name-}}>::Loading)
             .continue_to_state(ScreenLoadingState::<{{-name-}}>::Ready)
-            .load_collection::<EmptyAssetCollection>(),
+            .load_collection::<{{-collection-}}>(),
     );
 }

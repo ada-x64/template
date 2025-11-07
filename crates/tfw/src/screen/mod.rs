@@ -2,7 +2,7 @@
 
 use bevy::app::HierarchyPropagatePlugin;
 
-use crate::{AppSettings, prelude::*};
+use crate::{TfwSettings, prelude::*};
 
 mod data;
 mod scope;
@@ -15,7 +15,7 @@ pub mod prelude {
 }
 
 pub fn plugin(app: &mut App) {
-    let settings = app.world().resource::<AppSettings>();
+    let settings = app.world().resource::<TfwSettings>();
     app.insert_state::<CurrentScreen>(settings.initial_screen.into());
     app.insert_state::<CurrentScreenStatus>(ScreenStatus::Loading.into());
     app.init_resource::<NextScreen>();

@@ -4,14 +4,20 @@ version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 
+[workspace]
+members = [".", "./crates/*"]
+
 [package.metadata.bevy_lint]
 panicking_methods = { level = "warn" }
 
-[lints]
+[workspace.lints]
 rust.unexpected_cfgs = { level = "warn", check-cfg = ["cfg(bevy_lint)"] }
 clippy.too_many_arguments = "allow"
 clippy.type_complexity = "allow"
 clippy.nonstandard_macro_braces = "warn"
+
+[lints]
+workspace = true
 
 [profile.dev.package."*"]
 opt-level = 3
@@ -64,6 +70,9 @@ anyhow = "1.0.99"
 strum = { version = "0.27.2", features = ["derive"] }
 clap = { version = "4.5.50", features = ["derive"], optional = true }
 variadics_please = "1.1.0"
+
+# workspace
+tfw = {path = "./crates/tfw"}
 
 [build-dependencies]
 built = {version = "0.8.0", features=["chrono"]}

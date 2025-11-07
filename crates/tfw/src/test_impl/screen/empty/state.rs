@@ -1,3 +1,5 @@
+use bevy_asset_loader::loading_state::LoadingState;
+
 use crate::prelude::*;
 
 /// This plugin controls how the state transitions from Loading to Ready.

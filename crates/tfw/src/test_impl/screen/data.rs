@@ -1,22 +1,18 @@
+use bevy_asset_loader::asset_collection::AssetCollection;
+
 use crate::prelude::*;
 
-/// Enumeration of all screens within the app.
-/// Screens represent "sub-simulations" which scope
-/// systems, events, and entites. See the docs
-/// for more info.
 #[derive(Default, PartialEq, Eq, Hash, Debug, Clone, Copy, Reflect)]
 pub enum Screens {
     #[default]
-    Splash,
-    MainMenu,
-    World,
+    Empty,
+    NamedEntity,
 }
 impl Screens {
     pub const fn as_screen_type(self) -> ScreenType {
         let val = match self {
-            Screens::Splash => "splash",
-            Screens::MainMenu => "main_menu",
-            Screens::World => "world",
+            Screens::Empty => "empty",
+            Screens::NamedEntity => "named_entity",
         };
         ScreenType(val)
     }
