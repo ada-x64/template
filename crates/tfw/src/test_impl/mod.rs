@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 mod runner;
 mod screen;
-#[allow(clippy::module_inception)]
 mod tests;
 mod util;
 

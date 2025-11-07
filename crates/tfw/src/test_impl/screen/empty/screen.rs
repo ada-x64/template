@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::tests::prelude::*;
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct EmptyScreen;

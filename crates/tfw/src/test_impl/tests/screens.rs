@@ -1,6 +1,5 @@
 use bevy::ecs::entity_disabling::Internal;
 
-use crate::tests::prelude::*;
 use crate::{TfwPlugin, TfwSettings, prelude::*};
 
 #[test]

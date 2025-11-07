@@ -101,7 +101,7 @@ usage = """
     flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
 """
 run = """
-    RUST_LOG=${usage_rust_log?} cargo nextest run -F dev
+    RUST_LOG=${usage_rust_log?} cargo nextest run --workspace -F dev
 """
 
 # LOCAL #######################################################################
