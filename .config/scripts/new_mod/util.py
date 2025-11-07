@@ -24,6 +24,8 @@ class Vars:
     prelude_expr: Expr
     plugin_expr: Expr
     screens_expr: Expr
+    screens_pat_expr: Expr
+    screens_match_expr: Expr
     screens_exists_expr: Expr
     screens_data_mod: str
     super_mod: str
@@ -32,6 +34,7 @@ class Vars:
     prelude_str: str
     plugin_str: str
     screens_str: str
+    screens_pat: str
     file_str: str
     is_screen: bool
 
@@ -58,6 +61,10 @@ def get_vars(args: Args):
         plugin_expr=re.compile(r"\s*pub fn plugin\(_?\w+: &mut App\) \{[^}]*"),
         screens_expr=re.compile(r"enum Screens \{[^}]*"),
         screens_exists_expr=re.compile(rf"\s+{mod_camel_case},?\s+"),
+        screens_pat_expr=re.compile(rf"Screens::{mod_camel_case}\s+=>\s+\"\w+\",?"),
+        screens_match_expr=re.compile(
+            r"pub\s+const\s+fn\s+as_screen_type\(self\)\s+->\s+ScreenType\s+\{\n.+match self \{"
+        ),
         screens_data_mod=realpath("src/screen/data.rs"),
         super_mod=realpath(join(args.module_path, "../mod.rs")),
         mod_name=mod_name,
@@ -65,6 +72,7 @@ def get_vars(args: Args):
         prelude_str=f"pub use super::{mod_name}::prelude::*;",
         plugin_str=f"app.add_plugins({mod_name}::plugin);",
         screens_str=f"{mod_camel_case},",
+        screens_pat=f'Screens::{mod_camel_case} => "{mod_name}",',
         file_str="",
         is_screen="src/screen" in fspath(args.module_path),
     )

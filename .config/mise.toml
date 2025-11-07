@@ -190,8 +190,7 @@ cargo generate \
 catch_err
 
 uv run .config/scripts/new_mod/main.py\
-    "$DESTINATION/$BASENAME"\
-    "$DEBUG"
+    "$DESTINATION/$BASENAME"
 
 catch_err
 

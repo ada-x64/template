@@ -19,7 +19,7 @@ impl Screen for {{screen_name}} {
     /// Note: This can be replaced with EmptyScreenSettings
     {%- endif %}
     type SETTINGS = {{settings_name -}};
-    const NAME: Screens = Screens::{{- name | upper_camel_case -}};
+    const NAME: ScreenType = Screens::{{- name | upper_camel_case -}}.as_screen_type();
 
     {% if pedantic -%}
     /// Use this function to initialize your screen, e.g. by calling commands
