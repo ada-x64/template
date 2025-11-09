@@ -54,6 +54,8 @@ fn init(
         Collider::half_space(Vec3::Z),
     ));
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
+    commands.trigger(SpawnGlobalCtx);
+    commands.trigger(SpawnCursorCapture);
     let tc = commands
         .spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")))
         .id();
@@ -62,5 +64,8 @@ fn init(
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<CameraTestScreen>::fixed().build(app);
+    ScreenScopeBuilder::<CameraTestScreen>::fixed()
+        .add_systems(camera_test_systems().take())
+        .add_systems(tracking_cam_systems().take())
+        .build(app);
 }

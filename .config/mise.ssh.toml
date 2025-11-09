@@ -29,7 +29,7 @@ rsync -avzr --progress --mkpath \
 raw=true
 description="Run the application (SSH)"
 usage = """
-    arg "[bin]" default="app"
+    flag "--bin <bin>" default="app"
     flag "--args <args>" env="ARGS"
     flag "--auth <auth>" env="auth"
 """

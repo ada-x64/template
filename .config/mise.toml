@@ -150,6 +150,8 @@ template, postfixed with given template name. For example, calling
 'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
 """
 
+flag "--base-path <path>" help="Base path for the project. Scripts expect modules named '$BASE_PATH/${service, screen}' Defaults to 'src'" default="src"
+
 flag "--debug" help="Enable debug output."
 '''
 run='''
@@ -157,9 +159,10 @@ run='''
 TEMPLATE=${usage_template?}
 NAME=${usage_name?}
 DEBUG=${usage_debug:+--debug}
+BASE_PATH=${usage_base_path?}
 
 BASENAME=$(basename $NAME)
-DESTINATION="$(realpath src/$TEMPLATE/$(dirname $NAME))"
+DESTINATION="$(realpath $BASE_PATH/$TEMPLATE/$(dirname $NAME))"
 
 if [[ -n "$DEBUG" ]]; then
 cat <<EOF
@@ -212,6 +215,8 @@ template, postfixed with given template name. For example, calling
 'mise new service foo/bar' will generate 'src/service/foo/bar/...'.
 """
 
+flag "--base-path <path>" help="Base path for the project. Scripts expect modules named '$BASE_PATH/${service, screen}' Defaults to 'src'" default="src"
+
 flag "--debug" help="Enable debug output."
 '''
 run='''
@@ -219,7 +224,8 @@ run='''
 set -e
 TEMPLATE=${usage_template?}
 NAME=${usage_name?}
-DESTINATION="$(realpath src/$TEMPLATE/$NAME)"
+BASE_PATH=${usage_base_path?}
+DESTINATION="$(realpath $BASE_PATH/$TEMPLATE/$NAME)"
 DEBUG=${usage_debug:+--debug}
 
 uv run .config/scripts/new_mod/main.py\
