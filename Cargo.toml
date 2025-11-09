@@ -70,6 +70,8 @@ anyhow = "1.0.99"
 strum = { version = "0.27.2", features = ["derive"] }
 clap = { version = "4.5.50", features = ["derive"], optional = true }
 variadics_please = "1.1.0"
+# TODO: Switch to stable release when 0.17 is cut
+bevy_console = {git="https://github.com/makspll/bevy-console", branch="main", optional = true }
 
 # workspace
 tfw = {path = "./crates/tfw"}
@@ -82,5 +84,6 @@ dev = [
     "dep:bevy_mod_debugdump",
     "dep:bevy-inspector-egui",
     "dep:clap",
+    "dep:bevy_console",
 ]
 dylib = ["bevy/dynamic_linking"]
