@@ -1,20 +1,23 @@
 {
-  "lsp": {
-    "rust-analyzer": {
-      "initialization_options": {
-        "cargo": {
-          "features": "all"
-        },
-        "check": {
-          "command": "clippy",
-          "extraArgs": ["--locked", "--target-dir=target/rust-analyzer"]
+    "lsp": {
+        "rust-analyzer": {
+            "initialization_options": {
+                "cargo": {
+                    "features": "all"
+                },
+                "check": {
+                    "command": "clippy",
+                    "extraArgs": [
+                        "--locked",
+                        "--target-dir=target/rust-analyzer"
+                    ]
+                }
+            }
         }
-      }
+    },
+    "languages": {
+        "Python": {
+            "language_servers": ["ruff", "pyright"]
+        }
     }
-  },
-  "languages": {
-    "Python": {
-      "language_servers": ["ruff", "basedpyright"]
-    }
-  }
 }

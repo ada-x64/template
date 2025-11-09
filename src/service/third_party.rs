@@ -25,11 +25,4 @@ pub fn plugin(app: &mut App) {
         #[cfg(not(test))]
         bevy_rich_text3d::Text3dPlugin::default(),
     ));
-
-    #[cfg(not(test))]
-    #[cfg(feature = "dev")]
-    app.add_plugins((
-        bevy_inspector_egui::DefaultInspectorConfigPlugin,
-        bevy_inspector_egui::bevy_egui::EguiPlugin::default(),
-    ));
 }

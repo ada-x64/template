@@ -3,9 +3,9 @@ use bevy::ecs::schedule::ScheduleLabel;
 use std::marker::PhantomData;
 
 #[derive(Deref, DerefMut, Copy, Clone, Debug, PartialEq, Eq, Hash, Reflect)]
-pub struct ScreenType(pub &'static str);
-impl From<&'static str> for ScreenType {
-    fn from(value: &'static str) -> Self {
+pub struct ScreenType(pub u64);
+impl From<u64> for ScreenType {
+    fn from(value: u64) -> Self {
         Self(value)
     }
 }

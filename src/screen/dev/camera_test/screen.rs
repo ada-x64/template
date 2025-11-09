@@ -1,9 +1,25 @@
-use app::{AppPlugin, prelude::*};
-use avian3d::prelude::Collider;
+use crate::prelude::*;
 
-#[derive(Component)]
-struct Cube;
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
+pub struct CameraTestSettings;
 
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+pub struct CameraTestScreen;
+impl Screen for CameraTestScreen {
+    type SETTINGS = CameraTestSettings;
+
+    fn name() -> ScreenType {
+        Screens::CameraTest.into()
+    }
+
+    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
+        world.commands().run_system_cached(init);
+    }
+}
+
+/// spawn the scene.
+/// this is temp, ideally load the scene from file
+/// then spawn it
 fn init(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -38,6 +54,8 @@ fn init(
         Collider::half_space(Vec3::Z),
     ));
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
+    commands.trigger(SpawnGlobalCtx);
+    commands.trigger(SpawnCursorCapture);
     let tc = commands
         .spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")))
         .id();
@@ -45,19 +63,9 @@ fn init(
     **cam_list = vec![fc, tc];
 }
 
-fn update(mut query: Query<&mut Transform, With<Cube>>, time: Res<Time>) {
-    let mut tf = r!(query.single_mut());
-    *tf = tf.with_translation(Vec3::new(
-        3. * f32::cos(time.elapsed_secs()) - 1.5,
-        1.,
-        3. * f32::sin(time.elapsed_secs()) - 1.5,
-    ));
-}
-
-fn main() {
-    let mut app = App::new();
-    app.add_plugins((DefaultPlugins, AppPlugin::default()))
-        .add_systems(Startup, init)
-        .add_systems(Update, update)
-        .run();
+pub fn plugin(app: &mut App) {
+    ScreenScopeBuilder::<CameraTestScreen>::fixed()
+        .add_systems(camera_test_systems().take())
+        .add_systems(tracking_cam_systems().take())
+        .build(app);
 }

@@ -66,17 +66,20 @@ where
     }
 
     fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
-        debug!("Building screen '{:?}'", S::NAME);
+        debug!("Building screen '{:?}'", S::name());
         app.add_schedule(self.schedule);
         app.init_resource::<S::SETTINGS>();
-        app.add_systems(OnEnter(CurrentScreen(S::NAME)), |mut commands: Commands| {
-            debug!("OnEnter({:?})", S::NAME);
-            commands.spawn(ScreenWrapper(S::default()));
-        });
         app.add_systems(
-            OnExit(CurrentScreen(S::NAME)),
+            OnEnter(CurrentScreen(S::name())),
+            |mut commands: Commands| {
+                debug!("OnEnter({:?})", S::name());
+                commands.spawn(ScreenWrapper(S::default()));
+            },
+        );
+        app.add_systems(
+            OnExit(CurrentScreen(S::name())),
             |mut commands: Commands, e: Single<Entity, With<ScreenWrapper<S>>>| {
-                debug!("OnExit({:?})", S::NAME);
+                debug!("OnExit({:?})", S::name());
                 commands.entity(*e).despawn();
             },
         );
@@ -98,7 +101,7 @@ where
         app.add_schedule(Schedule::new(UnloadSchedule::<S>::default()));
         app.add_systems(
             UnloadSchedule::<S>::default(),
-            (S::unload(), on_finish_unload).run_if(in_state(CurrentScreen(S::NAME))),
+            (S::unload(), on_finish_unload).run_if(in_state(CurrentScreen(S::name()))),
         );
     }
 }
@@ -124,8 +127,8 @@ fn on_switch_screen<T: Screen>(
     mut next_screen: ResMut<NextScreen>,
     mut next_state: ResMut<NextState<CurrentScreenStatus>>,
 ) {
-    debug!("on_switch_screen ({:?})", T::NAME);
-    if ***current_screen == T::NAME {
+    debug!("on_switch_screen ({:?})", T::name());
+    if ***current_screen == T::name() {
         next_state.set(CurrentScreenStatus(ScreenStatus::Unloading));
         *next_screen = NextScreen(Some(trigger.0));
         commands.run_schedule(UnloadSchedule::<T>::default());

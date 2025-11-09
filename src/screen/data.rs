@@ -1,3 +1,5 @@
+use bevy::reflect::enum_hash;
+
 use crate::prelude::*;
 
 /// Enumeration of all screens within the app.
@@ -10,20 +12,12 @@ pub enum Screens {
     Splash,
     MainMenu,
     World,
-}
-impl Screens {
-    pub const fn as_screen_type(self) -> ScreenType {
-        let val = match self {
-            Screens::Splash => "splash",
-            Screens::MainMenu => "main_menu",
-            Screens::World => "world",
-        };
-        ScreenType(val)
-    }
+    #[cfg(feature = "dev")]
+    CameraTest,
 }
 impl From<Screens> for ScreenType {
     fn from(value: Screens) -> Self {
-        value.as_screen_type()
+        enum_hash(&value).unwrap().into()
     }
 }
 

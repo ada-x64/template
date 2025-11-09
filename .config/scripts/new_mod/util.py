@@ -1,4 +1,4 @@
-from os import PathLike, fspath
+from os import PathLike, fspath, path
 import re
 from dataclasses import dataclass, asdict
 from os.path import basename, join, realpath
@@ -74,7 +74,7 @@ def get_vars(args: Args):
         screens_str=f"{mod_camel_case},",
         screens_pat=f'Screens::{mod_camel_case} => "{mod_name}",',
         file_str="",
-        is_screen="src/screen" in fspath(args.module_path),
+        is_screen="/screen" in fspath(args.module_path),
     )
 
     if args.debug:

@@ -8,8 +8,10 @@ pub struct NamedEntityScreenSettings {
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct NamedEntityScreen;
 impl Screen for NamedEntityScreen {
-    const NAME: ScreenType = Screens::NamedEntity.as_screen_type();
     type SETTINGS = NamedEntityScreenSettings;
+    fn name() -> ScreenType {
+        Screens::NamedEntity.into()
+    }
     fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
         debug!("in init (Test)");
         let settings = world.resource::<Self::SETTINGS>().clone();
@@ -20,6 +22,5 @@ impl Screen for NamedEntityScreen {
 }
 
 pub fn plugin(app: &mut App) {
-    debug!("in test plugin");
     ScreenScopeBuilder::<NamedEntityScreen>::fixed().build(app);
 }
