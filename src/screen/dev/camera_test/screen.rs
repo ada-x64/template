@@ -64,12 +64,8 @@ fn init(
 }
 
 pub fn plugin(app: &mut App) {
-<<<<<<< HEAD
     ScreenScopeBuilder::<CameraTestScreen>::fixed()
         .add_systems(camera_test_systems().take())
         .add_systems(tracking_cam_systems().take())
         .build(app);
-=======
-    ScreenScopeBuilder::<CameraTestScreen>::fixed().build(app);
->>>>>>> 2875e60 (move camera test to dev screens)
 }
