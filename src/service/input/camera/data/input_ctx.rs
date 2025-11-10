@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-/// Default camera input context
-#[derive(Component, Default)]
-pub struct ICtxTrackingCam;
-
 /// PlayerAction_RotateCamera
 #[derive(InputAction, Reflect)]
 #[action_output(Vec2)]

@@ -9,7 +9,7 @@ fn update(mut query: Query<&mut Transform, With<Cube>>, time: Res<Time>) {
     ));
 }
 
-/// Add this function to any screens which need to use this service.
+/// Systems for the camera_test screen.
 pub fn systems() -> ServiceSystems {
     ServiceSystems::new(update)
 }

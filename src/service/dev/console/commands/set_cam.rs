@@ -1,32 +1,26 @@
 use bevy_console::reply;
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 
 use crate::prelude::*;
-
-#[derive(ValueEnum, Clone, Copy, Debug)]
-enum Cameras {
-    Fly,
-    Tracking,
-}
 
 #[derive(Parser, ConsoleCommand)]
 #[command(name = "set_cam")]
 pub struct SetCamCmd {
     #[arg(value_enum)]
-    cam: Cameras,
+    cam: CameraControllerKind,
 }
 
-fn set_cam_cmd(mut log: ConsoleCommand<SetCamCmd>) {
+fn set_cam_cmd(
+    mut log: ConsoleCommand<SetCamCmd>,
+    cams: Query<(Entity, &CameraController)>,
+    mut commands: Commands,
+) {
     if let Some(Ok(cmd)) = log.take() {
         reply!(log, "Switching to {:?}", cmd.cam);
-        // set the current camera using an event
-        match cmd.cam {
-            Cameras::Fly => {
-                // set the current camera using an event
-            }
-            Cameras::Tracking => {
-                // ...
-            }
+        for (cam, controller) in cams {
+            commands
+                .entity(cam)
+                .insert(controller.with_active(controller.kind == cmd.cam));
         }
     }
 }

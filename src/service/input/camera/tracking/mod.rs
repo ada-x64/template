@@ -21,6 +21,5 @@ pub mod prelude {
 // If there is a collision, then (smoothly) move to the collisions location.
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(events::plugin)
-        .add_input_context::<ICtxTrackingCam>();
+    app.add_plugins(events::plugin);
 }
