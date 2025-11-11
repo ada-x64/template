@@ -99,10 +99,10 @@ tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
 usage = """
     flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
-    arg "[rest]" double_dash = "optional" default="" help="Passed directly to `cargo nextest`. Use `mise test -- help` for nextest help."
+    arg "[rest]" double_dash = "required" default="" help="Passed directly to `cargo nextest`. Use `mise test -- help` for nextest help."
 """
 run = """
-    if [ -n ${usage_rest?} ]; then
+    if [ -n "${usage_rest?}" ]; then
         RUST_LOG=${usage_rust_log?} cargo nextest ${usage_rest?}
     else
         RUST_LOG=${usage_rust_log?} cargo nextest run --workspace -F dev
