@@ -32,6 +32,7 @@ usage = """
     flag "--bin <bin>" default="app"
     flag "--args <args>" env="ARGS"
     flag "--auth <auth>" env="auth"
+    flag "--env <env>" env="ENV"
 """
 run = """
 mise build
@@ -39,7 +40,9 @@ mise rsync
 AUTH="\\"auth\\": \\"${usage_auth}\\""
 PATH="\\"path\\": \\"$SSH_OUT/${usage_bin}\\""
 ARGS="\\"args\\": \\"${usage_args}\\""
-JSON="{$AUTH, $PATH, $ARGS}"
-echo $JSON
+ENV="\\"env\\": \\"${usage_env}\\""
+KIND="\\"kind\\": \\"open\\""
+JSON="{$AUTH, $PATH, $ARGS, $ENV, $KIND}"
 /usr/bin/curl $SSH_IP:9995 -sd "$JSON"
+/usr/bin/python3 .config/scripts/listen/listen.py --mode host
 """
