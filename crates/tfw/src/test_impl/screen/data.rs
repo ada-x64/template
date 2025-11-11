@@ -8,6 +8,7 @@ pub enum Screens {
     #[default]
     Empty,
     NamedEntity,
+    ScopedSystem,
 }
 impl From<Screens> for ScreenType {
     fn from(value: Screens) -> Self {

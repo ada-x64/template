@@ -67,8 +67,12 @@ where
 
     fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
         debug!("Building screen '{:?}'", S::name());
+
+        // insert data
         app.add_schedule(self.schedule);
         app.init_resource::<S::SETTINGS>();
+
+        // configure screen switch event
         app.add_systems(
             OnEnter(CurrentScreen(S::name())),
             |mut commands: Commands| {
@@ -84,6 +88,14 @@ where
             },
         );
         app.add_observer(on_switch_screen::<S>);
+
+        // scope systems
+        app.configure_sets(
+            self.scope,
+            self.scope.run_if(in_state(CurrentScreen(S::name()))),
+        );
+
+        // add to main schedule
         if self.fixed {
             let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
             match order {
@@ -98,6 +110,7 @@ where
             }
         }
 
+        // configure unload
         app.add_schedule(Schedule::new(UnloadSchedule::<S>::default()));
         app.add_systems(
             UnloadSchedule::<S>::default(),

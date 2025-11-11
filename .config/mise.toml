@@ -99,9 +99,14 @@ tools = { "cargo:cargo-nextest" = "latest" }
 description = "Run tests for a specific package or all packages"
 usage = """
     flag "--rust-log <rust_log>" env="RUST_LOG" default="app=debug"
+    arg "[rest]" double_dash = "required" default="" help="Passed directly to `cargo nextest`. Use `mise test -- help` for nextest help."
 """
 run = """
-    RUST_LOG=${usage_rust_log?} cargo nextest run --workspace -F dev
+    if [ -n "${usage_rest?}" ]; then
+        RUST_LOG=${usage_rust_log?} cargo nextest ${usage_rest?}
+    else
+        RUST_LOG=${usage_rust_log?} cargo nextest run --workspace -F dev
+    fi
 """
 
 # LOCAL #######################################################################
@@ -119,10 +124,15 @@ run = "cargo build --features $FEATURES --bin ${usage_bin} -- ${usage_rustc_opts
 [tasks.play]
 description = "Run the specified workspace binary. (Default: 'app')"
 usage = """
-    arg "<bin>" default="app"
-    arg "[rest]" var=#true default="--features $FEATURES"
+    flag "--bin <bin>" default="app"
+    flag "--features -F <features>" default="dev"
+    flag "--args <args>" env="ARGS"
+    flag "--env <env>" env="ENV"
 """
-run = "cargo run --bin ${usage_bin} ${usage_rest}"
+run = """
+echo "[RUNNING] {{get_env(name='ENV')}} cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}"
+{{get_env(name='ENV')}} cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}
+"""
 
 # LOCAL #######################################################################
 

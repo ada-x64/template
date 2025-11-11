@@ -16,11 +16,11 @@ fn screen_transitions() {
             let mut settings = app.world_mut().resource_mut::<NamedEntityScreenSettings>();
             settings.entity_name = "1".into();
         }
-        switch_screen(app, Screens::NamedEntity);
+        switch_screen(app, Screens::NamedEntity, SwitchScreenOpts::full());
         assert!(find_entity(app, "1"));
 
         // Check that screen transitions clear non-persistent entities.
-        switch_screen(app, Screens::Empty);
+        switch_screen(app, Screens::Empty, SwitchScreenOpts::full());
         find_entity(app, "1");
         assert!(!find_entity(app, "1"));
 
@@ -29,7 +29,7 @@ fn screen_transitions() {
             let mut settings = app.world_mut().resource_mut::<NamedEntityScreenSettings>();
             settings.entity_name = "2".into();
         }
-        switch_screen(app, Screens::NamedEntity);
+        switch_screen(app, Screens::NamedEntity, SwitchScreenOpts::full());
         assert!(find_entity(app, "2"));
         AppExit::Success
     })
@@ -73,7 +73,11 @@ fn persistent_entities() {
             "Great Grandchild"
         ));
 
-        switch_screen(app, Screens::Empty);
+        switch_screen(
+            app,
+            Screens::Empty,
+            SwitchScreenOpts::default().with_update(),
+        );
         assert!(find_entity(app, "Persistent"));
         assert!(find_entity(app, "Child"));
         assert!(!find_entity(app, "Grandchild"));
@@ -115,9 +119,51 @@ fn observer_cleanup() {
         assert!(find_entity(app, "Parent"));
         assert!(find_entity_filtered::<Allow<Internal>>(app, "Child"));
 
-        switch_screen(app, Screens::NamedEntity);
+        switch_screen(
+            app,
+            Screens::NamedEntity,
+            SwitchScreenOpts::default().with_update(),
+        );
         assert!(!find_entity(app, "Parent"));
         assert!(!find_entity_filtered::<Allow<Internal>>(app, "Child"));
+        AppExit::Success
+    })
+    .run();
+}
+
+#[test]
+fn scoped_systems() {
+    Runner::new(|app| {
+        app.add_plugins(TfwPlugin {
+            settings: TfwSettings {
+                initial_screen: Screens::ScopedSystem.into(),
+            },
+        });
+
+        for i in 1..=3 {
+            app.update();
+            let val = app.world().resource::<ScopedSystemValue>();
+            assert_eq!(**val, i);
+        }
+
+        {
+            switch_screen(
+                app,
+                Screens::Empty,
+                SwitchScreenOpts::default().with_update(),
+            );
+            let val = app.world().resource::<ScopedSystemValue>();
+            assert_eq!(**val, 3);
+        }
+
+        // this resets the value
+        switch_screen(app, Screens::ScopedSystem, SwitchScreenOpts::default());
+        for i in 1..=3 {
+            app.update();
+            let val = app.world().resource::<ScopedSystemValue>();
+            assert_eq!(**val, i);
+        }
+
         AppExit::Success
     })
     .run();

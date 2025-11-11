@@ -49,13 +49,39 @@ pub fn log_hierarchy(app: &mut App) {
     info!("{output}")
 }
 
+#[derive(Default)]
+pub struct SwitchScreenOpts {
+    pub log_hierarchy: bool,
+    pub update: bool,
+}
+impl SwitchScreenOpts {
+    pub fn with_log_heirarchy(mut self) -> Self {
+        self.log_hierarchy = true;
+        self
+    }
+    pub fn with_update(mut self) -> Self {
+        self.update = true;
+        self
+    }
+    pub fn full() -> Self {
+        Self {
+            log_hierarchy: true,
+            update: true,
+        }
+    }
+}
+
 /// Triggers [SwitchToScreen], then calls update and logs the world hierarchy.
-pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>) {
+pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>, opts: SwitchScreenOpts) {
     let screen = screen.into();
-    info!("SwitchToScreen({screen:?}) (about to update)");
+    info!("SwitchToScreen({screen:?})");
     app.world_mut().trigger(SwitchToScreen(screen));
-    app.update();
-    log_hierarchy(app);
+    if opts.update {
+        app.update();
+    }
+    if opts.log_hierarchy {
+        log_hierarchy(app);
+    }
 }
 
 /// Searches for an entity with the given [Name] component.

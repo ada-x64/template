@@ -51,4 +51,4 @@ jobs:
           log_level: info
 
       - run: "rustup component list --installed"
-      - run: "MISE_ENV=ci mise check ::: test --rust-log app=debug,bevy=debug,avian3d=debug,tnua3d=debug"
+      - run: "RUST_BACKTRACE=1 RUST_LOG=app=debug,tfw=debug MISE_ENV=ci mise check ::: test"
