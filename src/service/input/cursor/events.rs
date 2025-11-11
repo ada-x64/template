@@ -6,21 +6,8 @@ fn on_capture_cursor(
     _: On<Complete<PACaptureCursor>>,
     mut cursor: Single<&mut CursorOptions, With<PrimaryWindow>>,
     mut commands: Commands,
-    ictx_cam_default: Query<
-        // TODO: Replace with generic CameraController so we can toggle controllers separately from views
-        (Entity, &Camera),
-        (
-            With<ContextActivity<ICtxTrackingCam>>,
-            Without<ContextActivity<FlyCam>>,
-        ),
-    >,
-    ictx_flycam: Query<
-        (Entity, &Camera),
-        (
-            With<ContextActivity<FlyCam>>,
-            Without<ContextActivity<ICtxTrackingCam>>,
-        ),
-    >,
+    ictx_cam_default: Query<(Entity, &Camera), (With<TrackingCam>, Without<FlyCam>)>,
+    ictx_flycam: Query<(Entity, &Camera), (With<FlyCam>, Without<TrackingCam>)>,
 ) {
     cursor.visible = false;
     cursor.grab_mode = CursorGrabMode::Locked;
@@ -29,12 +16,12 @@ fn on_capture_cursor(
         if let Ok((ictx, cam)) = ictx_cam_default.single() {
             commands
                 .entity(ictx)
-                .insert(ContextActivity::<ICtxTrackingCam>::new(cam.is_active));
+                .insert(ContextActivity::<CameraController>::new(cam.is_active));
         }
         if let Ok((ictx, cam)) = ictx_flycam.single() {
             commands
                 .entity(ictx)
-                .insert(ContextActivity::<FlyCam>::new(cam.is_active));
+                .insert(ContextActivity::<CameraController>::new(cam.is_active));
         }
     }
 }
@@ -42,7 +29,7 @@ fn on_release_cursor(
     _: On<Complete<PAReleaseCursor>>,
     mut cursor: Single<&mut CursorOptions, With<PrimaryWindow>>,
     mut commands: Commands,
-    ictx_cam_default: Query<Entity, With<ContextActivity<ICtxTrackingCam>>>,
+    ictx_cam_default: Query<Entity, With<ContextActivity<CameraController>>>,
     #[cfg(feature = "dev")] ictx_flycam: Query<Entity, With<ContextActivity<FlyCam>>>,
 ) {
     debug!("release_mouse");
@@ -51,14 +38,14 @@ fn on_release_cursor(
     if let Ok(ictx_default) = ictx_cam_default.single() {
         commands
             .entity(ictx_default)
-            .insert(ContextActivity::<ICtxTrackingCam>::INACTIVE);
+            .insert(ContextActivity::<CameraController>::INACTIVE);
     }
     #[cfg(feature = "dev")]
     {
         if let Ok(ictx_flycam) = ictx_flycam.single() {
             commands
                 .entity(ictx_flycam)
-                .insert(ContextActivity::<FlyCam>::INACTIVE);
+                .insert(ContextActivity::<CameraController>::INACTIVE);
         }
     }
 }

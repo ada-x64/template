@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, screen::dev::camera_test};
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
 pub struct CameraTestSettings;
@@ -24,7 +24,6 @@ fn init(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut cam_list: ResMut<CameraList>,
 ) {
     // spawn everything
     let cube = meshes.add(Cuboid::default());
@@ -56,16 +55,13 @@ fn init(
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
     commands.trigger(SpawnGlobalCtx);
     commands.trigger(SpawnCursorCapture);
-    let tc = commands
-        .spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")))
-        .id();
-    let fc = commands.spawn((flycam_bundle(), Name::new("Fly Cam"))).id();
-    **cam_list = vec![fc, tc];
+    commands.spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")));
+    commands.spawn((flycam_bundle(), Name::new("Fly Cam")));
 }
 
 pub fn plugin(app: &mut App) {
     ScreenScopeBuilder::<CameraTestScreen>::fixed()
-        .add_systems(camera_test_systems().take())
-        .add_systems(tracking_cam_systems().take())
+        .add_systems(camera_test::systems().take())
+        .add_systems(camera_systems().take())
         .build(app);
 }
