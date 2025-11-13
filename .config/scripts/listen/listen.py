@@ -13,12 +13,14 @@ from typing import cast, TypeVar
 from threading import Thread
 import urllib.request
 import signal
+import re
 
 # data
 
 # todo: probably get this from an env variable or argument
 # echo pepperwepper | sha256sum
 pw = "08c505587bc1244785fb5311e8b0498adebe05117a145fe53215c2971db33d14"
+env_expr = re.compile(r"(\w+)=(\"[^\"]*\"|'[^']*'|[^\\w]+)")
 
 
 class Mode(Enum):
@@ -117,8 +119,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             args = shlex.split(data.args)
             if data.env != "":
                 env = data.env.split(" ")
-                env = dict(s.split("=") for s in env)
-                env = {**os.environ, **env} if env else None
+                env_dict = dict()
+                for s in env:
+                    match = env_expr.match(s)
+                    if match is not None:
+                        env_dict[match.group(1)] = match.group(2)
+                    else:
+                        self.log_error(f"Invalid env variable! {s}")
+                        self.send(400, f"Invalid env variable! {s}")
+                        return
+                env = {**os.environ, **env_dict} if data.env else None
             else:
                 env = None
             self.log_message(f"Running {path} {args}")
