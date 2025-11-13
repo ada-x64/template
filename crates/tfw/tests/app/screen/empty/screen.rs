@@ -4,15 +4,13 @@ use crate::prelude::*;
 pub struct EmptyScreen;
 impl Screen for EmptyScreen {
     type SETTINGS = EmptySettings;
+    type ASSETS = EmptyAssetCollection;
     fn name() -> ScreenType {
         Screens::Empty.into()
-    }
-    fn init<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {
-        debug!("in init (empty)");
     }
 }
 
 pub fn plugin(app: &mut App) {
     debug!("in test plugin");
-    ScreenScopeBuilder::<EmptyScreen>::fixed().build(app);
+    ScreenScopeBuilder::<EmptyScreen>::new(app).build();
 }

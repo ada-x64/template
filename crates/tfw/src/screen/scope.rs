@@ -14,58 +14,79 @@ pub use crate::prelude::*;
 /// world is in the given ReadyState. Schedules can run in either [Main] or
 /// [FixedMain]. The given systems will run after [Update] or
 /// [FixedUpdate].
-pub struct ScreenScopeBuilder<S>
+pub struct ScreenScopeBuilder<'a, S>
 where
     S: Screen,
 {
     schedule: Schedule,
+    fixed_schedule: Schedule,
     scope: ScreenScope<S>,
-    fixed: bool,
+    fixed_scope: ScreenScope<S>,
+    app: &'a mut App,
+    order: Order,
+    fixed_order: Order,
 }
 
-impl<S> Default for ScreenScopeBuilder<S>
+impl<'a, S> ScreenScopeBuilder<'a, S>
 where
     S: Screen,
 {
-    fn default() -> Self {
-        Self::new_inner(ScreenScope::<S>::Update, false)
-    }
-}
-impl<S> ScreenScopeBuilder<S>
-where
-    S: Screen,
-{
-    fn new_inner(scope: ScreenScope<S>, fixed: bool) -> Self {
-        let schedule = Schedule::new(scope);
+    pub fn new(app: &'a mut App) -> Self {
+        let scope = ScreenScope::<S>::Main;
+        let fixed_scope = ScreenScope::<S>::Fixed;
         Self {
-            schedule,
+            schedule: Schedule::new(scope),
+            fixed_schedule: Schedule::new(fixed_scope),
             scope,
-            fixed,
+            fixed_scope,
+            order: Order::After,
+            fixed_order: Order::After,
+            app,
         }
     }
 
-    pub fn fixed() -> Self {
-        Self::new_inner(ScreenScope::<S>::FixedUpdate, true)
+    /// Sets when this screen's systems run relative to the [Update] in the [Main] schedule
+    pub fn with_order(mut self, order: Order) -> Self {
+        self.order = order;
+        self
     }
 
-    /// Add systems to the schedule scope.
-    /// In order to scope observers, use `on_enter`
+    /// Sets when this screen's fixed systems run relative to the [FixedMain]
+    /// schedule
+    pub fn with_fixed_order(mut self, order: Order) -> Self {
+        self.fixed_order = order;
+        self
+    }
+
+    /// Add systems to the schedule scope. Will run before or after [Update]
+    /// according to the builder's [Order]
     pub fn add_systems<M>(mut self, systems: impl IntoScheduleConfigs<ScheduleSystem, M>) -> Self {
         self.schedule.add_systems(systems.in_set(self.scope));
         self
     }
 
-    /// Builds the schedule. It will run after [Update], or [FixedUpdate] if
-    /// fixed.
-    pub fn build(self, app: &mut App) {
-        if self.fixed {
-            self.build_inner(app, Order::After(FixedUpdate));
-        } else {
-            self.build_inner(app, Order::After(Update));
-        };
+    /// Add systems to the fixed schedule scope. Will run before or after
+    /// [FixedUpdate] according to the builder's [Order]
+    pub fn add_systems_fixed<M>(
+        mut self,
+        systems: impl IntoScheduleConfigs<ScheduleSystem, M>,
+    ) -> Self {
+        self.fixed_schedule.add_systems(systems.in_set(self.scope));
+        self
     }
 
-    fn build_inner<L: ScheduleLabel>(self, app: &mut App, order: Order<L>) {
+    /// Adds a system which will run when the screen finishes loading its
+    /// systems. This is a shorthand for
+    /// `app.add_systems(OnEnter(ScreenLoadingState::<S>::Ready), systems)`.
+    pub fn on_ready<M>(self, systems: impl IntoScheduleConfigs<ScheduleSystem, M>) -> Self {
+        self.app
+            .add_systems(OnEnter(ScreenLoadingState::<S>::Ready), systems);
+        self
+    }
+
+    /// Builds the schedule and adds it to the app.
+    pub fn build(self) {
+        let app = self.app;
         debug!("Building screen '{:?}'", S::name());
 
         // insert data
@@ -77,12 +98,12 @@ where
             OnEnter(CurrentScreen(S::name())),
             |mut commands: Commands| {
                 debug!("OnEnter({:?})", S::name());
-                commands.spawn(ScreenWrapper(S::default()));
+                commands.spawn(S::default());
             },
         );
         app.add_systems(
             OnExit(CurrentScreen(S::name())),
-            |mut commands: Commands, e: Single<Entity, With<ScreenWrapper<S>>>| {
+            |mut commands: Commands, e: Single<Entity, With<S>>| {
                 debug!("OnExit({:?})", S::name());
                 commands.entity(*e).despawn();
             },
@@ -92,23 +113,38 @@ where
         // scope systems
         app.configure_sets(
             self.scope,
-            self.scope.run_if(in_state(CurrentScreen(S::name()))),
+            self.scope.run_if(
+                in_state(CurrentScreen(S::name())).and(in_state(ScreenLoadingState::<S>::Ready)),
+            ),
+        );
+        app.configure_sets(
+            self.fixed_scope,
+            self.fixed_scope.run_if(
+                in_state(CurrentScreen(S::name())).and(in_state(ScreenLoadingState::<S>::Ready)),
+            ),
         );
 
-        // add to main schedule
-        if self.fixed {
-            let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
-            match order {
-                Order::Before(l) => ms_order.insert_before(l, self.scope),
-                Order::After(l) => ms_order.insert_after(l, self.scope),
-            }
-        } else {
-            let mut ms_order = app.world_mut().resource_mut::<MainScheduleOrder>();
-            match order {
-                Order::Before(l) => ms_order.insert_before(l, self.scope),
-                Order::After(l) => ms_order.insert_after(l, self.scope),
-            }
+        // add to fixed main
+        let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
+        match self.fixed_order {
+            Order::Before => ms_order.insert_before(FixedUpdate, self.fixed_scope),
+            Order::After => ms_order.insert_after(FixedUpdate, self.fixed_scope),
         }
+
+        // add to main schedule
+        let mut ms_order = app.world_mut().resource_mut::<MainScheduleOrder>();
+        match self.order {
+            Order::Before => ms_order.insert_before(Update, self.scope),
+            Order::After => ms_order.insert_after(Update, self.scope),
+        }
+
+        // loading state
+        app.init_state::<ScreenLoadingState<S>>();
+        app.add_loading_state(
+            LoadingState::new(ScreenLoadingState::<S>::Loading)
+                .continue_to_state(ScreenLoadingState::<S>::Ready)
+                .load_collection::<S::ASSETS>(),
+        );
 
         // configure unload
         app.add_schedule(Schedule::new(UnloadSchedule::<S>::default()));
@@ -120,31 +156,32 @@ where
 }
 
 /// Specifies the order of execution for a schedule.
-/// See [Main] and [FixedMain] for default schedule orders.
-pub enum Order<L: ScheduleLabel> {
-    Before(L),
-    After(L),
+pub enum Order {
+    Before,
+    After,
 }
 
-// Manuallly triggered schedule which is called when the screen is unloaded.
+/// Manuallly triggered schedule which is called when the screen is unloaded.
 #[derive(ScheduleLabel, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
 struct UnloadSchedule<T: Screen>(PhantomData<T>);
 
 // TODO: Would be nice to not have duplicates of this function.
 // Unfortunately, it seems impossible to convert from Screens to impl Screen
 // (Screen is not dyn compatible)
-fn on_switch_screen<T: Screen>(
+fn on_switch_screen<S: Screen>(
     trigger: On<SwitchToScreen>,
     mut commands: Commands,
     current_screen: Res<State<CurrentScreen>>,
+    mut next_loading_state: ResMut<NextState<ScreenLoadingState<S>>>,
     mut next_screen: ResMut<NextScreen>,
     mut next_state: ResMut<NextState<CurrentScreenStatus>>,
 ) {
-    debug!("on_switch_screen ({:?})", T::name());
-    if ***current_screen == T::name() {
+    debug!("on_switch_screen ({:?})", S::name());
+    if ***current_screen == S::name() {
         next_state.set(CurrentScreenStatus(ScreenStatus::Unloading));
         *next_screen = NextScreen(Some(trigger.0));
-        commands.run_schedule(UnloadSchedule::<T>::default());
+        commands.run_schedule(UnloadSchedule::<S>::default());
+        next_loading_state.set(ScreenLoadingState::<S>::Loading);
     }
 }
 

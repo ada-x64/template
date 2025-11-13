@@ -1,9 +1,3 @@
-#[allow(unused_imports, reason = "used for docs")]
-use bevy::{
-    app::{FixedMain, FixedMainScheduleOrder, MainScheduleOrder},
-    ecs::{schedule::ScheduleLabel, system::ScheduleSystem},
-};
-
 pub use crate::prelude::*;
 
 /// Implementation trait for Screen components.
@@ -18,19 +12,28 @@ pub use crate::prelude::*;
 /// is called before the screen unloads and is designed to run
 /// any cleanup logic before transitioning.
 pub trait Screen:
-    Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
+    Component
+    + Sized
+    + Default
+    + std::fmt::Debug
+    + Clone
+    + Copy
+    + Eq
+    + std::hash::Hash
+    + Send
+    + Sync
+    + 'static
 {
     /// The associated settings type. Set as [EmptySettings] for no settings.
     type SETTINGS: Resource + FromWorld;
+    /// Any associated assets which will load before the screen is considered
+    /// ready. Use [EmptyAssetCollection] to skip loading.
+    /// If you want to load in assets without blocking the scoped systems,
+    /// you should include asset collections and states within a service.
+    type ASSETS: AssetCollection;
 
     /// Used to get the screen name.
     fn name() -> ScreenType;
-
-    /// Used as the component wrapper's [on_add
-    /// hook.](https://docs.rs/bevy/latest/bevy/prelude/trait.Component.html#adding-components-hooks)
-    /// Use this to scope systems and observers. In order to get settings, use
-    /// `world.get_resource::<Self::SETTINGS>();`
-    fn init<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {}
 
     /// Called when the screen is about to unload.
     /// Use this to perform any necessary cleanup before the screen transitions.

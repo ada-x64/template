@@ -9,21 +9,20 @@ pub struct ScopedSystemSettings {
 pub struct ScopedSystemScreen;
 impl Screen for ScopedSystemScreen {
     type SETTINGS = ScopedSystemSettings;
-
+    type ASSETS = EmptyAssetCollection;
     fn name() -> ScreenType {
         Screens::ScopedSystem.into()
     }
+}
 
-    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        info!("In ScopedSystemScreen");
-        let value = world.resource::<ScopedSystemSettings>().value;
-        let mut res = world.resource_mut::<ScopedSystemValue>();
-        **res = value;
-    }
+fn init(settings: Res<ScopedSystemSettings>, mut value: ResMut<ScopedSystemValue>) {
+    info!("In ScopedSystemScreen");
+    **value = settings.value;
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<ScopedSystemScreen>::default()
+    ScreenScopeBuilder::<ScopedSystemScreen>::new(app)
         .add_systems(scoped_service_systems().take())
-        .build(app);
+        .on_ready(init)
+        .build();
 }

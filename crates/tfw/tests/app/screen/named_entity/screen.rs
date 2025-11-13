@@ -9,18 +9,19 @@ pub struct NamedEntityScreenSettings {
 pub struct NamedEntityScreen;
 impl Screen for NamedEntityScreen {
     type SETTINGS = NamedEntityScreenSettings;
+    type ASSETS = EmptyAssetCollection;
     fn name() -> ScreenType {
         Screens::NamedEntity.into()
     }
-    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        debug!("in init (Test)");
-        let settings = world.resource::<Self::SETTINGS>().clone();
-        world
-            .commands()
-            .spawn(Name::new(settings.entity_name.clone()));
-    }
+}
+
+fn on_ready(settings: Res<NamedEntityScreenSettings>, mut commands: Commands) {
+    debug!("on enter (Test)");
+    commands.spawn(Name::new(settings.entity_name.clone()));
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<NamedEntityScreen>::fixed().build(app);
+    ScreenScopeBuilder::<NamedEntityScreen>::new(app)
+        .on_ready(on_ready)
+        .build();
 }

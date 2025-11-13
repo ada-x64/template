@@ -1,4 +1,4 @@
-use crate::{prelude::*, test_impl::service::scoped_system::data::ScopedSystemValue};
+use crate::prelude::*;
 
 pub fn update_resource(mut resource: ResMut<ScopedSystemValue>) {
     *resource = ScopedSystemValue(resource.0 + 1);

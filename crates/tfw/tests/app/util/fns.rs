@@ -30,6 +30,12 @@ fn log_hierarchy_inner(app: &mut App, output: &mut String, entities: Vec<Entity>
     }
 }
 
+pub fn log_status(app: &mut App) {
+    let screen = app.world().resource::<State<CurrentScreen>>();
+    let status = app.world().resource::<State<CurrentScreenStatus>>();
+    info!("Current screen: {:?} ({:?})", ***screen, ***status)
+}
+
 pub fn log_hierarchy(app: &mut App) {
     let type_registry = app.world().resource::<AppTypeRegistry>().clone();
     let type_registry = type_registry.read();
@@ -71,17 +77,11 @@ impl SwitchScreenOpts {
     }
 }
 
-/// Triggers [SwitchToScreen], then calls update and logs the world hierarchy.
-pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>, opts: SwitchScreenOpts) {
+/// Triggers [SwitchToScreen]
+pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>) {
     let screen = screen.into();
     info!("SwitchToScreen({screen:?})");
     app.world_mut().trigger(SwitchToScreen(screen));
-    if opts.update {
-        app.update();
-    }
-    if opts.log_hierarchy {
-        log_hierarchy(app);
-    }
 }
 
 /// Searches for an entity with the given [Name] component.
@@ -111,3 +111,6 @@ pub fn _find_entity_with<C: Component + PartialEq>(
     q.iter(app.world())
         .any(|(ename, c)| (**ename).eq(&name.to_string()) && *c == value)
 }
+
+#[derive(Resource, Debug, Default, Deref, DerefMut)]
+pub struct Step(u32);

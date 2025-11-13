@@ -12,6 +12,7 @@ pub mod prelude {
     pub use super::data::*;
     pub use super::scope::*;
     pub use super::trait_impl::*;
+    pub use bevy_asset_loader::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {
