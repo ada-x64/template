@@ -6,7 +6,7 @@ pub fn flycam_bundle() -> impl Bundle {
         FlyCam,
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         RenderLayers::from(RenderLayer::DEFAULT | RenderLayer::GIZMOS_3D | RenderLayer::PARTICLES),
-        actions!(ICtxFlyCam[
+        actions!(CameraController[
             (
                 Action::<PAMoveCam>::new(),
                 DeadZone::default(),

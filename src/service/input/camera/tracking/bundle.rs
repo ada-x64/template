@@ -21,10 +21,9 @@ pub fn tracking_cam_bundle(tracking: Entity) -> impl Bundle {
         ),
         // actions
         (
-            ContextActivity::<ICtxTrackingCam>::ACTIVE,
-            ICtxTrackingCam,
+            ContextActivity::<CameraController>::ACTIVE,
             actions![
-                ICtxTrackingCam[
+                CameraController[
                 (
                     Action::<PARotateCam>::new(),
                     Bindings::spawn((

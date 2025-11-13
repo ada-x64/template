@@ -7,7 +7,6 @@ fn spawn_player_root(
     _: On<SpawnPlayerRoot>,
     mut commands: Commands,
     player_assets: Res<PlayerAssets>,
-    mut camera_list: ResMut<CameraList>,
 ) {
     let player_entt = commands
         .spawn((
@@ -40,20 +39,17 @@ fn spawn_player_root(
         ))
         .id();
 
-    let cam = commands
-        .spawn((
-            Name::new("PlayerCam"),
-            ScreenScoped,
-            (LockedAxes::new().lock_rotation_z(),),
-            (
-                #[cfg(feature = "dev")]
-                ShowLightGizmo::default(),
-                PointLight::default(),
-            ),
-            tracking_cam_bundle(player_entt),
-        ))
-        .id();
-    camera_list.push(cam);
+    commands.spawn((
+        Name::new("PlayerCam"),
+        ScreenScoped,
+        (LockedAxes::new().lock_rotation_z(),),
+        (
+            #[cfg(feature = "dev")]
+            ShowLightGizmo::default(),
+            PointLight::default(),
+        ),
+        tracking_cam_bundle(player_entt),
+    ));
 }
 
 fn on_move(trigger: On<Fire<PAMove>>, mut controller: Single<&mut PlayerController>) {

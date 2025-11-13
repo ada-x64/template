@@ -33,13 +33,7 @@ pub enum CameraOrder {
     Ui,
 }
 
-/// A global list of all the cameras in the order they should be presented
-/// for the cycle_cam dev command.
-// TODO: Could this just be a query?
-// The question is: do queries iterate based on how long the item has been there?
-// It doesn't seem like a reliable metric.
-#[derive(Resource, Debug, Deref, DerefMut, Default)]
-pub struct CameraList(Vec<Entity>);
+/// Marks a camera as eligble to be controlled.
 
 /// The currently active camera view.
 /// For the cycle_cam dev command.

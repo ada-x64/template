@@ -1,6 +1,10 @@
+#[cfg(feature = "dev")]
+use clap::ValueEnum;
+
 use crate::prelude::*;
 
-#[derive(Debug, Reflect, Copy, Clone)]
+#[derive(Debug, Reflect, Copy, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "dev", derive(ValueEnum))]
 pub enum CameraControllerKind {
     Fly,
     Tracking,
@@ -9,6 +13,7 @@ pub enum CameraControllerKind {
 #[derive(Debug, Reflect, Component, Copy, Clone)]
 #[require(Camera {is_active: false, ..Default::default()}, Camera3d)]
 #[component(immutable)]
+#[component(on_insert = super::events::insert_camera_controller)]
 pub struct CameraController {
     /// Is the controller enabled?
     pub enabled: bool,
