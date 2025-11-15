@@ -16,60 +16,20 @@ use bevy::{
     window::ExitCondition,
 };
 
-#[derive(Resource, Debug, Deref, DerefMut, Default)]
-pub struct TestSuccess(bool);
-pub trait TestFn: Fn(&mut App) -> bool {}
-impl<T> TestFn for T where T: Fn(&mut App) -> bool {}
+pub trait TestFn: Fn(&mut App) {}
+impl<T> TestFn for T where T: Fn(&mut App) {}
 
-/// Runs a headless instance. In order to succesfully exit the app, make sure
-/// you send an AppExit event. This can be accomplished with an
-/// [`EventWriter`] or with [`World::send_event`]. This does _not_
-/// work with [`Commands::trigger`].
-///
-/// Basic usage:
-/// ```rust
-/// use bevy::prelude::*;
-/// use integration::Runner;
-///
-/// fn example_test() -> AppExit {
-///    Runner::new(|app| {
-///        app.add_plugins(MyPlugin);
-///        app.add_systems(Update, |mut events: EventWriter<AppExit>| {
-///            events.write(AppExit::Success);
-///        });
-///        app.run()
-///    })
-///    .run()
-/// }
-///
-/// struct MyPlugin;
-/// impl Plugin for MyPlugin {
-///    fn build(&self, _: &mut App) {
-///        //...
-///    }
-/// }
-/// ```
-pub struct Runner {
-    test_fn: Box<dyn TestFn>,
-    timeout: f32,
+#[derive(Debug)]
+pub struct TestRunnerPlugin {
+    pub timeout: f32,
 }
-impl Runner {
-    /// Initializes the test runner.
-    pub fn new(test: impl TestFn + 'static) -> Self {
-        Self {
-            test_fn: Box::new(test),
-            timeout: 3.,
-        }
+impl Default for TestRunnerPlugin {
+    fn default() -> Self {
+        Self { timeout: 5. } // 5 sec
     }
-    /// Sets timeout in seconds.
-    pub fn with_timeout(&mut self, timeout: f32) -> &mut Self {
-        self.timeout = timeout;
-        self
-    }
-    /// Runs the test.
-    pub fn run(&mut self) {
-        debug!("Initializing headless app.");
-        let mut app = App::new();
+}
+impl Plugin for TestRunnerPlugin {
+    fn build(&self, app: &mut App) {
         app.add_plugins((
             TaskPoolPlugin::default(),
             FrameCountPlugin,
@@ -91,13 +51,6 @@ impl Runner {
             },
             AssetPlugin::default(),
             RenderPlugin {
-                // render_creation: RenderCreation::Manual(RenderResources(
-                //     RenderDevice::new(WgpuWrapper::new(device)),
-                //     RenderQueue(Arc::new(WgpuWrapper::new(queue))),
-                //     RenderAdapterInfo(WgpuWrapper::new(adapter_info)),
-                //     RenderAdapter(Arc::new(WgpuWrapper::new(adapter))),
-                //     RenderInstance(Arc::new(WgpuWrapper::new(instance))),
-                // )),
                 render_creation: RenderCreation::Automatic(WgpuSettings {
                     backends: None,
                     ..Default::default()
@@ -117,45 +70,48 @@ impl Runner {
             ScenePlugin,
         ));
 
-        app.init_resource::<TestSuccess>();
         let timeout = self.timeout;
         app.add_systems(
             Update,
-            move |time: Res<Time<Real>>,
-                  mut events: MessageWriter<AppExit>,
-                  mut test_success: ResMut<TestSuccess>| {
+            move |time: Res<Time<Real>>, mut events: MessageWriter<AppExit>| {
                 let elapsed = time.elapsed_secs();
                 if elapsed > timeout {
                     error!("Timeout after {elapsed}s");
                     events.write(AppExit::error());
-                    **test_success = false;
                 }
             },
         );
-
-        debug!("Running internal function.");
-        let test_result = self.test_fn.as_mut()(&mut app);
-        assert!(test_result);
+        app.add_systems(PostUpdate, |mut reader: MessageReader<AppExit>| {
+            for msg in reader.read() {
+                error!("Obtained exit message {msg:?}");
+            }
+        });
     }
 }
 
 #[test]
-#[should_panic]
 fn timeout() {
-    Runner::new(|app| app.run().is_success())
-        .with_timeout(0.5)
-        .run();
+    let mut app = App::new();
+    app.add_plugins(TestRunnerPlugin { timeout: 0.5 });
+    assert!(app.run().is_error());
 }
 
 #[test]
-#[should_panic]
 fn explicit_failure() {
-    Runner::new(|app| {
-        app.add_systems(First, |mut commands: Commands| {
-            commands.write_message(AppExit::error());
-        })
-        .run()
-        .is_success()
-    })
-    .run();
+    let mut app = App::new();
+    app.add_plugins(TestRunnerPlugin::default());
+    app.add_systems(First, |mut commands: Commands| {
+        commands.write_message(AppExit::error());
+    });
+    assert!(app.run().is_error());
+}
+
+#[test]
+fn explicit_success() {
+    let mut app = App::new();
+    app.add_plugins(TestRunnerPlugin::default());
+    app.add_systems(First, |mut commands: Commands| {
+        commands.write_message(AppExit::Success);
+    });
+    assert!(app.run().is_success());
 }

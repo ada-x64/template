@@ -33,8 +33,6 @@ pub enum CameraOrder {
     Ui,
 }
 
-/// Marks a camera as eligble to be controlled.
-
 /// The currently active camera view.
 /// For the cycle_cam dev command.
 #[derive(Resource, Debug, Deref, DerefMut, Default)]

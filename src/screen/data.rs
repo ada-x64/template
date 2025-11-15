@@ -15,11 +15,8 @@ pub enum Screens {
     #[cfg(feature = "dev")]
     CameraTest,
 }
-impl From<Screens> for ScreenType {
+impl From<Screens> for ScreenName {
     fn from(value: Screens) -> Self {
         enum_hash(&value).unwrap().into()
     }
 }
-
-#[derive(AssetCollection, Resource)]
-pub struct EmptyAssetCollection {}

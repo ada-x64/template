@@ -5,16 +5,16 @@ pub struct SplashScreen;
 
 impl Screen for SplashScreen {
     type SETTINGS = EmptySettings;
+    type ASSETS = NoAssets;
 
-    fn name() -> ScreenType {
-        Screens::Splash.into()
-    }
-
-    fn init<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {
-        debug!("init (splash)")
+    fn options() -> ScreenOptions {
+        ScreenOptions {
+            name: Screens::Splash.into(),
+            strategy: LoadingStrategy::Nonblocking,
+        }
     }
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<SplashScreen>::fixed().build(app);
+    ScreenScopeBuilder::<SplashScreen>::new(app).build();
 }

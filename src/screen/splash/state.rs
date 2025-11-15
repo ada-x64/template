@@ -6,6 +6,6 @@ pub fn plugin(app: &mut App) {
     app.add_loading_state(
         LoadingState::new(ScreenLoadingState::<SplashScreen>::Loading)
             .continue_to_state(ScreenLoadingState::<SplashScreen>::Ready)
-            .load_collection::<EmptyAssetCollection>(),
+            .load_collection::<NoAssets>(),
     );
 }

@@ -4,9 +4,12 @@ use crate::prelude::*;
 pub struct EmptyScreen;
 impl Screen for EmptyScreen {
     type SETTINGS = EmptySettings;
-    type ASSETS = EmptyAssetCollection;
-    fn name() -> ScreenType {
-        Screens::Empty.into()
+    type ASSETS = NoAssets;
+    fn options() -> ScreenOptions {
+        ScreenOptions {
+            name: Screens::Empty.into(),
+            strategy: LoadingStrategy::Nonblocking,
+        }
     }
 }
 

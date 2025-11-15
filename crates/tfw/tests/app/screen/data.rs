@@ -9,7 +9,7 @@ pub enum Screens {
     NamedEntity,
     ScopedSystem,
 }
-impl From<Screens> for ScreenType {
+impl From<Screens> for ScreenName {
     fn from(value: Screens) -> Self {
         enum_hash(&value).unwrap().into()
     }

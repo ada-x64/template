@@ -39,8 +39,8 @@ where
             fixed_schedule: Schedule::new(fixed_scope),
             scope,
             fixed_scope,
-            order: Order::After,
-            fixed_order: Order::After,
+            order: Order::default(),
+            fixed_order: Order::default(),
             app,
         }
     }
@@ -111,18 +111,25 @@ where
         app.add_observer(on_switch_screen::<S>);
 
         // scope systems
-        app.configure_sets(
-            self.scope,
-            self.scope.run_if(
-                in_state(CurrentScreen(S::name())).and(in_state(ScreenLoadingState::<S>::Ready)),
-            ),
-        );
-        app.configure_sets(
-            self.fixed_scope,
-            self.fixed_scope.run_if(
-                in_state(CurrentScreen(S::name())).and(in_state(ScreenLoadingState::<S>::Ready)),
-            ),
-        );
+        let (config, fixed_config) = match S::strategy() {
+            LoadingStrategy::Blocking => {
+                let condition = in_state(CurrentScreen(S::name()))
+                    .and(in_state(ScreenLoadingState::<S>::Ready));
+                (
+                    self.scope.run_if(condition.clone()),
+                    self.fixed_scope.run_if(condition),
+                )
+            }
+            LoadingStrategy::Nonblocking => {
+                let condition = in_state(CurrentScreen(S::name()));
+                (
+                    self.scope.run_if(condition.clone()),
+                    self.fixed_scope.run_if(condition),
+                )
+            }
+        };
+        app.configure_sets(self.scope, config);
+        app.configure_sets(self.fixed_scope, fixed_config);
 
         // add to fixed main
         let mut ms_order = app.world_mut().resource_mut::<FixedMainScheduleOrder>();
@@ -156,7 +163,9 @@ where
 }
 
 /// Specifies the order of execution for a schedule.
+#[derive(Default, Debug)]
 pub enum Order {
+    #[default]
     Before,
     After,
 }

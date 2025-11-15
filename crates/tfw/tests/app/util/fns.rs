@@ -5,14 +5,14 @@ use bevy_inspector_egui::bevy_inspector::{
     hierarchy::{Hierarchy, SelectedEntities},
 };
 
-fn log_hierarchy_inner(app: &mut App, output: &mut String, entities: Vec<Entity>, depth: u32) {
+fn log_hierarchy_inner(world: &mut World, output: &mut String, entities: Vec<Entity>, depth: u32) {
     for &entity in &entities {
-        let entity_name = guess_entity_name(app.world(), entity);
+        let entity_name = guess_entity_name(world, entity);
         let mut tags = vec![];
-        if app.world().entity(entity).get::<Persistent>().is_some() {
+        if world.entity(entity).get::<Persistent>().is_some() {
             tags.push("Persistent");
         }
-        if app.world().entity(entity).get::<Observer>().is_some() {
+        if world.entity(entity).get::<Observer>().is_some() {
             tags.push("Observer");
         }
         let indent = (0..depth).map(|_| "-").collect::<Vec<_>>().join("");
@@ -23,9 +23,9 @@ fn log_hierarchy_inner(app: &mut App, output: &mut String, entities: Vec<Entity>
 
         *output = format!("{output}\n{indent}> {entity_name} {tags}");
 
-        if let Some(children) = app.world().entity(entity).get::<Children>() {
+        if let Some(children) = world.entity(entity).get::<Children>() {
             let children = children.iter().collect::<Vec<Entity>>();
-            log_hierarchy_inner(app, output, children, depth + 1);
+            log_hierarchy_inner(world, output, children, depth + 1);
         }
     }
 }
@@ -36,11 +36,11 @@ pub fn log_status(app: &mut App) {
     info!("Current screen: {:?} ({:?})", ***screen, ***status)
 }
 
-pub fn log_hierarchy(app: &mut App) {
-    let type_registry = app.world().resource::<AppTypeRegistry>().clone();
+pub fn log_hierarchy(world: &mut World) {
+    let type_registry = world.resource::<AppTypeRegistry>().clone();
     let type_registry = type_registry.read();
     let h = Hierarchy {
-        world: app.world_mut(),
+        world,
         type_registry: &type_registry,
         selected: &mut SelectedEntities::default(),
         context_menu: None,
@@ -51,7 +51,7 @@ pub fn log_hierarchy(app: &mut App) {
     let mut root_query = h.world.query_filtered::<Entity, Without<ChildOf>>();
     let entities: Vec<_> = root_query.iter(h.world).collect();
     let mut output = String::new();
-    log_hierarchy_inner(app, &mut output, entities, 0);
+    log_hierarchy_inner(world, &mut output, entities, 0);
     info!("{output}")
 }
 
@@ -78,7 +78,7 @@ impl SwitchScreenOpts {
 }
 
 /// Triggers [SwitchToScreen]
-pub fn switch_screen(app: &mut App, screen: impl Into<ScreenType>) {
+pub fn switch_screen(app: &mut App, screen: impl Into<ScreenName>) {
     let screen = screen.into();
     info!("SwitchToScreen({screen:?})");
     app.world_mut().trigger(SwitchToScreen(screen));

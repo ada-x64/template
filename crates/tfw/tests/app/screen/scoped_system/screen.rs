@@ -9,9 +9,12 @@ pub struct ScopedSystemSettings {
 pub struct ScopedSystemScreen;
 impl Screen for ScopedSystemScreen {
     type SETTINGS = ScopedSystemSettings;
-    type ASSETS = EmptyAssetCollection;
-    fn name() -> ScreenType {
-        Screens::ScopedSystem.into()
+    type ASSETS = NoAssets;
+    fn options() -> ScreenOptions {
+        ScreenOptions {
+            name: Screens::ScopedSystem.into(),
+            strategy: LoadingStrategy::Nonblocking,
+        }
     }
 }
 

@@ -32,12 +32,41 @@ pub trait Screen:
     /// you should include asset collections and states within a service.
     type ASSETS: AssetCollection;
 
-    /// Used to get the screen name.
-    fn name() -> ScreenType;
+    /// Used to confgure the screen. See [ScreenOptions] for more details.
+    fn options() -> ScreenOptions;
+
+    fn name() -> ScreenName {
+        Self::options().name
+    }
+
+    fn strategy() -> LoadingStrategy {
+        Self::options().strategy
+    }
 
     /// Called when the screen is about to unload.
     /// Use this to perform any necessary cleanup before the screen transitions.
     fn unload() -> impl System<In = (), Out = ()> {
         IntoSystem::into_system(|| {})
     }
+}
+
+/// How should the screen load its assets?
+/// If `LoadingStrategy` is Blocking, the screen's systems will not run until
+/// loading is complete. If it is Nonblocking, the screen's systems will run
+/// regardless of asset completion status.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum LoadingStrategy {
+    Blocking,
+    Nonblocking,
+}
+impl LoadingStrategy {
+    pub fn is_blocking(&self) -> bool {
+        matches!(self, Self::Blocking)
+    }
+}
+
+/// Options for the screen.
+pub struct ScreenOptions {
+    pub strategy: LoadingStrategy,
+    pub name: ScreenName,
 }

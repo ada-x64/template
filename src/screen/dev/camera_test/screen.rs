@@ -7,13 +7,13 @@ pub struct CameraTestSettings;
 pub struct CameraTestScreen;
 impl Screen for CameraTestScreen {
     type SETTINGS = CameraTestSettings;
+    type ASSETS = NoAssets;
 
-    fn name() -> ScreenType {
-        Screens::CameraTest.into()
-    }
-
-    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        world.commands().run_system_cached(init);
+    fn options() -> ScreenOptions {
+        ScreenOptions {
+            name: Screens::CameraTest.into(),
+            strategy: LoadingStrategy::Nonblocking,
+        }
     }
 }
 
@@ -60,8 +60,9 @@ fn init(
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<CameraTestScreen>::fixed()
+    ScreenScopeBuilder::<CameraTestScreen>::new(app)
+        .on_ready(init)
         .add_systems(camera_test::systems().take())
         .add_systems(camera_systems().take())
-        .build(app);
+        .build();
 }

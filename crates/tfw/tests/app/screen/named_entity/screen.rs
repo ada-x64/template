@@ -6,22 +6,32 @@ pub struct NamedEntityScreenSettings {
 }
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[component(on_insert = init, on_remove = deinit)]
 pub struct NamedEntityScreen;
 impl Screen for NamedEntityScreen {
     type SETTINGS = NamedEntityScreenSettings;
-    type ASSETS = EmptyAssetCollection;
-    fn name() -> ScreenType {
-        Screens::NamedEntity.into()
+    type ASSETS = NoAssets;
+    fn options() -> ScreenOptions {
+        ScreenOptions {
+            name: Screens::NamedEntity.into(),
+            strategy: LoadingStrategy::Nonblocking,
+        }
     }
 }
 
-fn on_ready(settings: Res<NamedEntityScreenSettings>, mut commands: Commands) {
-    debug!("on enter (Test)");
-    commands.spawn(Name::new(settings.entity_name.clone()));
+fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
+    debug!("on_insert");
+    let name = world
+        .resource::<NamedEntityScreenSettings>()
+        .entity_name
+        .clone();
+    world.commands().spawn(Name::new(name));
+}
+
+fn deinit<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {
+    debug!("deinit")
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<NamedEntityScreen>::new(app)
-        .on_ready(on_ready)
-        .build();
+    ScreenScopeBuilder::<NamedEntityScreen>::new(app).build();
 }
