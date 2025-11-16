@@ -1,7 +1,6 @@
 use std::process::exit;
 
 use app::{AppSettings, prelude::*};
-use bevy::reflect::{DynamicEnum, DynamicTuple, DynamicVariant};
 use clap::{Parser, arg};
 
 mod built_info {
@@ -27,17 +26,8 @@ pub fn parse_args() -> AppSettings {
         exit(0);
     }
 
-    let initial_screen = args
-        .screen
-        .and_then(|scr| {
-            let mut tup = DynamicTuple::default();
-            tup.insert(ScreenStatus::Loading);
-            let dynamic = DynamicEnum::new(scr, DynamicVariant::Tuple(tup));
-            let res = Screens::from_reflect(&dynamic);
-            println!("opening to {res:?}");
-            res
-        })
-        .unwrap_or_default();
+    // manual default x_x
+    let initial_screen = args.screen.unwrap_or("SplashScreen".into());
 
     AppSettings {
         initial_screen,

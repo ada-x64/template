@@ -1,57 +1,34 @@
 {%- assign settings_name = name | upper_camel_case | append: "Settings" -%}
 {%- assign screen_name = name | upper_camel_case | append: "Screen" -%}
+{%- assign assets_name = name | upper_camel_case | append: "Assets" -%}
 use crate::prelude::*;
 
-{% if pedantic -%}
-/// This screen's settings. Can also be replaced with [EmptyScreenSettings] if desired.
-/// This struct can be used to dynamically change the screen's behavior.
-{%- endif %}
+{% if settings %}
 #[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
 pub struct {{settings_name -}};
-
-{% if pedantic -%}
-/// The main [Screen] implementation.
 {%- endif %}
+
+{% if assets %}
+#[derive(AssetCollection, Resource, Debug, Default)]
+pub struct {{assets_name -}} {
+    // some assets ...
+    // see bevy_asset_loader docs
+    // https://docs.rs/bevy_asset_loader/latest/bevy_asset_loader/
+}
+{%-  endif %}
+
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct {{screen_name -}};
 impl Screen for {{screen_name}} {
-    {% if pedantic -%}
-    /// Note: This can be replaced with EmptyScreenSettings
-    {%- endif %}
-    type SETTINGS = {{settings_name -}};
-
-    fn name() -> ScreenType {
-        Screens::{{- name | upper_camel_case -}}.into()
-    }
-
-    {% if pedantic -%}
-    /// Use this function to initialize your screen, e.g. by calling commands
-    /// or scoping observers.
-    {%- endif %}
-    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        let settings = world.resource::<Self::SETTINGS>().clone();
-        // ...
-    }
-
-    {% if pedantic -%}
-    /// Use this optional function to handle any unloading logic, e.g.
-    /// despawning entities, serializing state, etc.
-    fn unload() -> impl System<In = (), Out = ()> {
-        IntoSystem::into_system(|| {})
-    }
-    {%- endif %}
+    type SETTINGS = {% if settings -%} {{- settings_name -}} {%- else -%} NoSettings {%- endif -%};
+    type ASSETS = {% if assets -%} {{- assets_name -}} {%- else -%} NoAssets {%- endif %};
+    const STRATEGY: LoadingStrategy = {{strategy -}};
 }
 
 pub fn plugin(app: &mut App) {
-    {% if pedantic -%}
-    // Used `fixed` to hook into the fixed schedule and `default` to hook into
-    // the main schedule.
-    {%- endif %}
-    ScreenScopeBuilder::<{{screen_name}}>::fixed()
-    {% if pedantic -%}
-        // add systems here ...
-        // .add_systems(player_systems().take())
-        // .add_systems(tracking_cam_systems().take())
-    {%- endif %}
-        .build(app);
+    ScreenScopeBuilder::<{{screen_name}}>::new(app)
+        // .add_systems(some_service_systems().take())
+        // .on_ready(init)
+        // .on_unload(unload)
+        .build();
 }

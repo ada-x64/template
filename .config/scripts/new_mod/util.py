@@ -63,7 +63,7 @@ def get_vars(args: Args):
         screens_exists_expr=re.compile(rf"\s+{mod_camel_case},?\s+"),
         screens_pat_expr=re.compile(rf"Screens::{mod_camel_case}\s+=>\s+\"\w+\",?"),
         screens_match_expr=re.compile(
-            r"pub\s+const\s+fn\s+as_screen_type\(self\)\s+->\s+ScreenType\s+\{\n.+match self \{"
+            r"pub\s+const\s+fn\s+as_screen_type\(self\)\s+->\s+ScreenId\s+\{\n.+match self \{"
         ),
         screens_data_mod=realpath("src/screen/data.rs"),
         super_mod=realpath(join(args.module_path, "../mod.rs")),

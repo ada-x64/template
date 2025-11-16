@@ -5,17 +5,12 @@ pub struct ScopedSystemSettings {
     pub value: u32,
 }
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct ScopedSystemScreen;
 impl Screen for ScopedSystemScreen {
     type SETTINGS = ScopedSystemSettings;
     type ASSETS = NoAssets;
-    fn options() -> ScreenOptions {
-        ScreenOptions {
-            name: Screens::ScopedSystem.into(),
-            strategy: LoadingStrategy::Nonblocking,
-        }
-    }
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
 fn init(settings: Res<ScopedSystemSettings>, mut value: ResMut<ScopedSystemValue>) {

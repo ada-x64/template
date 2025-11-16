@@ -5,18 +5,13 @@ pub struct NamedEntityScreenSettings {
     pub entity_name: String,
 }
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 #[component(on_insert = init, on_remove = deinit)]
 pub struct NamedEntityScreen;
 impl Screen for NamedEntityScreen {
     type SETTINGS = NamedEntityScreenSettings;
     type ASSETS = NoAssets;
-    fn options() -> ScreenOptions {
-        ScreenOptions {
-            name: Screens::NamedEntity.into(),
-            strategy: LoadingStrategy::Nonblocking,
-        }
-    }
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
 fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {

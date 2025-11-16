@@ -20,7 +20,7 @@ pub mod prelude {
 
 #[derive(Resource, Debug, Reflect, Clone)]
 pub struct TfwSettings {
-    pub initial_screen: ScreenName,
+    pub initial_screen: String,
 }
 
 /// The main export plugin for TFW. `Screens` should be an enum with screen

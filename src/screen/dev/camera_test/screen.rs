@@ -1,20 +1,11 @@
 use crate::{prelude::*, screen::dev::camera_test};
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
-pub struct CameraTestSettings;
-
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct CameraTestScreen;
 impl Screen for CameraTestScreen {
-    type SETTINGS = CameraTestSettings;
+    type SETTINGS = NoSettings;
     type ASSETS = NoAssets;
-
-    fn options() -> ScreenOptions {
-        ScreenOptions {
-            name: Screens::CameraTest.into(),
-            strategy: LoadingStrategy::Nonblocking,
-        }
-    }
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
 /// spawn the scene.

@@ -6,8 +6,8 @@ struct CameraTestScreenAssetCollection {}
 
 pub fn plugin(app: &mut App) {
     app.add_loading_state(
-        LoadingState::new(ScreenLoadingState::<CameraTestScreen>::Loading)
-            .continue_to_state(ScreenLoadingState::<CameraTestScreen>::Ready)
+        LoadingState::new(ScreenState::<CameraTestScreen>::Loading)
+            .continue_to_state(ScreenState::<CameraTestScreen>::Ready)
             .load_collection::<CameraTestScreenAssetCollection>(),
     );
 }

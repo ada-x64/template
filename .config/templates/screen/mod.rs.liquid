@@ -2,12 +2,15 @@
 {%- assign screen_name = name | upper_camel_case | append: "Screen" -%}
 use crate::prelude::*;
 
-mod state;
 mod screen;
 pub mod prelude {
-    pub use super::screen::{ {{settings_name}}, {{screen_name}} };
+    pub use super::screen{ {{screen_name}}
+    {%- if settings -%}
+    , {{settings_name}}
+    {%- endif -%}
+    };
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((state::plugin, screen::plugin));
+    app.add_plugins(screen::plugin);
 }

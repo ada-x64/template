@@ -5,18 +5,12 @@ pub struct WorldAssets {
     pub player_assets: PlayerAssets,
 }
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct WorldScreen;
 impl Screen for WorldScreen {
-    type SETTINGS = EmptySettings;
+    type SETTINGS = NoSettings;
     type ASSETS = WorldAssets;
-
-    fn options() -> ScreenOptions {
-        ScreenOptions {
-            name: Screens::World.into(),
-            strategy: LoadingStrategy::Blocking,
-        }
-    }
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Blocking;
 }
 
 fn init(mut commands: Commands) {

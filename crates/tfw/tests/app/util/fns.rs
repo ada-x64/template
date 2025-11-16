@@ -30,12 +30,6 @@ fn log_hierarchy_inner(world: &mut World, output: &mut String, entities: Vec<Ent
     }
 }
 
-pub fn log_status(app: &mut App) {
-    let screen = app.world().resource::<State<CurrentScreen>>();
-    let status = app.world().resource::<State<CurrentScreenStatus>>();
-    info!("Current screen: {:?} ({:?})", ***screen, ***status)
-}
-
 pub fn log_hierarchy(world: &mut World) {
     let type_registry = world.resource::<AppTypeRegistry>().clone();
     let type_registry = type_registry.read();
@@ -75,13 +69,6 @@ impl SwitchScreenOpts {
             update: true,
         }
     }
-}
-
-/// Triggers [SwitchToScreen]
-pub fn switch_screen(app: &mut App, screen: impl Into<ScreenName>) {
-    let screen = screen.into();
-    info!("SwitchToScreen({screen:?})");
-    app.world_mut().trigger(SwitchToScreen(screen));
 }
 
 /// Searches for an entity with the given [Name] component.

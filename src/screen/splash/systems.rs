@@ -1,18 +1,11 @@
 use crate::prelude::*;
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct SplashScreen;
-
 impl Screen for SplashScreen {
-    type SETTINGS = EmptySettings;
+    type SETTINGS = NoSettings;
     type ASSETS = NoAssets;
-
-    fn options() -> ScreenOptions {
-        ScreenOptions {
-            name: Screens::Splash.into(),
-            strategy: LoadingStrategy::Nonblocking,
-        }
-    }
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
 pub fn plugin(app: &mut App) {

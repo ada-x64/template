@@ -7,7 +7,7 @@ mod systems;
 
 pub mod prelude {
     pub use super::data::*;
-    pub use super::screen::{CameraTestScreen, CameraTestSettings};
+    pub use super::screen::CameraTestScreen;
 }
 
 pub use systems::systems;

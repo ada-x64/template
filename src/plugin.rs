@@ -7,7 +7,7 @@ use crate::prelude::*;
 /// default value.
 #[derive(Resource, Clone, Debug)]
 pub struct AppSettings {
-    pub initial_screen: Screens,
+    pub initial_screen: String,
     pub use_physics: bool,
 }
 #[allow(clippy::derivable_impls)]
@@ -41,7 +41,8 @@ impl Plugin for AppPlugin {
         app.add_plugins((
             tfw::TfwPlugin {
                 settings: TfwSettings {
-                    initial_screen: self.settings.initial_screen.into(),
+                    // TODO: FIXME
+                    initial_screen: self.settings.initial_screen.clone(),
                 },
             },
             crate::service::plugin,

@@ -1,5 +1,3 @@
-use bevy::reflect::enum_hash;
-
 use crate::prelude::*;
 
 /// Enumeration of all screens within the app.
@@ -14,9 +12,4 @@ pub enum Screens {
     World,
     #[cfg(feature = "dev")]
     CameraTest,
-}
-impl From<Screens> for ScreenName {
-    fn from(value: Screens) -> Self {
-        enum_hash(&value).unwrap().into()
-    }
 }

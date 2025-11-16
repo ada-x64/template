@@ -4,8 +4,8 @@ use crate::prelude::*;
 /// It does not have to use [bevy_asset_loader], but it's helpful to do so.
 pub fn plugin(app: &mut App) {
     app.add_loading_state(
-        LoadingState::new(ScreenLoadingState::<SplashScreen>::Loading)
-            .continue_to_state(ScreenLoadingState::<SplashScreen>::Ready)
+        LoadingState::new(ScreenState::<SplashScreen>::Loading)
+            .continue_to_state(ScreenState::<SplashScreen>::Ready)
             .load_collection::<NoAssets>(),
     );
 }

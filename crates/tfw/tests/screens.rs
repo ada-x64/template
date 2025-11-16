@@ -14,7 +14,7 @@ fn screen_transitions() {
         app::plugin,
         TfwPlugin {
             settings: TfwSettings {
-                initial_screen: Screens::Empty.into(),
+                initial_screen: EmptyScreen::name(),
             },
         },
     ));
@@ -23,7 +23,7 @@ fn screen_transitions() {
         log_hierarchy(world);
         let step = world.resource::<Step>();
         if **step != *last_step {
-            debug!(?step, ?count);
+            info!(?step, ?count);
             *last_step += 1;
         }
         *count += 1;
@@ -36,12 +36,12 @@ fn screen_transitions() {
             // set up named entity screen
             0 => {
                 settings.entity_name = "1".into();
-                commands.trigger(SwitchToScreen(Screens::NamedEntity.into()));
+                commands.trigger(SwitchToScreen::<NamedEntityScreen>::default());
             }
             // assert that the named entity exists after load
             1 => {
                 let found = q.iter().any(|(_, ename)| {
-                    debug!(?ename);
+                    info!(?ename);
                     (**ename).eq("1")
                 });
                 if !found {
@@ -49,7 +49,7 @@ fn screen_transitions() {
                     commands.write_message(AppExit::error());
                     return;
                 }
-                commands.trigger(SwitchToScreen(Screens::Empty.into()));
+                commands.trigger(SwitchToScreen::<EmptyScreen>::default());
             }
             // Check that screen transitions clear non-persistent entities.
             2 => {
@@ -60,7 +60,7 @@ fn screen_transitions() {
                     return;
                 }
                 settings.entity_name = "2".into();
-                commands.trigger(SwitchToScreen(Screens::NamedEntity.into()));
+                commands.trigger(SwitchToScreen::<NamedEntityScreen>::default());
             }
             // Check that updating settings affects next load.
             3 => {
@@ -90,7 +90,7 @@ fn persistent_entities() {
         app::plugin,
         TfwPlugin {
             settings: TfwSettings {
-                initial_screen: Screens::NamedEntity.into(),
+                initial_screen: NamedEntityScreen::name(),
             },
         },
     ));
@@ -123,7 +123,8 @@ fn persistent_entities() {
         "Great Grandchild"
     ));
 
-    switch_screen(&mut app, Screens::Empty);
+    app.world_mut()
+        .trigger(SwitchToScreen::<EmptyScreen>::default());
     app.update();
     assert!(find_entity(&mut app, "Persistent"));
     assert!(find_entity(&mut app, "Child"));
@@ -146,7 +147,7 @@ fn observer_cleanup() {
         app::plugin,
         TfwPlugin {
             settings: TfwSettings {
-                initial_screen: Screens::Empty.into(),
+                initial_screen: EmptyScreen::name(),
             },
         },
     ));
@@ -156,7 +157,9 @@ fn observer_cleanup() {
             Name::new("Parent"),
             children![(
                 Name::new("Child"),
-                Observer::new(|trigger: On<SwitchToScreen>| { info!("Observer ({:?})", *trigger) }),
+                Observer::new(|trigger: On<SwitchToScreen<NamedEntityScreen>>| {
+                    info!("Observer ({:?})", *trigger)
+                }),
                 Empty
             )],
         ));
@@ -165,7 +168,8 @@ fn observer_cleanup() {
     assert!(find_entity(&mut app, "Parent"));
     assert!(find_entity_filtered::<Allow<Internal>>(&mut app, "Child"));
 
-    switch_screen(&mut app, Screens::NamedEntity);
+    app.world_mut()
+        .trigger(SwitchToScreen::<NamedEntityScreen>::default());
     app.update();
     assert!(!find_entity(&mut app, "Parent"));
     assert!(!find_entity_filtered::<Allow<Internal>>(&mut app, "Child"));
@@ -174,8 +178,53 @@ fn observer_cleanup() {
 // the rest of the tests use non-blocking asset loading to circumvent the delay.
 // but this prevents the use of on_ready. and we need to test that loading blocking works.
 #[test]
-fn blocking_load() {
-    todo!();
+fn lifecycle() {
+    let mut app = App::new();
+    app.add_plugins((
+        TestRunnerPlugin::default(),
+        app::plugin,
+        TfwPlugin {
+            settings: TfwSettings {
+                initial_screen: LifecycleScreen::name(),
+            },
+        },
+    ));
+    app.add_systems(
+        OnEnter(ScreenState::<LifecycleScreen>::Loading),
+        |mut r: ResMut<LifecycleStatus>| {
+            info!("loading");
+            r.loading = true;
+        },
+    );
+    app.add_systems(
+        OnEnter(ScreenState::<LifecycleScreen>::Ready),
+        |mut r: ResMut<LifecycleStatus>, mut commands: Commands| {
+            info!("ready");
+            r.ready = true;
+            commands.trigger(SwitchToScreen::<EmptyScreen>::default());
+        },
+    );
+    app.add_systems(
+        OnEnter(ScreenState::<LifecycleScreen>::Unloaded),
+        |mut r: ResMut<LifecycleStatus>| {
+            info!("unloaded");
+            r.unloaded = true;
+        },
+    );
+    app.add_systems(
+        OnEnter(ScreenState::<EmptyScreen>::Ready),
+        |r: Res<LifecycleStatus>, mut commands: Commands| {
+            let ok = r.loading && r.ready && r.unloaded && r.in_init && r.in_unload;
+            if ok {
+                commands.write_message(AppExit::Success);
+            } else {
+                error!("Did not reach all expected points.");
+                error!(?r);
+                commands.write_message(AppExit::error());
+            }
+        },
+    );
+    assert!(app.run().is_success());
 }
 
 #[test]
@@ -186,7 +235,7 @@ fn scoped_systems() {
         app::plugin,
         TfwPlugin {
             settings: TfwSettings {
-                initial_screen: Screens::ScopedSystem.into(),
+                initial_screen: ScopedSystemScreen::name(),
             },
         },
     ));
@@ -194,10 +243,10 @@ fn scoped_systems() {
     app.add_systems(
         PostUpdate,
         |mut step: ResMut<Step>, mut commands: Commands, value: Res<ScopedSystemValue>| {
-            debug!("PostUpdate");
+            info!("PostUpdate");
             match **step {
                 0..=2 => {
-                    debug_once!(?step, ?value);
+                    info_once!(?step, ?value);
                     if **value != **step + 1 {
                         error!("step value did not match");
                         commands.write_message(AppExit::error());
@@ -206,24 +255,24 @@ fn scoped_systems() {
                     **step += 1;
                 }
                 3 => {
-                    debug_once!(?step, ?value);
-                    commands.trigger(SwitchToScreen(Screens::Empty.into()));
+                    info_once!(?step, ?value);
+                    commands.trigger(SwitchToScreen::<EmptyScreen>::default());
                     **step += 1;
                 }
                 // assert value does not update when in different screen
                 4 => {
-                    debug_once!(?step, ?value);
+                    info_once!(?step, ?value);
                     if **value != 4 {
                         error!("step value did not match");
                         commands.write_message(AppExit::error());
                         return;
                     }
-                    commands.trigger(SwitchToScreen(Screens::ScopedSystem.into()));
+                    commands.trigger(SwitchToScreen::<ScopedSystemScreen>::default());
                     **step += 1;
                 }
                 // assert switching continues to increment
                 5 => {
-                    debug_once!(?step, ?value);
+                    info_once!(?step, ?value);
                     if **value != 5 {
                         error!("step value did not match");
                         commands.write_message(AppExit::error());

@@ -1,3 +1,5 @@
+use bevy::ecs::component::ComponentIdFor;
+
 pub use crate::prelude::*;
 
 /// Implementation trait for Screen components.
@@ -15,6 +17,7 @@ pub trait Screen:
     Component
     + Sized
     + Default
+    + Reflect
     + std::fmt::Debug
     + Clone
     + Copy
@@ -31,42 +34,23 @@ pub trait Screen:
     /// If you want to load in assets without blocking the scoped systems,
     /// you should include asset collections and states within a service.
     type ASSETS: AssetCollection;
+    /// [LoadingStrategy] for the [Screen].
+    const STRATEGY: LoadingStrategy;
 
-    /// Used to confgure the screen. See [ScreenOptions] for more details.
-    fn options() -> ScreenOptions;
-
-    fn name() -> ScreenName {
-        Self::options().name
+    fn name() -> String {
+        let default = Self::default();
+        Reflect::as_reflect(&default)
+            .reflect_short_type_path()
+            .to_owned()
     }
 
-    fn strategy() -> LoadingStrategy {
-        Self::options().strategy
+    /// Gets the spawn function
+    fn spawn(
+        mut commands: Commands,
+        mut next_state: ResMut<NextState<ScreenState<Self>>>,
+        id: ComponentIdFor<Self>,
+    ) {
+        commands.spawn((Self::default(), Name::new(Self::name()), ScreenMarker(*id)));
+        next_state.set(ScreenState::Loading);
     }
-
-    /// Called when the screen is about to unload.
-    /// Use this to perform any necessary cleanup before the screen transitions.
-    fn unload() -> impl System<In = (), Out = ()> {
-        IntoSystem::into_system(|| {})
-    }
-}
-
-/// How should the screen load its assets?
-/// If `LoadingStrategy` is Blocking, the screen's systems will not run until
-/// loading is complete. If it is Nonblocking, the screen's systems will run
-/// regardless of asset completion status.
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub enum LoadingStrategy {
-    Blocking,
-    Nonblocking,
-}
-impl LoadingStrategy {
-    pub fn is_blocking(&self) -> bool {
-        matches!(self, Self::Blocking)
-    }
-}
-
-/// Options for the screen.
-pub struct ScreenOptions {
-    pub strategy: LoadingStrategy,
-    pub name: ScreenName,
 }
