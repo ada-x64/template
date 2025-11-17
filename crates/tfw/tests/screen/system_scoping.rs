@@ -17,15 +17,15 @@ fn nonblocking() {
             },
         },
     ));
-    app.init_state::<Step>();
     app.init_resource::<SavedValue>();
-    app.add_systems(
-        PostUpdate,
-        (|mut step: ResMut<NextState<Step>>,
-          mut commands: Commands,
-          mut saved_value: ResMut<SavedValue>,
-          value: Res<ScopedSystemValue>,
-          screen_state: Res<State<ScreenState<ScopedSystemScreen>>>| {
+
+    app.add_step(
+        0,
+        |mut step: ResMut<NextState<Step>>,
+         mut commands: Commands,
+         mut saved_value: ResMut<SavedValue>,
+         value: Res<ScopedSystemValue>,
+         screen_state: Res<State<ScreenState<ScopedSystemScreen>>>| {
             if !screen_state.is_ready() {
                 return;
             }
@@ -34,18 +34,15 @@ fn nonblocking() {
             // this should _immediately_ freeze the screen-scoped systems
             commands.trigger(SwitchToScreen::<EmptyScreen>::default());
             **saved_value = **value;
-        })
-        .run_if(in_state(Step(0))),
-    );
-    // assert that systems have frozen, i.e. value does not increment while unloading
-    // or while in a different screen
-    app.add_systems(
-        PostUpdate,
-        (|mut step: ResMut<NextState<Step>>,
-          mut commands: Commands,
-          value: Res<ScopedSystemValue>,
-          saved_value: Res<SavedValue>,
-          screen_state: Res<State<ScreenState<EmptyScreen>>>| {
+        },
+    )
+    .add_step(
+        1,
+        |mut step: ResMut<NextState<Step>>,
+         mut commands: Commands,
+         value: Res<ScopedSystemValue>,
+         saved_value: Res<SavedValue>,
+         screen_state: Res<State<ScreenState<EmptyScreen>>>| {
             if !screen_state.is_ready() {
                 return;
             }
@@ -57,16 +54,14 @@ fn nonblocking() {
             }
             commands.trigger(SwitchToScreen::<ScopedSystemScreen>::default());
             step.set(Step(2));
-        })
-        .run_if(in_state(Step(1))),
-    );
-    // assert that value increments once returned to the screen
-    app.add_systems(
-        PostUpdate,
-        (|mut commands: Commands,
-          value: Res<ScopedSystemValue>,
-          saved_value: ResMut<SavedValue>,
-          screen_state: Res<State<ScreenState<ScopedSystemScreen>>>| {
+        },
+    )
+    .add_step(
+        2,
+        |mut commands: Commands,
+         value: Res<ScopedSystemValue>,
+         saved_value: ResMut<SavedValue>,
+         screen_state: Res<State<ScreenState<ScopedSystemScreen>>>| {
             if !screen_state.is_ready() {
                 return;
             }
@@ -77,9 +72,9 @@ fn nonblocking() {
             } else {
                 commands.write_message(AppExit::Success);
             }
-        })
-        .run_if(in_state(Step(2))),
+        },
     );
+
     assert!(app.run().is_success());
 }
 
@@ -99,18 +94,18 @@ fn blocking() {
             },
         },
     ));
-    app.init_state::<Step>();
     app.insert_resource(Settings {
         initial_value: 100,
         unload_value: 200,
     });
-    app.add_systems(
-        PostUpdate,
-        (|mut step: ResMut<NextState<Step>>,
-          mut commands: Commands,
-          settings: Res<Settings>,
-          value: Res<Value>,
-          screen_state: Res<State<ScreenState<Screen>>>| {
+
+    app.add_step(
+        0,
+        |mut step: ResMut<NextState<Step>>,
+         mut commands: Commands,
+         settings: Res<Settings>,
+         value: Res<Value>,
+         screen_state: Res<State<ScreenState<Screen>>>| {
             if !screen_state.is_ready() {
                 if *value != Value::default() {
                     error!("Got spurious value change!");
@@ -126,35 +121,29 @@ fn blocking() {
                 }
                 step.set(Step(1));
             }
-        })
-        .run_if(in_state(Step(0))),
-    );
-    // let it increment for a bit
-    app.add_systems(
-        PostUpdate,
-        (|mut step: ResMut<NextState<Step>>,
-          mut commands: Commands,
-          settings: Res<Settings>,
-          value: Res<Value>| {
+        },
+    )
+    .add_step(
+        1,
+        |mut step: ResMut<NextState<Step>>,
+         mut commands: Commands,
+         settings: Res<Settings>,
+         value: Res<Value>| {
             if **value < settings.initial_value + 5 {
                 return;
             }
             // this immediately runs unload, should be frozen at unload_value
             commands.trigger(SwitchToScreen::<EmptyScreen>::default());
             step.set(Step(2));
-        })
-        .run_if(in_state(Step(1))),
-    );
-
-    // assert that systems have frozen, i.e. value does not increment while unloading
-    // or while in a different screen
-    app.add_systems(
-        PostUpdate,
-        (|mut step: ResMut<NextState<Step>>,
-          mut commands: Commands,
-          value: Res<Value>,
-          settings: Res<Settings>,
-          screen_state: Res<State<ScreenState<EmptyScreen>>>| {
+        },
+    )
+    .add_step(
+        2,
+        |mut step: ResMut<NextState<Step>>,
+         mut commands: Commands,
+         value: Res<Value>,
+         settings: Res<Settings>,
+         screen_state: Res<State<ScreenState<EmptyScreen>>>| {
             // assert value has been frozen
             if **value != settings.unload_value {
                 error!("Value does not match unload_value");
@@ -166,16 +155,14 @@ fn blocking() {
             }
             commands.trigger(SwitchToScreen::<Screen>::default());
             step.set(Step(3));
-        })
-        .run_if(in_state(Step(2))),
-    );
-    // assert that value resets on init
-    app.add_systems(
-        PostUpdate,
-        (|mut commands: Commands,
-          value: Res<Value>,
-          settings: Res<Settings>,
-          screen_state: Res<State<ScreenState<Screen>>>| {
+        },
+    )
+    .add_step(
+        3,
+        |mut commands: Commands,
+         value: Res<Value>,
+         settings: Res<Settings>,
+         screen_state: Res<State<ScreenState<Screen>>>| {
             if !screen_state.is_ready() {
                 if **value != settings.unload_value {
                     error!("Got spurious value change!");
@@ -189,8 +176,8 @@ fn blocking() {
             } else {
                 commands.write_message(AppExit::Success);
             }
-        })
-        .run_if(in_state(Step(3))),
+        },
     );
+
     assert!(app.run().is_success());
 }

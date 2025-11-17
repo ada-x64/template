@@ -16,6 +16,8 @@ use bevy::{
     window::ExitCondition,
 };
 
+use crate::prelude::*;
+
 pub trait TestFn: Fn(&mut App) {}
 impl<T> TestFn for T where T: Fn(&mut App) {}
 
@@ -86,6 +88,8 @@ impl Plugin for TestRunnerPlugin {
                 error!("Obtained exit message {msg:?}");
             }
         });
+
+        app.init_state::<Step>();
     }
 }
 
