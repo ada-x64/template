@@ -1,13 +1,41 @@
-use std::marker::PhantomData;
-
 #[allow(unused_imports, reason = "used in docs")]
 use bevy::app::FixedMain;
 use bevy::{
     app::{FixedMainScheduleOrder, MainScheduleOrder},
-    ecs::{schedule::ScheduleLabel, system::ScheduleSystem},
+    ecs::system::ScheduleSystem,
 };
 
 pub use crate::prelude::*;
+
+mod data {
+    use std::marker::PhantomData;
+
+    use bevy::ecs::schedule::ScheduleLabel;
+
+    use crate::prelude::*;
+
+    /// Specifies the order of execution for a schedule.
+    #[derive(Default, Debug)]
+    pub enum Order {
+        #[default]
+        Before,
+        After,
+    }
+
+    /// Manually triggered schedule which is called when the screen is unloaded.
+    #[derive(ScheduleLabel, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
+    pub struct UnloadSchedule;
+
+    /// Interal. Called during [UnloadSchedule]
+    #[derive(SystemSet, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
+    pub struct UnloadSystems<S: Screen>(PhantomData<S>);
+
+    /// Interal. Called after [UnloadSchedule]
+    #[derive(SystemSet, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
+    pub struct PostUnloadSystems<S: Screen>(PhantomData<S>);
+}
+pub use data::Order;
+use data::*;
 
 /// On build, this will initialize a new [Schedule]. The newly created schedule
 /// has a [SystemSet] associated with it which is scoped to run only if the
@@ -162,10 +190,8 @@ where
         app.add_systems(
             UnloadSchedule,
             (
-                post_unload.in_set(PostUnloadSystems::<S>::default()),
-                (|| debug!("UnloadSystems {:?}", S::name())).in_set(UnloadSystems::<S>::default()),
-                (|| debug!("PostUnloadSystems {:?}", S::name()))
-                    .in_set(PostUnloadSystems::<S>::default()),
+                unload::<S>.in_set(UnloadSystems::<S>::default()),
+                post_unload::<S>.in_set(PostUnloadSystems::<S>::default()),
             ),
         );
 
@@ -176,6 +202,9 @@ where
         );
         app.add_systems(OnEnter(ScreenState::<S>::Ready), || {
             debug!("Ready {:?}", S::name())
+        });
+        app.add_systems(OnEnter(ScreenState::<S>::Unloading), || {
+            debug!("Unloading {:?}", S::name())
         });
         app.add_systems(OnEnter(ScreenState::<S>::Unloaded), || {
             debug!("Unloaded {:?}", S::name())
@@ -192,26 +221,15 @@ fn on_switch_screen<T: Screen>(
     next_state.set(ScreenState::Loading);
 }
 
-/// Specifies the order of execution for a schedule.
-#[derive(Default, Debug)]
-pub enum Order {
-    #[default]
-    Before,
-    After,
+fn unload<S: Screen>(mut next_state: ResMut<NextState<ScreenState<S>>>) {
+    debug!("UnloadSystems {:?}", S::name());
+    next_state.set(ScreenState::Unloading);
 }
 
-/// Manually triggered schedule which is called when the screen is unloaded.
-#[derive(ScheduleLabel, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
-struct UnloadSchedule;
-/// Interal. Called during [UnloadSchedule]
-#[derive(SystemSet, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
-struct UnloadSystems<S: Screen>(PhantomData<S>);
-/// Interal. Called after [UnloadSchedule]
-#[derive(SystemSet, Debug, Copy, Clone, PartialEq, Eq, Hash, Default)]
-struct PostUnloadSystems<S: Screen>(PhantomData<S>);
-
 /// This function clears out all the non-screen-scoped entities.
-fn post_unload(
+fn post_unload<S: Screen>(
+    mut commands: Commands,
+    mut next_state: ResMut<NextState<ScreenState<S>>>,
     // Any entity which is (explicitly marked as ScreenScoped, or is _not_ marked
     // as persistent) _and_ is not a top-level observer
     screen_scoped: Query<
@@ -224,10 +242,10 @@ fn post_unload(
             Not<(Or<(With<Observer>, With<Window>)>, Without<ChildOf>)>, // top-level items
         ),
     >,
-    mut commands: Commands,
 ) {
-    debug!("post_unload");
+    debug!("PostUnloadSystems {:?}", S::name());
     screen_scoped.iter().for_each(|e| {
         commands.entity(e).despawn();
     });
+    next_state.set(ScreenState::Unloaded);
 }

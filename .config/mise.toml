@@ -184,7 +184,9 @@ EOF
 fi
 
 catch_err () {
-    if [ $? -ne 0 ]; then
+    VAL=$?
+    if [ $VAL -ne 0 ]; then
+        echo "Got exit code $VAL!"
         echo "Reverting changes on fail..."
         set -x
         git restore $DESTINATION/mod.rs

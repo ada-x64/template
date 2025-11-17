@@ -1,12 +1,16 @@
 {%- assign settings_name = name | upper_camel_case | append: "Settings" -%}
 {%- assign screen_name = name | upper_camel_case | append: "Screen" -%}
+{%- assign screen_name = name | upper_camel_case | append: "Assets" -%}
 use crate::prelude::*;
 
 mod screen;
 pub mod prelude {
-    pub use super::screen{ {{screen_name}}
+    pub use super::screen::{ {{screen_name}}
     {%- if settings -%}
     , {{settings_name}}
+    {%- endif -%}
+    {%- if assets -%}
+    , {{assets_name}}
     {%- endif -%}
     };
 }

@@ -3,6 +3,7 @@ pub mod service;
 pub mod util;
 
 pub mod prelude {
+    pub use super::AppPlugin;
     pub use super::screen::prelude::*;
     pub use super::service::prelude::*;
     pub use super::util::prelude::*;
@@ -11,6 +12,9 @@ pub mod prelude {
 }
 use prelude::*;
 
-pub fn plugin(app: &mut App) {
-    app.add_plugins((screen::plugin, service::plugin));
+pub struct AppPlugin;
+impl Plugin for AppPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins((screen::plugin, service::plugin));
+    }
 }

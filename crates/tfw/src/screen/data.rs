@@ -53,16 +53,13 @@ pub enum ScreenScope<T: Screen> {
 /// [State] for a [Screen]. This is the main state mechanism for screens. It is
 /// also used as the type parameter for [LoadingState]. See the
 /// [bevy_asset_loader] docs for more info on how asset loading works.
-/// NOTE: Because
-/// assets are unloaded when all handles are released, _and_ because unload
-/// hooks are guaranteed to run within one schedule, there is no need to have a
-/// Unloading step.
 #[derive(States, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 pub enum ScreenState<T: Screen> {
     #[default]
     Unloaded,
     Loading,
     Ready,
+    Unloading,
     _Phantom(PhantomData<T>),
 }
 impl<T: Screen> ScreenState<T> {
@@ -73,7 +70,7 @@ impl<T: Screen> ScreenState<T> {
         matches!(self, Self::Loading)
     }
     pub fn is_unloading(&self) -> bool {
-        matches!(self, Self::Unloaded)
+        matches!(self, Self::Unloading)
     }
     pub fn is_unloaded(&self) -> bool {
         matches!(self, Self::Unloaded)

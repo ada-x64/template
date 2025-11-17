@@ -13,14 +13,8 @@ impl Screen for ScopedSystemScreen {
     const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
-fn init(settings: Res<ScopedSystemSettings>, mut value: ResMut<ScopedSystemValue>) {
-    info!("In ScopedSystemScreen");
-    **value = settings.value;
-}
-
 pub fn plugin(app: &mut App) {
     ScreenScopeBuilder::<ScopedSystemScreen>::new(app)
         .add_systems(scoped_service_systems().take())
-        .on_ready(init)
         .build();
 }

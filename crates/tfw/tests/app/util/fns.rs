@@ -98,6 +98,3 @@ pub fn _find_entity_with<C: Component + PartialEq>(
     q.iter(app.world())
         .any(|(ename, c)| (**ename).eq(&name.to_string()) && *c == value)
 }
-
-#[derive(Resource, Debug, Default, Deref, DerefMut)]
-pub struct Step(u32);

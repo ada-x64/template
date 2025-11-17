@@ -17,12 +17,12 @@ pub struct {{assets_name -}} {
 }
 {%-  endif %}
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct {{screen_name -}};
 impl Screen for {{screen_name}} {
     type SETTINGS = {% if settings -%} {{- settings_name -}} {%- else -%} NoSettings {%- endif -%};
     type ASSETS = {% if assets -%} {{- assets_name -}} {%- else -%} NoAssets {%- endif %};
-    const STRATEGY: LoadingStrategy = {{strategy -}};
+    const STRATEGY: LoadingStrategy = LoadingStrategy::{{strategy -}};
 }
 
 pub fn plugin(app: &mut App) {
