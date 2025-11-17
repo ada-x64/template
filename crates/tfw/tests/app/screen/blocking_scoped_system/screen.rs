@@ -11,7 +11,7 @@ pub struct BlockingScopedSystemValue(pub u32);
 #[derive(AssetCollection, Resource, Debug, Default)]
 pub struct BlockingScopedSystemAssets {
     #[asset(path = "test/cat2.png")]
-    img: Handle<Image>,
+    _img: Handle<Image>,
 }
 
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
@@ -24,16 +24,19 @@ impl Screen for BlockingScopedSystemScreen {
 
 fn increment(mut value: ResMut<BlockingScopedSystemValue>) {
     **value += 1;
+    info!("increment, value={}", **value);
 }
 
 fn init(mut value: ResMut<BlockingScopedSystemValue>, settings: Res<BlockingScopedSystemSettings>) {
     **value = settings.initial_value;
+    info!("init, value={}", **value);
 }
 fn unload(
     mut value: ResMut<BlockingScopedSystemValue>,
     settings: Res<BlockingScopedSystemSettings>,
 ) {
     **value = settings.unload_value;
+    info!("unload, value={}", **value);
 }
 
 pub fn plugin(app: &mut App) {

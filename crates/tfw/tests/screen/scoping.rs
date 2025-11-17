@@ -112,13 +112,16 @@ fn blocking() {
           value: Res<Value>,
           screen_state: Res<State<ScreenState<Screen>>>| {
             if !screen_state.is_ready() {
-                if **value == settings.initial_value {
+                if *value != Value::default() {
                     error!("Got spurious value change!");
+                    info!("Step = 1, Value = {}", **value);
                     commands.write_message(AppExit::error());
                 }
             } else {
-                if **value != settings.initial_value {
+                // +1 because it will have updated by now
+                if **value != settings.initial_value + 1 {
                     error!("Did not get value change on ready!");
+                    info!("Step = 1, Value = {}", **value);
                     commands.write_message(AppExit::error());
                 }
                 step.set(Step(1));
@@ -149,18 +152,19 @@ fn blocking() {
         PostUpdate,
         (|mut step: ResMut<NextState<Step>>,
           mut commands: Commands,
-          value: Res<ScopedSystemValue>,
+          value: Res<Value>,
           settings: Res<Settings>,
-          screen_state: Res<State<ScreenState<Screen>>>| {
+          screen_state: Res<State<ScreenState<EmptyScreen>>>| {
             // assert value has been frozen
             if **value != settings.unload_value {
-                error!("Got spurious update while in empty screen!");
+                error!("Value does not match unload_value");
+                info!("Step = 2, Value = {}", **value);
                 commands.write_message(AppExit::error());
             }
             if !screen_state.is_ready() {
                 return;
             }
-            commands.trigger(SwitchToScreen::<ScopedSystemScreen>::default());
+            commands.trigger(SwitchToScreen::<Screen>::default());
             step.set(Step(3));
         })
         .run_if(in_state(Step(2))),
@@ -169,16 +173,18 @@ fn blocking() {
     app.add_systems(
         PostUpdate,
         (|mut commands: Commands,
-          value: Res<ScopedSystemValue>,
+          value: Res<Value>,
           settings: Res<Settings>,
-          screen_state: Res<State<ScreenState<ScopedSystemScreen>>>| {
+          screen_state: Res<State<ScreenState<Screen>>>| {
             if !screen_state.is_ready() {
-                if **value == settings.unload_value {
+                if **value != settings.unload_value {
                     error!("Got spurious value change!");
+                    info!("Step = 3, Value = {}", **value);
                     commands.write_message(AppExit::error());
                 }
-            } else if **value != settings.initial_value {
+            } else if **value != settings.initial_value + 1 {
                 error!("Did not get value change on ready!");
+                info!("Step = 3, Value = {}", **value);
                 commands.write_message(AppExit::error());
             } else {
                 commands.write_message(AppExit::Success);
