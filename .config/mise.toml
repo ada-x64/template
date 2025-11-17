@@ -126,12 +126,11 @@ description = "Run the specified workspace binary. (Default: 'app')"
 usage = """
     flag "--bin <bin>" default="app"
     flag "--features -F <features>" default="dev"
-    flag "--args <args>" env="ARGS"
-    flag "--env <env>" env="ENV"
+    flag "--args <args>" env="ARGS" default=""
 """
 run = """
-echo "[RUNNING] {{get_env(name='ENV')}} cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}"
-{{get_env(name='ENV')}} cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}
+echo "[RUNNING] cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}"
+cargo run --bin ${usage_bin?} -F ${usage_features?} -- ${usage_args}
 """
 
 # LOCAL #######################################################################
@@ -185,7 +184,9 @@ EOF
 fi
 
 catch_err () {
-    if [ $? -ne 0 ]; then
+    VAL=$?
+    if [ $VAL -ne 0 ]; then
+        echo "Got exit code $VAL!"
         echo "Reverting changes on fail..."
         set -x
         git restore $DESTINATION/mod.rs

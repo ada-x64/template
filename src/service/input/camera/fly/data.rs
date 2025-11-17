@@ -1,8 +1,5 @@
 use crate::prelude::*;
 
 #[derive(Component)]
-#[require(CameraController::new(CameraControllerKind::Fly), ICtxFlyCam)]
+#[require(CameraController::new(CameraControllerKind::Fly))]
 pub struct FlyCam;
-
-#[derive(Component, Default)]
-pub struct ICtxFlyCam;

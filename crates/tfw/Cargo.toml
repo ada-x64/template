@@ -16,9 +16,9 @@ serde = { version = "1.0.219", features = ["derive"] }
 anyhow = "1.0.99"
 strum = { version = "0.27.2", features = ["derive"] }
 variadics_please = "1.1.0"
+bevy_asset_loader = "0.24.0-rc.1"
 
 [dev-dependencies]
-bevy_asset_loader = "0.24.0-rc.1"
 # just for a few inspector things... should really fork them
 bevy-inspector-egui = "0.35"
 

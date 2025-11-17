@@ -12,16 +12,23 @@ pub mod prelude {
     pub use super::data::*;
     pub use super::scope::*;
     pub use super::trait_impl::*;
+    pub use bevy_asset_loader::prelude::*;
 }
 
 pub fn plugin(app: &mut App) {
-    let settings = app.world().resource::<TfwSettings>();
-    app.insert_state::<CurrentScreen>(settings.initial_screen.into());
-    app.insert_state::<CurrentScreenStatus>(ScreenStatus::Loading.into());
-    app.init_resource::<NextScreen>();
-
     app.add_plugins((
         HierarchyPropagatePlugin::<Persistent>::new(PostUpdate),
         HierarchyPropagatePlugin::<ScreenScoped>::new(PostUpdate),
     ));
+    // This occurs _after_ registration
+    app.add_systems(
+        Startup,
+        |registry: Res<ScreenRegistry>, settings: Res<TfwSettings>, mut commands: Commands| {
+            let name = &settings.initial_screen;
+            let system_id = registry
+                .get(name)
+                .unwrap_or_else(|| panic!("Invalid initial screen {name:?}"));
+            commands.run_system(*system_id);
+        },
+    );
 }

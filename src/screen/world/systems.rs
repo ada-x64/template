@@ -1,25 +1,28 @@
 use crate::prelude::*;
 
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(AssetCollection, Resource, Default, Debug)]
+pub struct WorldAssets {
+    pub player_assets: PlayerAssets,
+}
+
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct WorldScreen;
 impl Screen for WorldScreen {
-    type SETTINGS = EmptySettings;
+    type SETTINGS = NoSettings;
+    type ASSETS = WorldAssets;
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Blocking;
+}
 
-    fn name() -> ScreenType {
-        Screens::World.into()
-    }
-
-    fn init<'w>(mut world: DeferredWorld, _ctx: HookContext) {
-        debug!("in world: init");
-        let mut commands = world.commands();
-        commands.trigger(SpawnPlayerRoot);
-        commands.trigger(SpawnWorldgenRoot);
-    }
+fn init(mut commands: Commands) {
+    debug!("in world: init");
+    commands.trigger(SpawnPlayerRoot);
+    commands.trigger(SpawnWorldgenRoot);
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<WorldScreen>::fixed()
+    ScreenScopeBuilder::<WorldScreen>::new(app)
+        .on_ready(init)
         .add_systems(player_systems().take())
         .add_systems(tracking_cam_systems().take())
-        .build(app);
+        .build();
 }

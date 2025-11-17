@@ -58,7 +58,6 @@ avian3d = "0.4"
 bevy-tnua = "0.26"
 bevy-tnua-avian3d = "0.7"
 bevy_rich_text3d = "0.5"
-bevy-inspector-egui = { optional = true, version = "0.35" }
 
 # not bevy
 tiny_bail = "0.7"
@@ -80,7 +79,6 @@ built = {version = "0.8.0", features=["chrono"]}
 [features]
 dev = [
     "dep:bevy_mod_debugdump",
-    "dep:bevy-inspector-egui",
     "dep:clap",
 ]
 dylib = ["bevy/dynamic_linking"]

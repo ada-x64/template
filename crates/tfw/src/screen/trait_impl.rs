@@ -1,8 +1,4 @@
-#[allow(unused_imports, reason = "used for docs")]
-use bevy::{
-    app::{FixedMain, FixedMainScheduleOrder, MainScheduleOrder},
-    ecs::{schedule::ScheduleLabel, system::ScheduleSystem},
-};
+use bevy::ecs::component::ComponentIdFor;
 
 pub use crate::prelude::*;
 
@@ -18,23 +14,43 @@ pub use crate::prelude::*;
 /// is called before the screen unloads and is designed to run
 /// any cleanup logic before transitioning.
 pub trait Screen:
-    Sized + Default + std::fmt::Debug + Clone + Copy + Eq + std::hash::Hash + Send + Sync + 'static
+    Component
+    + Sized
+    + Default
+    + Reflect
+    + std::fmt::Debug
+    + Clone
+    + Copy
+    + Eq
+    + std::hash::Hash
+    + Send
+    + Sync
+    + 'static
 {
     /// The associated settings type. Set as [EmptySettings] for no settings.
     type SETTINGS: Resource + FromWorld;
+    /// Any associated assets which will load before the screen is considered
+    /// ready. Use [EmptyAssetCollection] to skip loading.
+    /// If you want to load in assets without blocking the scoped systems,
+    /// you should include asset collections and states within a service.
+    type ASSETS: AssetCollection;
+    /// [LoadingStrategy] for the [Screen].
+    const STRATEGY: LoadingStrategy;
 
-    /// Used to get the screen name.
-    fn name() -> ScreenType;
+    fn name() -> String {
+        let default = Self::default();
+        Reflect::as_reflect(&default)
+            .reflect_short_type_path()
+            .to_owned()
+    }
 
-    /// Used as the component wrapper's [on_add
-    /// hook.](https://docs.rs/bevy/latest/bevy/prelude/trait.Component.html#adding-components-hooks)
-    /// Use this to scope systems and observers. In order to get settings, use
-    /// `world.get_resource::<Self::SETTINGS>();`
-    fn init<'w>(_world: DeferredWorld<'w>, _ctx: HookContext) {}
-
-    /// Called when the screen is about to unload.
-    /// Use this to perform any necessary cleanup before the screen transitions.
-    fn unload() -> impl System<In = (), Out = ()> {
-        IntoSystem::into_system(|| {})
+    /// Gets the spawn function
+    fn spawn(
+        mut commands: Commands,
+        mut next_state: ResMut<NextState<ScreenState<Self>>>,
+        id: ComponentIdFor<Self>,
+    ) {
+        commands.spawn((Self::default(), Name::new(Self::name()), ScreenMarker(*id)));
+        next_state.set(ScreenState::Loading);
     }
 }

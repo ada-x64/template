@@ -1,3 +1,5 @@
 [placeholders]
 name = {type="string", prompt="Screen name?", default="screen"}
-pedantic = {type='bool', prompt="Add pedantic comments?"}
+assets = {type="bool", prompt="Require assets?" }
+settings = {type="bool", prompt="Require settings?" }
+strategy = {type="string", prompt="Loading strategy?", choices=["Blocking", "NonBlocking"] }

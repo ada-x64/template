@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Tracking camera. Will follow the given entity. Will spawn a CameraController on add.
 /// Prefer to use [tracking_cam_bundle].
 #[derive(Component, Debug, Reflect)]
-#[require(CameraController::new(CameraControllerKind::Tracking), ICtxTrackingCam)]
+#[require(CameraController::new(CameraControllerKind::Tracking))]
 #[component(on_add=on_add_tracking_cam)]
 pub struct TrackingCam {
     /// In radians.

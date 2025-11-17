@@ -1,20 +1,11 @@
-use crate::prelude::*;
+use crate::{prelude::*, screen::dev::camera_test};
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, Reflect, Default, Resource)]
-pub struct CameraTestSettings;
-
-#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
+#[derive(Component, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Reflect)]
 pub struct CameraTestScreen;
 impl Screen for CameraTestScreen {
-    type SETTINGS = CameraTestSettings;
-
-    fn name() -> ScreenType {
-        Screens::CameraTest.into()
-    }
-
-    fn init<'w>(mut world: DeferredWorld<'w>, _ctx: HookContext) {
-        world.commands().run_system_cached(init);
-    }
+    type SETTINGS = NoSettings;
+    type ASSETS = NoAssets;
+    const STRATEGY: LoadingStrategy = LoadingStrategy::Nonblocking;
 }
 
 /// spawn the scene.
@@ -24,7 +15,6 @@ fn init(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut cam_list: ResMut<CameraList>,
 ) {
     // spawn everything
     let cube = meshes.add(Cuboid::default());
@@ -56,16 +46,14 @@ fn init(
     commands.spawn((PointLight::default(), Transform::from_xyz(0., 3., 0.)));
     commands.trigger(SpawnGlobalCtx);
     commands.trigger(SpawnCursorCapture);
-    let tc = commands
-        .spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")))
-        .id();
-    let fc = commands.spawn((flycam_bundle(), Name::new("Fly Cam"))).id();
-    **cam_list = vec![fc, tc];
+    commands.spawn((tracking_cam_bundle(cube_entt), Name::new("Tracking Cam")));
+    commands.spawn((flycam_bundle(), Name::new("Fly Cam")));
 }
 
 pub fn plugin(app: &mut App) {
-    ScreenScopeBuilder::<CameraTestScreen>::fixed()
-        .add_systems(camera_test_systems().take())
-        .add_systems(tracking_cam_systems().take())
-        .build(app);
+    ScreenScopeBuilder::<CameraTestScreen>::new(app)
+        .on_ready(init)
+        .add_systems(camera_test::systems().take())
+        .add_systems(camera_systems().take())
+        .build();
 }

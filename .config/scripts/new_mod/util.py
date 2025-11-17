@@ -1,4 +1,4 @@
-from os import PathLike, fspath, path
+from os import PathLike, fspath, path, stat
 import re
 from dataclasses import dataclass, asdict
 from os.path import basename, join, realpath
@@ -12,7 +12,7 @@ type Expr = Pattern[str]
 
 @dataclass
 class Args(argparse.Namespace):
-    module_path: PathLike[str] | None
+    base_path: PathLike[str] | None
     remove: bool
     debug: bool
 
@@ -48,11 +48,11 @@ def get_vars(args: Args):
     )
     logger = logging.getLogger(__name__)
 
-    if args.module_path is None:
+    if args.base_path is None:
         logger.error("Please provide a module path.\n")
         exit(1)
 
-    mod_name = basename(args.module_path)
+    mod_name = basename(args.base_path)
     mod_camel_case = mod_name.replace("_", " ").title().replace(" ", "")
     vars = Vars(
         use_expr=re.compile(r"(\s*use\s+[\w:]+;\n?)+"),
@@ -63,10 +63,10 @@ def get_vars(args: Args):
         screens_exists_expr=re.compile(rf"\s+{mod_camel_case},?\s+"),
         screens_pat_expr=re.compile(rf"Screens::{mod_camel_case}\s+=>\s+\"\w+\",?"),
         screens_match_expr=re.compile(
-            r"pub\s+const\s+fn\s+as_screen_type\(self\)\s+->\s+ScreenType\s+\{\n.+match self \{"
+            r"pub\s+const\s+fn\s+as_screen_type\(self\)\s+->\s+ScreenId\s+\{\n.+match self \{"
         ),
-        screens_data_mod=realpath("src/screen/data.rs"),
-        super_mod=realpath(join(args.module_path, "../mod.rs")),
+        screens_data_mod=realpath(join(args.base_path, "../data.rs")),
+        super_mod=realpath(join(args.base_path, "../mod.rs")),
         mod_name=mod_name,
         mod_str=f"mod {mod_name};",
         prelude_str=f"pub use super::{mod_name}::prelude::*;",
@@ -74,7 +74,7 @@ def get_vars(args: Args):
         screens_str=f"{mod_camel_case},",
         screens_pat=f'Screens::{mod_camel_case} => "{mod_name}",',
         file_str="",
-        is_screen="/screen" in fspath(args.module_path),
+        is_screen="/screen" in fspath(args.base_path),
     )
 
     if args.debug:

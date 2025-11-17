@@ -1,37 +1,13 @@
 use crate::prelude::*;
 
-fn update_camera_controller(
-    trigger: On<InsertCameraController>,
-    mut commands: Commands,
-    mut camera: Query<&mut Camera>,
-) {
-    commands
-        .entity(trigger.entity)
-        .insert(trigger.new_controller);
-    let mut cam = camera
-        .get_mut(trigger.entity)
-        .expect("No camera to be controlled!");
-    cam.is_active = trigger.new_controller.active;
-    match trigger.new_controller.kind {
-        CameraControllerKind::Fly => {
-            debug!("ICtxFlyCam => {}", trigger.new_controller.enabled);
-            commands
-                .entity(trigger.entity)
-                .insert(ContextActivity::<ICtxFlyCam>::new(
-                    trigger.new_controller.enabled,
-                ));
-        }
-        CameraControllerKind::Tracking => {
-            debug!("ICtxTrackingCam => {}", trigger.new_controller.enabled);
-            commands
-                .entity(trigger.entity)
-                .insert(ContextActivity::<ICtxTrackingCam>::new(
-                    trigger.new_controller.enabled,
-                ));
-        }
+pub fn insert_camera_controller<'w>(mut world: DeferredWorld<'w>, ctx: HookContext) {
+    let entity = ctx.entity;
+    let controller = world.get::<CameraController>(entity).cloned();
+    if let Some(mut camera) = world.get_mut::<Camera>(entity)
+        && let Some(controller) = controller
+    {
+        camera.is_active = controller.active;
     }
 }
 
-pub fn plugin(app: &mut App) {
-    app.add_observer(update_camera_controller);
-}
+pub fn plugin(_app: &mut App) {}
